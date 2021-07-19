@@ -440,7 +440,7 @@ control_P_INS_MODO_PRESION:
 sigue_control_P_inspiracion:
 
 			
-			ldiw	xh,xl,0x03E8
+			ldiw	xh,xl,0x01F4
 			inr		r16,Presion_cmH2OL
 			inr		r17,Presion_cmH2OH
 			cp		r16,Xl
