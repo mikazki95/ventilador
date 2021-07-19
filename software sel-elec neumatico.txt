@@ -1,0 +1,4436 @@
+
+;2.0	VERSION PARA CONTROL DE ELECTROVALVULAS 
+
+.include    "m2560def.inc"
+
+;#define    simulacion
+
+#define	version_firmware	"2.0"
+
+.equ	fxtal		=	11059200		;Frecuencia del cristal
+
+.equ	udr_debug	=	udr0
+.equ	txc_debug	=	txc0
+.equ	rxc_debug	=	rxc0
+.equ	udre_debug	=	udre0
+.equ	ucsra_debug	=	ucsr0a
+
+.equ		Fpwm		=	20000
+#define		Val_PWMmax		Fxtal/Fpwm
+#define		FR_max			200
+#define		T_max			6000			;60.00 segundos
+
+            .org	0x0000
+            jmp		inicio
+			.org	0x0002
+			jmp		int_cancela_inspiracion
+			.org	0x0004
+			jmp		int_Retroalimentacion
+			.org	0x002A
+			jmp		timer_10ms
+            .org	0x0040
+			jmp		timer_frecuencia
+			.org	0x0048
+			jmp		rx_trigger
+
+			.org	0x0100
+;**********************************************************
+.include    "macros.inc"
+.include    "macros2.inc"
+.include	"definiciones.inc"
+.include	"fp_def.inc"
+.include	"fp.inc"
+.include	"fp2.inc"
+.include	"usart_debug.inc"
+.include	"Calculos.inc"
+.include	"Interrupciones.inc"
+.include	"Comandos.inc"
+;************************************************************
+
+;************************************************************
+inicio:     outiw       sph,spl,ramend
+
+            call		init_io
+
+						lds			r16,ocr1al
+						tx_debug_r	r16
+						lds			r16,ocr1ah
+						tx_debug_r	r16
+
+						lds			r16,ocr5al
+						tx_debug_r	r16
+						lds			r16,ocr5ah
+						tx_debug_r	r16
+ 
+
+			tx_debug_string		"Listo",0x0A
+
+ 
+					ldiw	xh,xl,Val_PWMmax+1
+					outi			reg_PWM0L,0x00
+					outi			reg_PWM0H,0x01
+LOOP:				INC_VOLUMEN
+					tx_debug_reg	reg_PWM0L
+					tx_debug_reg	reg_PWM0H
+
+					RJMP	LOOP
+ 
+
+reiniciar:
+			call		tst_electrovalvulas
+
+wait_rx:	rx_debug_reg	buff_rx_debug,'T'
+			inr			r16,buff_rx_debug
+			outi		buff_rx_debug,0x00
+			cpi			r16,'M'
+			rbreq		wait_PPSIH
+			cpi			r16,'C'
+			rbreq		Rx_configuracion
+			cpi			r16,'F'
+			rbreq		Tx_version
+			cpi			r16,'P'
+			rbreq		tx_estado
+			cpi			r16,'O'
+			rbreq		cal_O2
+
+;++++++++++++++++++++++++++++++++++
+			inr			r17,alarma_sv
+			cpi			r17,0x00
+			breq		tst_ping_a
+;+++++	Activa alarma por SV
+			inr			r16,estado_alarmas
+			cpi			r16,'0'
+			breq		carga_1c		;Si es '0', asigna '1'
+			cpi			r16,'1'
+			rbreq		activa_alarma	;Si ya estaba en '1'
+			cpi			r16,'2'
+			breq		carga_3c		;Si estaba en '2', asigna '3', alarma conjugada
+			rjmp		activa_alarma	;Si no es ninguna de las anteriores es '3', mantiene la alarma
+carga_1c:	outi		estado_alarmas,'1'
+			rjmp		activa_alarma
+carga_3c:	outi		estado_alarmas,'3'
+			rjmp		activa_alarma
+
+tst_ping_a:
+			inr			r16,tmr_ping_run
+			cpi			r16,0x02
+			rbrne		sigue
+			outi		tmr_ping_run,0x01
+envia_ping:	tx_debug_k	'S'
+			tx_debug_k	0x0A
+
+;Seccion de espera de comandos, despues de enviar el ping
+			rx_debug_reg	buff_rx_debug,'T'
+			inr			r16,buff_rx_debug
+			outi		buff_rx_debug,0x00
+			cpi			r16,'M'
+			rbreq		wait_PPSIH
+			cpi			r16,'C'
+			rbreq		Rx_configuracion
+			cpi			r16,'F'
+			rbreq		Tx_version
+			cpi			r16,'P'
+			rbreq		tx_estado
+			cpi			r16,'O'
+			rbreq		cal_O2
+
+;++++++++++++++++++++++++++++++++++
+			inr			r17,alarma_sv
+			cpi			r17,0x00
+			breq		tst_S			;Si alarma_sv != 0 -> alarma signos vitales
+;+++++	Activa alarma por SV
+			inr			r16,estado_alarmas
+			cpi			r16,'0'
+			breq		carga_1a		;Si es '0', asigna '1'
+			cpi			r16,'1'
+			breq		tst_S			;Si ya estaba en '1'
+			cpi			r16,'2'
+			breq		carga_3a		;Si estaba en '2', asigna '3', alarma conjugada
+			rjmp		tst_S			;Si no es ninguna de las anteriores es '3', mantiene la alarma
+carga_1a:	outi		estado_alarmas,'1'
+			rjmp		tst_S
+carga_3a:	outi		estado_alarmas,'3'
+			rjmp		tst_S
+
+;Verifica si hay que activar la alarma por ping
+tst_S:		cpi			r16,'S'
+			breq		ping_ok
+;+++++	Activa alarma por Raspberry
+			inr			r16,estado_alarmas
+			cpi			r16,'0'
+			breq		carga_2b		;Si es '0', asigna '2'
+			cpi			r16,'1'
+			breq		carga_3b		;Si es '1', alarma conjugada, debe de cambiarse a '3'
+			cpi			r16,'2'
+			breq		activa_alarma
+			rjmp		activa_alarma	;Si no es ninguna de las anteriores es '3', mantiene la alarma
+
+carga_2b:	outi		estado_alarmas,'2'
+			rjmp		activa_alarma
+carga_3b:	outi		estado_alarmas,'3'
+			rjmp		activa_alarma
+
+;Activa alarma
+activa_alarma:
+			outi		alarma_sv,0x00
+
+			outi		tmp_led,2
+			outi		tccr3b,0x09								;Activa la salida de alarma
+			sbi			ALARMA
+			outi		estado_mute,0x00
+			inr			r16,tmr_alarma_onL
+			inr			r17,tmr_alarma_onH
+			outr		tmr_alarmaL,r16
+			outr		tmr_alarmaH,r17
+			cli
+			outi		tmr_pingL,low(tiempo_ping_10s/10)		;Temporizador para ping
+			outi		tmr_pingH,high(tiempo_ping_10s/10)		;0.1seg x tmr_ping
+			sei
+			rjmp		wait_rx
+
+ping_ok:	inr			r16,estado_alarmas
+			cpi			r16,'0'
+			breq		desactiva_alarma
+			cpi			r16,'1'
+			breq		no_desactiva_alarma
+			cpi			r16,'2'
+			breq		desactiva_alarma
+			cpi			r16,'3'
+			breq		carga_1d
+
+carga_1d:	outi		estado_alarmas,'1'
+			rjmp		no_desactiva_alarma
+
+desactiva_alarma:
+			outi		tmp_led,10
+			outi		tccr3b,0x08								;Desactiva la salida de alarma
+			cbi			ALARMA
+			rjmp		wait_rx
+
+no_desactiva_alarma:
+			rjmp		wait_rx
+
+sigue:		inr			r16,bandera_tx_estado
+			cpi			r16,0x01
+			rbrne		wait_rx
+			outi		bandera_tx_estado,0x00
+			jmp			tx_estado
+;************************************************************************************
+
+;************************************************************************************
+desactiva_alarma_ping:
+			cli
+			outi		tmr_pingL,low(tiempo_ping_10s/10)		;Temporizador para ping
+			outi		tmr_pingH,high(tiempo_ping_10s/10)		;0.1seg x tmr_ping
+			sei
+			outi		tmr_ping_run,0x01
+			outi		tmp_led,10
+			outi		tccr3b,0x08								;Desactiva la salida de alarma
+			cbi			ALARMA
+			ret
+;************************************************************************************
+
+;************************************************************
+time_out:
+tx_error:	tx_debug_string		"E2",0x0A
+			jmp		wait_rx
+;************************************************************
+
+;************************************************************
+tst_electrovalvulas:
+			CLI
+;			FASE_TST_ELECTROVALVULAS
+			SEI
+			;delay_ms	500
+			outi		estado_electrovalvulas,'2'	;Electrovalvulas OK
+			tx_debug_k		'C'
+			tx_debug_k		'0'
+			tx_debug_k		0x0A
+regresa:	CLI
+			FASE_STANDBY
+			SEI
+			ret
+
+error_electrovalvulas:
+			outi		estado_electrovalvulas,'0'	;Error
+			tx_debug_k		'C'
+			tx_debug_k		'1'
+			tx_debug_k		0x0A
+			rjmp		regresa
+;************************************************************
+
+;2.0
+;************************************************************
+calcula_TIEMPO_inspiracion:
+			call	CLR_DECIMAL
+
+			inr		r17,TIEMPO_INSH
+			subi	r17,0x30
+			swap	r17
+			inr		r16,TIEMPO_INSM
+			subi	r16,0x30
+			or		r16,r17
+			outr	DEC_ML,r16
+			inr		r16,TIEMPO_INSL		;Se recorre un digito para obtener como resultado
+			subi	r16,0x30			;la multiplicación x 10
+			swap	r16
+			outr	DEC_L,r16
+
+			DTOH
+			inr		r16,HEX_ML
+			outr	tmp_tmr_TIEMPO_INSH,r16
+			inr		r16,HEX_L
+			outr	tmp_tmr_TIEMPO_INSL,r16
+			ret
+;************************************************************
+
+;************************************************************
+calcula_TIEMPO_pausa:
+			call	CLR_DECIMAL
+
+			inr		r17,TIEMPOpausaH
+			subi	r17,0x30
+			swap	r17
+			inr		r16,TIEMPOpausaM
+			subi	r16,0x30
+			or		r16,r17
+			outr	DEC_ML,r16
+
+			inr		r16,TIEMPOpausaL
+			subi	r16,0x30
+			swap	r16
+			outr	DEC_L,r16
+			DTOH
+
+			inr		r16,HEX_ML
+			outr	tmp_tmr_TIEMPOpausaH,r16
+			inr		r16,HEX_L
+			outr	tmp_tmr_TIEMPOpausaL,r16
+			ret
+;************************************************************
+
+;************************************************************
+calcula_TIEMPO_expiracion:
+			call	CLR_DECIMAL
+
+			inr		r17,TIEMPO_EXPH
+			subi	r17,0x30
+			swap	r17
+			inr		r16,TIEMPO_EXPM
+			subi	r16,0x30
+			or		r16,r17
+			outr	DEC_ML,r16
+
+			inr		r16,TIEMPO_EXPL
+			subi	r16,0x30
+			swap	r16
+			outr	DEC_L,r16
+			DTOH
+
+			inr		r16,HEX_ML
+			outr	tmp_tmr_TIEMPO_EXPH,r16
+			inr		r16,HEX_L
+			outr	tmp_tmr_TIEMPO_EXPL,r16
+			ret
+;************************************************************
+
+;************************************************************
+calcula_tiempo_total:
+			inr		r16,tmp_tmr_TIEMPO_INSL
+			inr		r17,tmp_tmr_TIEMPO_INSH
+			inr		r18,tmp_tmr_TIEMPOpausaL
+			inr		r19,tmp_tmr_TIEMPOpausaH
+			inr		r20,tmp_tmr_TIEMPO_EXPL
+			inr		r21,tmp_tmr_TIEMPO_EXPH
+			add		r16,r18
+			adc		r17,r19
+			add		r16,r20
+			adc		r17,r21
+			outr	tmp_tmr_ventanaSIMV_L,r16
+			outr	tmp_tmr_ventanaSIMV_H,r16
+			ret
+;************************************************************
+
+;************************************************************
+calcula_FR:	call	CLR_DECIMAL
+			inr		r16,FRH
+			subi	r16,0x30
+			outr	DEC_ML,r16
+			inr		r17,FRM
+			subi	r17,0x30
+			swap	r17
+			inr		r16,FRL
+			subi	r16,0x30
+			or		r16,r17
+			outr	DEC_L,r16
+			DTOH
+
+			inr		r16,HEX_ML
+			outr	tmp_reg_FRH,r16
+			inr		r16,HEX_L
+			outr	tmp_reg_FRL,r16
+			ret
+;************************************************************
+
+;************************************************************
+calcula_PWM0:
+			call	CLR_DECIMAL
+			inr		r17,PWM0H
+			subi	r17,0x30
+			swap	r17
+			inr		r16,PWM0MH
+			subi	r16,0x30
+			or		r16,r17
+			outr	DEC_ML,r16
+			inr		r17,PWM0ML
+			subi	r17,0x30
+			swap	r17
+			inr		r16,PWM0L
+			subi	r16,0x30
+			or		r16,r17
+			outr	DEC_L,r16
+			DTOH
+			inr		r17,HEX_ML
+			outr	tmp_reg_PWM0H,r17
+			inr		r16,HEX_L
+			outr	tmp_reg_PWM0L,r16
+
+;Calcula el 50% del valor del PWM que se recibio, considerando el offset de
+;262.
+			ldiw	xh,xl,262
+			sub		r16,xl	;Al valor de PWM, se le resta el valor minimo.
+			sbc		r17,xh	;262 de acuerdo con la caracterización de las
+							;electrovalvulas.
+			brpl	divide_2
+			ldi		r16,0x00
+			ldi		r17,0x00
+			jmp		carga_x
+
+divide_2:	lsr		r17		;Se divide entre dos el resultado
+			ror		r16
+
+carga_x:	inr		xl,tmp_reg_PWM0L	;Se toma nuevamente el valor original
+			inr		xh,tmp_reg_PWM0H	;del PWM.
+			sub		xl,r16
+			sbc		xh,r17
+			outr	reg_PWM0H_50p,xh
+			outr	reg_PWM0L_50p,xl
+			ret
+;************************************************************
+ 
+;************************************************************
+calcula_PWM0ps:
+			call	CLR_DECIMAL
+			inr		r17,PWM0_psH
+			subi	r17,0x30
+			swap	r17
+			inr		r16,PWM0_psMH
+			subi	r16,0x30
+			or		r16,r17
+			outr	DEC_ML,r16
+			inr		r17,PWM0_psML
+			subi	r17,0x30
+			swap	r17
+			inr		r16,PWM0_psL
+			subi	r16,0x30
+			or		r16,r17
+			outr	DEC_L,r16
+			DTOH
+			inr		r16,HEX_ML
+			outr	tmp_reg_PWM0_psH,r16
+			inr		r16,HEX_L
+			outr	tmp_reg_PWM0_psL,r16
+			ret
+;************************************************************
+ 
+;************************************************************
+calcula_PWM1_O2:
+			call	CLR_DECIMAL
+			inr		r17,PWM1_O2H
+			subi	r17,0x30
+			swap	r17
+			inr		r16,PWM1_O2MH
+			subi	r16,0x30
+			or		r16,r17
+			outr	DEC_ML,r16
+			inr		r17,PWM1_O2ML
+			subi	r17,0x30
+			swap	r17
+			inr		r16,PWM1_O2L
+			subi	r16,0x30
+			or		r16,r17
+			outr	DEC_L,r16
+			DTOH
+			inr		r16,HEX_ML
+			outr	tmp_reg_PWM1_O2H,r16
+			inr		r16,HEX_L
+			outr	tmp_reg_PWM1_O2L,r16
+			ret
+;************************************************************
+
+;************************************************************
+calcula_PWM2_Aire:
+			call	CLR_DECIMAL
+			inr		r17,PWM2_AireH
+			subi	r17,0x30
+			swap	r17
+			inr		r16,PWM2_AireMH
+			subi	r16,0x30
+			or		r16,r17
+			outr	DEC_ML,r16
+			inr		r17,PWM2_AireML
+			subi	r17,0x30
+			swap	r17
+			inr		r16,PWM2_AireL
+			subi	r16,0x30
+			or		r16,r17
+			outr	DEC_L,r16
+			DTOH
+			inr		r16,HEX_ML
+			outr	tmp_reg_PWM2_AireH,r16
+			inr		r16,HEX_L
+			outr	tmp_reg_PWM2_AireL,r16
+			ret
+;************************************************************
+
+;************************************************************
+;Sección para FiO2
+;
+;((ADC)(5))/1023 = Vs = Voltaje del sensor
+;FiO2 = Vs * 23.2
+;
+;(5/1023)*23.2 = 0.113391984
+;
+;FiO2 = ADC * 0.113391984
+;
+;k0p113391984:	.db	0x0E, 0x3A, 0xE8, 0x3D
+k0p099057:		.db	0x30, 0xDE, 0xCA, 0x3D					;0.0990566037735849
+;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+calcula_FiO2:
+			call	CLR_HEXADECIMAL
+			cli
+			inr		r16,FiO2_nuevoL
+			outr	HEX_L,r16
+			inr		r16,FiO2_nuevoH
+			outr	HEX_ML,r16
+			outi	FiO2_valido,'0'	;borra la bandera para indicar que ya se tomo
+									;el valor de la nueva lectura de FiO2
+			sei
+			NORMHEXTOA1
+
+			ldiw	zh,zl,(k0p099057*2);(k0p113391984*2)
+
+			FLDKA2
+
+			FMULT
+
+			DENORMA1TOHEX
+			inr		r16,HEX_L
+			outr	FiO2HEX_L,r16
+			inr		r16,HEX_ML
+			outr	FiO2HEX_H,r16
+
+			HTOD
+			inr		r16,DEC_L
+			andi	r16,0x0F
+			subi	r16,-0x30
+			outr	tx_FiO2L,r16
+			inr		r16,DEC_L
+			andi	r16,0xF0
+			swap	r16
+			subi	r16,-0x30
+			outr	tx_FiO2M,r16
+			inr		r16,DEC_ML
+			andi	r16,0x0F
+			subi	r16,-0x30
+			outr	tx_FiO2H,r16
+			ret
+;************************************************************
+
+ 
+;************************************************************
+calcula_ventana:
+			call	CLR_DECIMAL
+			inr		r16,ventanaH
+			subi	r16,0x30
+			outr	DEC_ML,r16
+			inr		r17,ventanaM
+			subi	r17,0x30
+			swap	r17
+			inr		r16,ventanaL
+			subi	r16,0x30
+			or		r16,r17
+			outr	DEC_L,r16
+			DTOH
+
+			inr		r16,HEX_ML
+			outr	tmp_tmr_ventanaH,r16
+			inr		r16,HEX_L
+			outr	tmp_tmr_ventanaL,r16
+			ret
+;************************************************************
+ 
+
+;2.0
+ 
+Comando
+Ping			P			P
+Firmware		F			F <ON_OFF> <VERSION DE FIRMWARE>
+Test			C			C <CODIGO DE FALLA>
+								0	SIN FALLA
+								1	CON FALLA
+Calibra 21%		O0			VERIFICA 21%
+							O0<CODIGO DE FALLA>
+								0	SENSOR OK
+								1	SENSOR EN FALLA
+Calibra 100%	O1			VERIFICA 100%
+							O1<CODIGO DE FALLA>
+								0	SENSOR OK
+								1	SENSOR EN FALLA
+Configuración	M (ver codigo)
+ 
+
+;************************************************************************************
+;************************************************************************************
+;************************************************************************************
+;Sección del comando P
+tx_estado:	call		desactiva_alarma_ping
+			call		tx_P
+			jmp		wait_rx
+
+tx_P:		tx_debug_k		'P'
+			tx_debug_reg	estado_electrovalvulas
+			outi			estado_alarmas,'0'
+			tx_debug_reg	estado_alarmas
+			tx_debug_reg	alarmas_criticas		;Estado de las condiciones de alarma que se recibio de la
+													;tarjeta SV
+			outi		alarmas_criticas,'0'
+
+;Sección agregada para FiO2
+			cpri	FiO2_valido,'1'	;Si aun no hay una lectura valida, salta
+			brne	tx_FiO2			;a transmitir la lectura anterior
+
+			rcall	calcula_FiO2
+
+tx_FiO2:	tx_debug_reg	tx_FiO2H
+			tx_debug_reg	tx_FiO2M
+			tx_debug_reg	tx_FiO2L
+
+;Sección agregada para enviar la lectura de la bateria y del estado de AC/BAT
+			sbis			pinc,0
+			rjmp			carga_modo_bat
+carga_modo_AC:
+			outi			modo_alimentacion,modo_AC
+			rjmp			tx_modo_alimentacion
+carga_modo_bat:
+			outi			modo_alimentacion,modo_Bateria
+			rjmp			tx_modo_alimentacion
+
+tx_modo_alimentacion:
+			tx_debug_reg	modo_alimentacion
+			tx_debug_reg	nivel_bat
+			tx_debug_k		0x0A
+			outi			bandera_tx_estado,0x00
+			ret
+;************************************************************************************
+;************************************************************************************
+;************************************************************************************
+
+;************************************************************************************
+;************************************************************************************
+;************************************************************************************
+Tx_version:
+			call		desactiva_alarma_ping
+			tx_debug_k		'F'
+			tx_debug_reg	ON_OFF
+
+			tx_debug_string		version_firmware,0x0A
+			jmp		wait_rx
+;************************************************************************************
+;************************************************************************************
+;************************************************************************************
+
+;************************************************************************************
+;************************************************************************************
+;************************************************************************************
+;Sección del comando C
+Rx_configuracion:
+			call		desactiva_alarma_ping
+			jmp		reiniciar
+;************************************************************************************
+;************************************************************************************
+;************************************************************************************
+
+;************************************************************************************
+;************************************************************************************
+;************************************************************************************
+;Sección del comando de calibración de O2
+cal_O2:		call				desactiva_alarma_ping
+			rx_debug_reg_val	rx_CAL_O2,'T'
+			inr					r16,rx_CAL_O2
+			cpi					r16,'0'		;Si este byte es '0', indica que efectuara
+			rbreq				calibra_21	;la calibración al 21%
+			cpi					r16,'1'		;Si este byte es '1', indica que efectuara
+			rbrne				tx_error	;la calibración al 100%
+;++++++++++++++++++++++++++++++++++++++++++++++++++
+
+;++++++++++++++++++++++++++++++++++++++++++++++++++
+calibra_100:CLI
+			FASE_O2_100
+			SEI
+			delay_ms			5000
+			call				desactiva_alarma_ping
+			call				tx_P
+			delay_ms			5000
+			call				desactiva_alarma_ping
+			call				tx_P
+			delay_ms			5000
+			call				desactiva_alarma_ping
+			rcall				calcula_FiO2
+			inr					r16,FiO2HEX_L	;Se obtiene el valor HEX en % de O2
+			inr					r17,FiO2HEX_H
+
+			cpi					r16,low(125)	;Si la lectura del sensor de O2 genera
+			cpci				r17,high(125)	;un resultado > o = 125, indica un error
+			brlo				tst_97			;en la operación del hardware
+			outi				estado_100_O2,'0'
+			rjmp				tx_resultado_O1
+
+tst_97:		cpi					r16,low(97)
+			cpci				r17,high(97)
+			brlo				tst_93
+			outi				estado_100_O2,'9'
+			rjmp				tx_resultado_O1
+
+tst_93:		cpi					r16,low(93)
+			cpci				r17,high(93)
+			brlo				tst_89
+			outi				estado_100_O2,'8'
+			rjmp				tx_resultado_O1
+
+tst_89:		cpi					r16,low(89)
+			cpci				r17,high(89)
+			brlo				tst_85
+			outi				estado_100_O2,'7'
+			rjmp				tx_resultado_O1
+
+tst_85:		cpi					r16,low(85)
+			cpci				r17,high(85)
+			brlo				tst_82
+			outi				estado_100_O2,'6'
+			rjmp				tx_resultado_O1
+
+tst_82:		cpi					r16,low(82)
+			cpci				r17,high(82)
+			brlo				tst_79
+			outi				estado_100_O2,'5'
+			rjmp				tx_resultado_O1
+
+tst_79:		cpi					r16,low(79)
+			cpci				r17,high(79)
+			brlo				tst_76
+			outi				estado_100_O2,'4'
+			rjmp				tx_resultado_O1
+
+tst_76:		cpi					r16,low(76)
+			cpci				r17,high(76)
+			brlo				tst_75
+			outi				estado_100_O2,'3'
+			rjmp				tx_resultado_O1
+
+tst_75:		cpi					r16,low(75)
+			cpci				r17,high(75)
+			brlo				error_O2_1
+			outi				estado_100_O2,'2'
+			rjmp				tx_resultado_O1
+
+error_O2_1:	outi				estado_100_O2,'1'
+
+tx_resultado_O1:
+			tx_debug_k		'O'
+			tx_debug_k		'1'
+			tx_debug_reg	estado_100_O2,'0'
+			tx_debug_k		0x0A
+			CLI
+			FASE_STANDBY
+			SEI
+			jmp			wait_rx
+;++++++++++++++++++++++++++++++++++++++++++++++++++
+
+;++++++++++++++++++++++++++++++++++++++++++++++++++
+calibra_21:	CLI
+			FASE_O2_21
+			SEI
+			delay_ms			5000
+			call				desactiva_alarma_ping
+			call				tx_P
+			delay_ms			5000
+			call				desactiva_alarma_ping
+			call				tx_P
+			delay_ms			5000
+			call				desactiva_alarma_ping
+			call				calcula_FiO2
+			inr					r16,FiO2HEX_L	;Se obtiene el valor HEX en % de O2
+			inr					r17,FiO2HEX_H
+
+			cpi					r16,low(27)	;Si la lectura del sensor de O2 genera
+			cpci				r17,high(27);un resultado > o = 27, indica un error
+			brlo				tst_21		;en la operación del hardware
+			outi				estado_21_O2,'0'
+			rjmp				tx_resultado_O0
+
+tst_21:		cpi					r16,low(21)
+			cpci				r17,high(21)
+			brlo				tst_20
+			outi				estado_21_O2,'9'
+			rjmp				tx_resultado_O0
+
+tst_20:		cpi					r16,low(20)
+			cpci				r17,high(20)
+			brlo				tst_19
+			outi				estado_21_O2,'8'
+			rjmp				tx_resultado_O0
+
+tst_19:		cpi					r16,low(19)
+			cpci				r17,high(19)
+			brlo				tst_18
+			outi				estado_21_O2,'7'
+			rjmp				tx_resultado_O0
+
+tst_18:		cpi					r16,low(18)
+			cpci				r17,high(18)
+			brlo				tst_17
+			outi				estado_21_O2,'6'
+			rjmp				tx_resultado_O0
+
+tst_17:		cpi					r16,low(17)
+			cpci				r17,high(17)
+			brlo				tst_16
+			outi				estado_21_O2,'4'
+			rjmp				tx_resultado_O0
+
+tst_16:		cpi					r16,low(16)
+			cpci				r17,high(16)
+			brlo				tst_15
+			outi				estado_21_O2,'3'
+			rjmp				tx_resultado_O0
+
+tst_15:		cpi					r16,low(15)
+			cpci				r17,high(15)
+			brlo				error_O2_0
+			outi				estado_21_O2,'2'
+			rjmp				tx_resultado_O1
+
+error_O2_0:	outi				estado_100_O2,'1'
+
+tx_resultado_O0:
+			tx_debug_k		'O'
+			tx_debug_k		'1'
+			tx_debug_reg	estado_100_O2,'0'
+			tx_debug_k		0x0A
+			CLI
+			FASE_STANDBY
+			SEI
+			jmp			wait_rx
+;************************************************************************************
+;************************************************************************************
+;************************************************************************************
+
+;************************************************************************************
+;************************************************************************************
+;************************************************************************************
+;Sección del comando M
+wait_PPSIH:	call		desactiva_alarma_ping
+			rx_debug_reg_val	rx_Modo_op,'T'			;Rx_modo
+			rx_debug_reg_val	rx_TIEMPO_INSH,'T'		;Decenas
+			rx_debug_reg_val	rx_TIEMPO_INSM,'T'		;Unidades
+			rx_debug_reg_val	rx_TIEMPO_INSL,'T'		;Decimas de segundo
+			rx_debug_reg_val	rx_TIEMPOpausaH,'T'			;Espera los bytes del tiempo "pausa"
+			rx_debug_reg_val	rx_TIEMPOpausaM,'T'
+			rx_debug_reg_val	rx_TIEMPOpausaL,'T'
+			rx_debug_reg_val	rx_TIEMPO_EXPH,'T'
+			rx_debug_reg_val	rx_TIEMPO_EXPM,'T'
+			rx_debug_reg_val	rx_TIEMPO_EXPL,'T'
+			rx_debug_reg_val	rx_FRH,'T'			;Frecuencia respiratoria
+			rx_debug_reg_val	rx_FRM,'T'
+			rx_debug_reg_val	rx_FRL,'T'
+
+			rx_debug_reg_val	rx_PWM0H,'T'		;Valor de PWM para ventilar
+			rx_debug_reg_val	rx_PWM0MH,'T'		;
+			rx_debug_reg_val	rx_PWM0ML,'T'		;
+			rx_debug_reg_val	rx_PWM0L,'T'		;
+ 
+			rx_debug_reg_val	rx_PWM0_psH,'T'		;Valor de PWM para presion soporte
+			rx_debug_reg_val	rx_PWM0_psMH,'T'		;
+			rx_debug_reg_val	rx_PWM0_psML,'T'		;
+			rx_debug_reg_val	rx_PWM0_psL,'T'		;
+ 
+			rx_debug_reg_val	rx_PWM1_O2H,'T'		;Valor de PWM para ventilar
+			rx_debug_reg_val	rx_PWM1_O2MH,'T'		;
+			rx_debug_reg_val	rx_PWM1_O2ML,'T'		;
+			rx_debug_reg_val	rx_PWM1_O2L,'T'		;
+
+			rx_debug_reg_val	rx_PWM2_AireH,'T'		;Valor de PWM para ventilar
+			rx_debug_reg_val	rx_PWM2_AireMH,'T'		;
+			rx_debug_reg_val	rx_PWM2_AireML,'T'		;
+			rx_debug_reg_val	rx_PWM2_AireL,'T'		;
+
+;video	para segunda ventana de tiempo
+
+;trigger dispara presion soporte o ciclo de ventilacion
+
+;			rx_debug_reg_val	rx_ventanaH,'T'
+;			rx_debug_reg_val	rx_ventanaM,'T'
+;			rx_debug_reg_val	rx_ventanaL,'T'
+
+wait_On_Off:rx_debug_reg_val	rx_ON_OFF,'T'
+			inr					r16,rx_ON_OFF
+			outr				ON_OFF,r16
+			cpi					r16,'0'		;Si este byte es '0', indica que se debe de detener el motor
+			rbreq				detener_ventilador
+			cpi					r16,'1'		;Si este byte es '1' indica que se deben de aplicar los parametros para
+			rbrne				tx_error	;arranque del motor, en caso de no ser asi, es error
+
+;Copia el buffer rx hacia los registros para calcular y convertir los valores
+			COPY_SRAM	TIEMPO_INSL,rx_TIEMPO_INSL,28
+
+;video	para segunda ventana de tiempo
+
+;trigger dispara presion soporte o ciclo de ventilacion
+
+;			rx_debug_reg_val	rx_ventanaH,'T'
+;			rx_debug_reg_val	rx_ventanaM,'T'
+;			rx_debug_reg_val	rx_ventanaL,'T'
+
+;			inr					r16,rx_ON_OFF
+;			outr				ON_OFF,r16
+
+ 
+			inr				r16,rx_ventanaH
+			outr			ventanaH,r16
+			inr				r16,rx_ventanaM
+			outr			ventanaM,r16
+			inr				r16,rx_ventanaL
+			outr			ventanaL,r16
+
+			call			calcula_ventana
+
+			inr				r16,tmp_tmr_ventanaL
+			inr				r17,tmp_tmr_ventanaH
+			cpi				r16,low(500)
+			cpci			r17,high(500)
+			rbrsh			tx_error
+ 
+
+;			inr			r16,rx_modo_op
+;			cpi			r16,'0'
+;			breq		modo_ok
+;			cpi			r16,'2'
+;			breq		modo2_ok
+;			jmp			tx_error
+
+;modo2_ok:	;inr			r16,tmp_tmr_ventanaL
+			;inr			r17,tmp_tmr_ventanaH
+			;cpi			r16,0x00
+			;cpci		r17,0x00
+			;rbreq		tx_error
+
+;Pregunta si el ventilador ya se encuentra operando
+			call		calcula_TIEMPO_inspiracion
+			call		calcula_TIEMPO_pausa
+			call		calcula_TIEMPO_expiracion
+			call		calcula_FR
+			call		calcula_PWM0
+;			call		calcula_PWM0ps
+			call		calcula_PWM1_O2
+			call		calcula_PWM2_Aire
+			call		calcula_tiempo_total	;TI + Tpausa + TE
+
+			inr			r16,rx_Modo_op
+			cpi			r16,P_CMV
+			breq		modo_ok
+			cpi			r16,V_CMV
+			breq		modo_ok
+			cpi			r16,P_SIMV
+			breq		modo_ok
+			cpi			r16,V_SIMV
+			breq		modo_ok
+			cpi			r16,PSV
+			breq		modo_ok
+			cpi			r16,CPRV
+			breq		modo_ok
+			cpi			r16,CPAP
+			breq		modo_ok
+			jmp			tx_error
+
+;cp_limites	regH,regL,'n',Valor_max
+;Si se especifica 'n', indica que solo hay limite maximo.
+;En este caso si el valor de los registros (reg) es menor o igual a Valor_max,
+;continua en la siguiente linea, en caso contrario salta a tx_error
+;
+;cp_limites	regH,regL,Valor_min,Valor_max
+;En este caso si el valor de los registros (reg) es mayor o igual a Valor_min
+; "Y" menor o igual a Valor_max, continua en la siguiente linea, en caso
+;contrario salta a tx_error
+modo_ok:	cp_limites	tmp_tmr_TIEMPO_INSH,tmp_tmr_TIEMPO_INSL,	1,	T_max,tx_error
+			cp_limites	tmp_tmr_TIEMPOpausaH,tmp_tmr_TIEMPOpausaL,	'n',T_max,tx_error
+			cp_limites	tmp_tmr_TIEMPO_EXPH,tmp_tmr_TIEMPO_EXPL,	1,	T_max,tx_error
+			cp_limites	tmp_reg_FRH,tmp_reg_FRL,					1,	T_max,tx_error
+			cp_limites	tmp_reg_PWM0H,tmp_reg_PWM0L,				1,	Val_PWMmax,tx_error
+;			cp_limites	tmp_reg_PWM0_psH,tmp_reg_PWM0_psL,			'n',Val_PWMmax,tx_error
+			cp_limites	tmp_reg_PWM1_O2H,tmp_reg_PWM1_O2L,			1,	Val_PWMmax,tx_error
+			cp_limites	tmp_reg_PWM2_AireH,tmp_reg_PWM2_AireL,		1,	Val_PWMmax,tx_error
+
+				cpri		FASE,STANDBY
+				breq		arranque_inicial
+
+				outi		stop_ventilador,0x01
+wait_stop2:					;sbi		pina,0
+				delay_ms	10
+				inr			r16,stop_ventilador	;La subrutina de interrupción se encarga
+				cpi			r16,0x01			;de borrar el registro stop_ventilador y
+				breq		wait_stop2			;selecciona FASE_ESPERA
+arranque_inicial:
+;Copia los 16 bytes de parametros "tmp" a los registros de trabajo
+			COPY_SRAM	tmr_TIEMPO_INSL,tmp_tmr_TIEMPO_INSL,16
+
+			outi		ventana,'0'		;Este registro se usa para determinar la función
+										;del trigger en modo SIMV (diferenciar entre
+										;asistida y presión soporte
+			inr			r16,tmp_tmr_ventanaSIMV_L
+			inr			r17,tmp_tmr_ventanaSIMV_H
+			outr		tmr_ventanaSIMV_L,r16
+			outr		tmr_ventanaSIMV_H,r17
+
+			CLI
+			inr					r16,rx_Modo_op
+			outr				Modo_op,r16
+			FASE_INSPIRACION
+			SEI
+			call		desactiva_alarma_ping
+			jmp			tx_respuesta_M
+;*********************************************
+
+;*********************************************
+detener_ventilador:
+			cpri		FASE,STANDBY
+			rbreq		skip_stop_v
+			outi		stop_ventilador,0x01
+wait_stop:	inr			r16,stop_ventilador
+			cpi			r16,0x01
+			breq		wait_stop
+			CLI
+			FASE_STANDBY
+			SEI
+skip_stop_v:call		desactiva_alarma_ping
+
+tx_respuesta_M:
+			tx_debug_k		'M'
+			tx_debug_reg	rx_Modo_op
+			tx_debug_reg	rx_TIEMPO_INSH
+			tx_debug_reg	rx_TIEMPO_INSM
+			tx_debug_reg	rx_TIEMPO_INSL
+			tx_debug_reg	rx_TIEMPOpausaH
+			tx_debug_reg	rx_TIEMPOpausaM
+			tx_debug_reg	rx_TIEMPOpausaL
+			tx_debug_reg	rx_TIEMPO_EXPH
+			tx_debug_reg	rx_TIEMPO_EXPM
+			tx_debug_reg	rx_TIEMPO_EXPL
+			tx_debug_reg	rx_FRH
+			tx_debug_reg	rx_FRM
+			tx_debug_reg	rx_FRL
+			tx_debug_reg	rx_PWM0H
+			tx_debug_reg	rx_PWM0MH
+			tx_debug_reg	rx_PWM0ML
+			tx_debug_reg	rx_PWM0L
+;			tx_debug_reg	rx_PWM0_psH
+;			tx_debug_reg	rx_PWM0_psMH
+;			tx_debug_reg	rx_PWM0_psML
+;			tx_debug_reg	rx_PWM0_psL
+			tx_debug_reg	rx_PWM1_O2H
+			tx_debug_reg	rx_PWM1_O2MH
+			tx_debug_reg	rx_PWM1_O2ML
+			tx_debug_reg	rx_PWM1_O2L
+			tx_debug_reg	rx_PWM2_AireH
+			tx_debug_reg	rx_PWM2_AireMH
+			tx_debug_reg	rx_PWM2_AireML
+			tx_debug_reg	rx_PWM2_AireL
+;			tx_debug_reg	rx_ventanaH
+;			tx_debug_reg	rx_ventanaM
+;			tx_debug_reg	rx_ventanaL
+			tx_debug_reg	rx_ON_OFF
+
+			tx_debug_k		0x0A
+			jmp		wait_rx
+;************************************************************************************
+;************************************************************************************
+;************************************************************************************
+
+;2.0
+;Asignación de pines
+#define		SCK					pinb,1	;SCK, MOSI y MISO, son solo para programación
+#define		MOSI				pinb,2
+#define		MISO				portb,3
+#define		PWM0				portb,7	;OC1C, control de flujo y presión
+
+#define		NO_BREAK_AC_BAT		pinc,0
+
+#define		ALARMA_PRESION_MAX	pind,0	;Señal proveniente de la tarjeta SV. Si se detecta
+										;un pulso en este pin, se cancela la fase de
+										;inspiración sin importar el modo de operación.
+#define		INT_RETRO			pind,1	;Señal de disparo de la retroalimentación
+										;La función a realizar, dependera de
+										;la combinación de los pines PL0 y PL1
+#define		RXD_SV				pind,2
+#define		TXD_SV				portd,3
+#define		T_PAUSA				portd,4	;Indica que esta activo el tiempo pausa
+#define		ALARMA				portd,5	;Salida de alarma audible
+#define		ELECTROVALVULA0		portd,6
+#define		ELECTROVALVULA1		portd,7
+
+#define		RXD_Raspberry		pine,0
+#define		TXD_Raspberry		porte,1
+
+#define		NO_BREAK_VBAT		pinf,1
+#define		O2					pinf,2
+
+#define		led_run				ping,0
+
+#define		INC_PWM				pinl,0
+#define		DEC_PWM				pinl,1
+#define		PIN_PS				portl,2		;Indicador de presión soporte
+#define		PWM1				portl,4		;OC5B, control de concentración de O2
+#define		PWM2				portl,5		;OC5C, control de paso de aire
+#define		PIN_INSP_EXHA		portl,6		;Señalización de inspiración/exhalación para
+											;la tarjeta SV
+
+#define		STANDBY				'0'
+#define		INSPIRACION			'1'
+#define		TIEMPO_PAUSA		'2'
+#define		EXHALACION			'3'
+#define		PRESION_SOPORTE		'4'
+
+;#define		TRIGGER_SIMV		'5'
+#define		TST_ELECTROVALVULAS	'9'
+#define		ESPERA				'E'
+
+#define		CALIBRA_O2_21		'o'
+#define		CALIBRA_O2_100		'O'
+
+
+#define		CMV					'0'
+#define		SIMV				'2'
+
+#define		PWM_FLUJOH			ocr1ch
+#define		PWM_FLUJOL			ocr1cl
+#define		PWM_O2H				ocr5bh
+#define		PWM_O2L				ocr5bl
+#define		PWM_AIREH			ocr5ch
+#define		PWM_AIREL			ocr5cl
+
+.macro		INSP_EXHA
+			push		r25
+			ldi			r25,@0
+			cpi			r25,1
+			brne		borra_insp_exha
+			inr			r25,portl
+			ori			r25,0b01000000
+			outr		portl,r25
+			rjmp		salir_macro_insp_exha
+borra_insp_exha:
+			inr			r25,portl
+			andi		r25,0b10111111
+			outr		portl,r25
+salir_macro_insp_exha:
+			pop			r25
+.endm
+
+.macro		PIN_PS1
+			inr			r25,portl
+			ori			r25,0b00000100
+			outr		portl,r25
+.endm
+
+.macro		PIN_PS0
+			inr			r25,portl
+			andi		r25,0b11111011
+			outr		portl,r25
+.endm
+
+.macro		ASIGNA_TIEMPO
+			.if		@0==0 & @1==0
+					outiw		cont_10msH,cont_10msL,0x0000
+			.else
+					inr			r24,@1
+					inr			r25,@0
+					outr		cont_10msH,r25
+					outr		cont_10msL,r24
+			.endif
+.endm
+
+.macro		ASIGNA_PWM_FLUJO
+			.if		@0==0 & @1==0
+					outiw		PWM_FLUJOH,PWM_FLUJOL,0x0000
+			.else
+					inr			r24,@1
+					inr			r25,@0
+					outr		PWM_FLUJOH,r25
+					outr		PWM_FLUJOL,r24
+			.endif
+.endm
+
+.macro		ASIGNA_PWM_O2
+			.if		@0==0 & @1==0
+					outiw		PWM_O2H,PWM_O2L,0x0000
+			.else
+					inr			r24,@1
+					inr			r25,@0
+					outr		PWM_O2H,r25
+					outr		PWM_O2L,r24
+			.endif
+.endm
+
+.macro		ASIGNA_PWM_AIRE
+			.if		@0==0 & @1==0
+					outiw		PWM_AIREH,PWM_AIREL,0x0000
+			.else
+					inr			r24,@1
+					inr			r25,@0
+					outr		PWM_AIREH,r25
+					outr		PWM_AIREL,r24
+			.endif
+.endm
+
+;************************************************************
+.macro		rx_debug_reg_val
+			push	r25
+			outi	tmr_debug,100
+wait_debug:	ldi		r25,'T'
+			cpi		r25,@1
+			brne	test_ucsra
+			cpri	tmr_debug,0x00
+			breq	salta_time_out
+test_ucsra:	inr		r25,ucsra_debug
+			sbrs	r25,rxc_debug
+			jmp		wait_debug
+			inr		r25,udr_debug
+			outr	@0,r25
+			cpi		r25,'0'
+			brlo	salta_tx_error
+			cpi		r25,'9'+1
+			brsh	salta_tx_error
+			rjmp	fin_macro_rx
+salta_time_out:
+			pop		r25
+			jmp		time_out
+salta_tx_error:
+			pop		r25
+			jmp		tx_error
+fin_macro_rx:
+			pop		r25
+.endm
+;************************************************************
+
+;************************************************************
+;cp_limites	regH,regL,'n',Valor_max
+;Si se especifica 'n', indica que solo hay limite maximo.
+;En este caso si el valor de los registros (reg) es menor o igual a Valor_max,
+;continua en la siguiente linea, en caso contrario salta a @4
+;
+;cp_limites	regH,regL,Valor_min,Valor_max
+;En este caso si el valor de los registros (reg) es mayor o igual a Valor_min
+; "Y" menor o igual a Valor_max, continua en la siguiente linea, en caso
+;contrario salta a @4
+.macro		cp_limites
+			inr			r16,@1
+			inr			r17,@0
+			.if		@2=='n'
+				cpi			r16,low(@3)
+				cpci		r17,high(@3)
+				rbrsh		@4
+			.else
+				cpi			r16,low(@2)
+				cpci		r17,high(@2)
+				rbrlo		@4
+				cpi			r16,low(@3+1)			;El valor no debe de exceder a 59.9seg
+				cpci		r17,high(@3+1)
+				rbrsh		@4
+			.endif
+.endm
+;************************************************************
+
+;*********************************************************************
+
+;*********************************************************************
+.macro		FASE_STANDBY
+			outi	inhibe_inc_dec_pwm,'1'
+			OUTI	FASE,						STANDBY
+			INSP_EXHA							0
+			PIN_PS0
+			CBI		T_PAUSA
+			ASIGNA_TIEMPO						0,0
+;			cpri	presion_liberada,'1'
+;			breq	fin_macro_standby
+			ASIGNA_PWM_FLUJO					0,0
+			ELECTROVALVULAS						0b00
+			ASIGNA_PWM_O2						0,0
+			ASIGNA_PWM_AIRE						0,0
+fin_macro_standby:
+			.endm
+
+;Esta fase se definio para el caso particular de rx el comando M, mientras el ventilador
+;ya estaba trabajando, por lo cual se inhibe la interrupción mientras se asignan los
+;nuevos valores o se borran si se recibio la orden de detener el ventilador.
+.macro		FASE_ESPERA
+			OUTI	FASE,						ESPERA
+			INSP_EXHA							0
+			PIN_PS0
+			CBI		T_PAUSA
+;			cpri	presion_liberada,'1'
+;			breq	fin_macro_espera
+;			ASIGNA_TIEMPO						0,0
+;			ASIGNA_PWM_FLUJO					0,0
+;			ELECTROVALVULAS						0b00
+;			ASIGNA_PWM_O2						0,0
+;			ASIGNA_PWM_AIRE						0,0
+fin_macro_espera:
+			.endm
+
+.macro		FASE_INSPIRACION
+			outi	inhibe_inc_dec_pwm,'0'
+			OUTI	FASE,						INSPIRACION
+			INSP_EXHA							1
+			PIN_PS0
+			CBI		T_PAUSA
+			ASIGNA_TIEMPO						tmr_TIEMPO_INSH,tmr_TIEMPO_INSL
+;			cpri	presion_liberada,'1'
+;			breq	fin_macro_inspiracion
+			ASIGNA_PWM_FLUJO					reg_PWM0H,reg_PWM0L
+			ELECTROVALVULAS						0b01
+			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
+			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
+fin_macro_inspiracion:
+			.endm
+
+.macro		FASE_TIEMPO_PAUSA
+			OUTI	FASE,						TIEMPO_PAUSA
+			INSP_EXHA							1
+			PIN_PS0
+			SBI									T_PAUSA
+			ASIGNA_TIEMPO						tmr_TIEMPOpausaH,tmr_TIEMPOpausaL
+			cpri	presion_liberada,'1'
+			breq	fin_macro_tiempo_pausa
+			ASIGNA_PWM_FLUJO					0,0
+			ELECTROVALVULAS						0b01		;Combinación para Tiempo pausa
+			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
+			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
+fin_macro_tiempo_pausa:
+			.endm
+
+.macro		FASE_EXHALACION
+			OUTI	FASE,						EXHALACION
+			INSP_EXHA							0
+			PIN_PS0
+			CBI		T_PAUSA
+			ASIGNA_TIEMPO						tmr_TIEMPO_EXPH,tmr_TIEMPO_EXPL
+			cpri	presion_liberada,'1'
+			breq	fin_macro_exhalacion
+			ASIGNA_PWM_FLUJO					0,0
+			ELECTROVALVULAS						0b00	;Fase de expiración
+			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
+			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
+fin_macro_exhalacion:
+			.endm
+
+.macro		FASE_PRESION_SOPORTE
+			OUTI	FASE,						PRESION_SOPORTE
+			INSP_EXHA							1
+			PIN_PS1
+			CBI		T_PAUSA
+			ASIGNA_TIEMPO						tmr_TIEMPO_INSH,tmr_TIEMPO_INSL
+			cpri	presion_liberada,'1'
+			breq	fin_macro_presion_soporte
+			ASIGNA_PWM_FLUJO					reg_PWM0H,reg_PWM0L
+			ELECTROVALVULAS						0b01
+			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
+			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
+fin_macro_presion_soporte:
+			.endm
+
+.macro		FASE_O2_21
+			OUTI	FASE,						CALIBRA_O2_21
+			INSP_EXHA							0
+			PIN_PS0
+			CBI		T_PAUSA
+			ASIGNA_TIEMPO						0,0
+			cpri	presion_liberada,'1'
+			breq	fin_macro_o2_21
+			ASIGNA_PWM_FLUJO					0,0
+			ELECTROVALVULAS						0b00	;Fase de expiración
+			ASIGNA_PWM_O2						0,0
+			ASIGNA_PWM_AIRE						ocr5ah,ocr5al
+fin_macro_o2_21:
+			.endm
+
+.macro		FASE_O2_100
+			OUTI	FASE,						CALIBRA_O2_100
+			INSP_EXHA							0
+			PIN_PS0
+			CBI		T_PAUSA
+			ASIGNA_TIEMPO						0,0
+			cpri	presion_liberada,'1'
+			breq	fin_macro_o2_100
+			ASIGNA_PWM_FLUJO					0,0
+			ELECTROVALVULAS						0b00	;Fase de expiración
+			ASIGNA_PWM_O2						ocr5ah,ocr5al
+			ASIGNA_PWM_AIRE						0,0
+fin_macro_o2_100:
+			.endm
+
+.macro		ON_PRESION
+;			OUTI	FASE,						INSPIRACION
+;			INSP_EXHA							1
+;			PIN_PS0
+;			CBI		T_PAUSA
+;			ASIGNA_TIEMPO						tmr_TIEMPO_INSH,tmr_TIEMPO_INSL
+			cpri	presion_liberada,'1'
+			breq	fin_macro_on_presion
+			ASIGNA_PWM_FLUJO					reg_PWM0H_50p,reg_PWM0L_50p	;reg_PWM0H,reg_PWM0L
+			ELECTROVALVULAS						0b01
+			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
+			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
+fin_macro_on_presion:
+			.endm
+
+.macro		OFF_PRESION
+;			OUTI	FASE,						INSPIRACION
+;			INSP_EXHA							1
+;			PIN_PS0
+;			CBI		T_PAUSA
+;			ASIGNA_TIEMPO						tmr_TIEMPO_INSH,tmr_TIEMPO_INSL
+			cpri	presion_liberada,'1'
+			breq	fin_macro_off_presion
+			ASIGNA_PWM_FLUJO					0,0
+			ELECTROVALVULAS						0b01
+			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
+			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
+fin_macro_off_presion:
+			.endm
+
+.macro		INC_VOLUMEN
+			pushx
+;			OUTI	FASE,						INSPIRACION
+;			INSP_EXHA							1
+;			PIN_PS0
+;			CBI		T_PAUSA
+;			ASIGNA_TIEMPO						tmr_TIEMPO_INSH,tmr_TIEMPO_INSL
+			outi	inhibe_inc_dec_pwm,'1'
+			inr		r24,reg_PWM0L
+			inr		r25,reg_PWM0H
+			subi	r24,low(-10)
+			sbci	r25,high(-10)
+			ldiw	xh,xl,Val_PWMmax+1
+			cp		r24,xl
+			cpc		r25,xh
+			brsh	skip_actualiza
+			outr	reg_PWM0L,r24
+			outr	reg_PWM0H,r25
+skip_actualiza:
+;			cpri	presion_liberada,'1'
+;			breq	fin_macro_inc_volumen
+;			ASIGNA_PWM_FLUJO					reg_PWM0H,reg_PWM0L
+;			ELECTROVALVULAS						0b01
+;			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
+;			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
+fin_macro_inc_volumen:
+			popx
+			.endm
+
+.macro		DEC_VOLUMEN
+			pushx
+;			OUTI	FASE,						INSPIRACION
+;			INSP_EXHA							1
+;			PIN_PS0
+;			CBI		T_PAUSA
+;			ASIGNA_TIEMPO						tmr_TIEMPO_INSH,tmr_TIEMPO_INSL
+			outi	inhibe_inc_dec_pwm,'1'
+			inr		r24,reg_PWM0L
+			inr		r25,reg_PWM0H
+			subi	r24,low(10)
+			sbci	r25,high(10)
+			brmi	skip_actualiza			;Si el resultado es negativo, no se
+											;actualiza el valor de la resta
+			outr	reg_PWM0L,r24
+			outr	reg_PWM0H,r25
+skip_actualiza:
+;			cpri	presion_liberada,'1'
+;			breq	fin_macro_dec_volumen
+;			ASIGNA_PWM_FLUJO					reg_PWM0H,reg_PWM0L
+;			ELECTROVALVULAS						0b01
+;			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
+;			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
+fin_macro_dec_volumen:
+			popx
+			.endm
+
+ 
+
+.macro		FASE_TST_ELECTROVALVULAS
+			outi		FASE,TST_ELECTROVALVULAS
+			INSP_EXHA	0
+
+			electrovalvulas						0b0010
+			.endm
+ 
+;*********************************************************************
+
+;*********************************************************************
+;Modos de operación del respirador
+#define		P_CMV		'0'
+#define		V_CMV		'1'
+#define		P_SIMV		'2'
+#define		V_SIMV		'3'
+#define		PSV			'4'
+#define		CPRV		'5'
+#define		CPAP		'6'
+;*********************************************************************
+
+;*********************************************************************
+.macro		electrovalvulas
+			.if		@0==0b00
+					cbi		ELECTROVALVULA0
+					cbi		ELECTROVALVULA1
+			.elif	@0==0b01
+					sbi		ELECTROVALVULA0
+					cbi		ELECTROVALVULA1
+			.elif	@0==0b10
+					cbi		ELECTROVALVULA0
+					sbi		ELECTROVALVULA1
+			.elif	@0==0b11
+					sbi		ELECTROVALVULA0
+					sbi		ELECTROVALVULA1
+			.endif
+.endm
+;*********************************************************************
+
+;*********************************************************************
+.equ		Reg_rx				=	0x0400
+.equ		rx_Modo_op			=	Reg_rx+0
+.equ		rx_TIEMPO_INSL		=	Reg_rx+1
+.equ		rx_TIEMPO_INSM		=	Reg_rx+2
+.equ		rx_TIEMPO_INSH		=	Reg_rx+3
+.equ		rx_TIEMPOpausaL		=	Reg_rx+4
+.equ		rx_TIEMPOpausaM		=	Reg_rx+5
+.equ		rx_TIEMPOpausaH		=	Reg_rx+6
+.equ		rx_TIEMPO_EXPL		=	Reg_rx+7
+.equ		rx_TIEMPO_EXPM		=	Reg_rx+8
+.equ		rx_TIEMPO_EXPH		=	Reg_rx+9
+.equ		rx_FRL				=	Reg_rx+10
+.equ		rx_FRM				=	Reg_rx+11
+.equ		rx_FRH				=	Reg_rx+12
+.equ		rx_PWM0L			=	Reg_rx+13		;Valor de PWM para ventilar
+.equ		rx_PWM0ML			=	Reg_rx+14
+.equ		rx_PWM0MH			=	Reg_rx+15
+.equ		rx_PWM0H			=	Reg_rx+16
+;.equ		rx_PWM0_psL			=	Reg_rx+17		;Valor de PWM para presion soporte
+;.equ		rx_PWM0_psML		=	Reg_rx+18
+;.equ		rx_PWM0_psMH		=	Reg_rx+19
+;.equ		rx_PWM0_psH			=	Reg_rx+20
+.equ		rx_PWM1_O2L			=	Reg_rx+21		;Valor de PWM para O2
+.equ		rx_PWM1_O2ML		=	Reg_rx+22
+.equ		rx_PWM1_O2MH		=	Reg_rx+23
+.equ		rx_PWM1_O2H			=	Reg_rx+24
+.equ		rx_PWM2_AireL		=	Reg_rx+25		;Valor de PWM la valvula que controla
+.equ		rx_PWM2_AireML		=	Reg_rx+26		;la entrada de aire
+.equ		rx_PWM2_AireMH		=	Reg_rx+27
+.equ		rx_PWM2_AireH		=	Reg_rx+28
+.equ		rx_ON_OFF			=	Reg_rx+29
+
+.equ		rx_CAL_O2			=	Reg_rx+30
+
+.equ		Reg_internos		=	0x0500
+.equ		Modo_op				=	Reg_internos+0
+.equ		TIEMPO_INSL			=	Reg_internos+1
+.equ		TIEMPO_INSM			=	Reg_internos+2
+.equ		TIEMPO_INSH			=	Reg_internos+3
+.equ		TIEMPOpausaL		=	Reg_internos+4
+.equ		TIEMPOpausaM		=	Reg_internos+5
+.equ		TIEMPOpausaH		=	Reg_internos+6
+.equ		TIEMPO_EXPL			=	Reg_internos+7
+.equ		TIEMPO_EXPM			=	Reg_internos+8
+.equ		TIEMPO_EXPH			=	Reg_internos+9
+.equ		FRL					=	Reg_internos+10
+.equ		FRM					=	Reg_internos+11
+.equ		FRH					=	Reg_internos+12
+.equ		PWM0L				=	Reg_internos+13
+.equ		PWM0ML				=	Reg_internos+14
+.equ		PWM0MH				=	Reg_internos+15
+.equ		PWM0H				=	Reg_internos+16
+;.equ		PWM0_psL			=	Reg_internos+17
+;.equ		PWM0_psML			=	Reg_internos+18
+;.equ		PWM0_psMH			=	Reg_internos+19
+;.equ		PWM0_psH			=	Reg_internos+20
+.equ		PWM1_O2L			=	Reg_internos+21
+.equ		PWM1_O2ML			=	Reg_internos+22
+.equ		PWM1_O2MH			=	Reg_internos+23
+.equ		PWM1_O2H			=	Reg_internos+24
+.equ		PWM2_AireL			=	Reg_internos+25
+.equ		PWM2_AireML			=	Reg_internos+26
+.equ		PWM2_AireMH			=	Reg_internos+27
+.equ		PWM2_AireH			=	Reg_internos+28
+.equ		ON_OFF				=	Reg_internos+29
+
+.equ		Reg_hex				=	0x0600
+.equ		tmr_TIEMPO_INSL		=	Reg_hex+0
+.equ		tmr_TIEMPO_INSH		=	Reg_hex+1
+.equ		tmr_TIEMPOpausaL	=	Reg_hex+2
+.equ		tmr_TIEMPOpausaH	=	Reg_hex+3
+.equ		tmr_TIEMPO_EXPL		=	Reg_hex+4
+.equ		tmr_TIEMPO_EXPH		=	Reg_hex+5
+.equ		reg_FRL				=	Reg_hex+6
+.equ		reg_FRH				=	Reg_hex+7
+.equ		reg_PWM0L			=	Reg_hex+8
+.equ		reg_PWM0H			=	Reg_hex+9
+;.equ		reg_PWM0_psL		=	Reg_hex+10
+;.equ		reg_PWM0_psH		=	Reg_hex+11
+.equ		reg_PWM1_O2L		=	Reg_hex+12
+.equ		reg_PWM1_O2H		=	Reg_hex+13
+.equ		reg_PWM2_AireL		=	Reg_hex+14
+.equ		reg_PWM2_AireH		=	Reg_hex+15
+
+.equ		tmp_tmr_TIEMPO_INSL	=	Reg_hex+16
+.equ		tmp_tmr_TIEMPO_INSH	=	Reg_hex+17
+.equ		tmp_tmr_TIEMPOpausaL=	Reg_hex+18
+.equ		tmp_tmr_TIEMPOpausaH=	Reg_hex+19
+.equ		tmp_tmr_TIEMPO_EXPL	=	Reg_hex+20
+.equ		tmp_tmr_TIEMPO_EXPH	=	Reg_hex+21
+.equ		tmp_reg_FRL			=	Reg_hex+22
+.equ		tmp_reg_FRH			=	Reg_hex+23
+.equ		tmp_reg_PWM0L		=	Reg_hex+24
+.equ		tmp_reg_PWM0H		=	Reg_hex+25
+;.equ		tmp_reg_PWM0_psL	=	Reg_hex+26
+;.equ		tmp_reg_PWM0_psH	=	Reg_hex+27
+.equ		tmp_reg_PWM1_O2L	=	Reg_hex+28
+.equ		tmp_reg_PWM1_O2H	=	Reg_hex+29
+.equ		tmp_reg_PWM2_AireL	=	Reg_hex+30
+.equ		tmp_reg_PWM2_AireH	=	Reg_hex+31
+
+.equ		Reg_misc			=	0x0700
+.equ		cont_10msL			=	Reg_misc+0
+.equ		cont_10msH			=	Reg_misc+1
+.equ		tmp_cont_10msAL		=	Reg_misc+2
+.equ		tmp_cont_10msAH		=	Reg_misc+3
+.equ		tmp_cont_10msRL		=	Reg_misc+4
+.equ		tmp_cont_10msRH		=	Reg_misc+5
+
+.equ		estado_electrovalvulas	=	Reg_misc+6
+
+.equ		bandera_tx_estado	=	Reg_misc+7 ;Esta bandera se usa dentro de la interrupcion de conteo de pulsos
+
+.equ		stop_ventilador		=	Reg_misc+8	;Bandera para indicar el final del ciclo de respiración
+
+.equ		tmr_pingL			=	Reg_misc+9
+.equ		tmr_pingH			=	Reg_misc+10
+
+.equ		tmr_ping_run		=	Reg_misc+11
+
+.equ		trigger				=	Reg_misc+12
+
+.equ		tmp_udr1			=	Reg_misc+13
+
+.equ		tmp_ocr3al_0		=	Reg_misc+14	;Comparador para el tiempo bajo de la alarma
+.equ		tmp_ocr3ah_0		=	Reg_misc+15
+.equ		tmp_ocr3al_1		=	Reg_misc+16	;Comparador para el tiempo alto de la alarma
+.equ		tmp_ocr3ah_1		=	Reg_misc+17
+
+.equ		tmr_alarma_onL		=	Reg_misc+18	;Temporizador de alarma encendida
+.equ		tmr_alarma_onH		=	Reg_misc+19
+.equ		tmr_alarma_muteL	=	Reg_misc+20	;Temporizador de alarma en mute
+.equ		tmr_alarma_muteH	=	Reg_misc+21
+
+.equ		tmr_alarmaL			=	Reg_misc+22
+.equ		tmr_alarmaH			=	Reg_misc+23
+
+.equ		estado_mute			=	Reg_misc+24
+
+.equ		tmr_sv				=	Reg_misc+25
+.equ		alarma_sv			=	Reg_misc+26
+.equ		cont_alarma_sv		=	Reg_misc+27
+
+.equ		estado_alarmas		=	Reg_misc+28
+
+.equ		alarmas_criticas	=	Reg_misc+29
+
+;Este registro mantiene el estado la fase activa de operación
+;FASE	FASE_PS
+;'0'			Mecanismo en estado de reposo
+;'1'			Motor en movimiento durante inspiración
+;'2'			Pausa de inspiración
+;'3'			Motor en movimiento durante la expiración
+;'4'			Ventana de tiempo para inhibir el trigger (solo en modo 2)
+;'5'			Pausa de expiración
+;'9'			Busqueda de origen
+.equ		FASE				=	Reg_misc+30
+
+.equ		ventana				=	Reg_misc+31
+
+.equ		tmp_tmr_ventanaSIMV_L	=	Reg_misc+32
+.equ		tmp_tmr_ventanaSIMV_H	=	Reg_misc+33
+.equ		tmr_ventanaSIMV_L		=	Reg_misc+34
+.equ		tmr_ventanaSIMV_H		=	Reg_misc+35
+
+.equ		tmr_led				=	Reg_misc+36
+.equ		tmp_led				=	Reg_misc+37
+.equ		buff_rx_debug		=	Reg_misc+38
+.equ		tmr_debug			=	Reg_misc+39
+
+.equ		presion_liberada	=	Reg_misc+40
+
+.equ		start_exha			=	Reg_misc+41
+
+.equ		inhibe_inc_dec_pwm	=	Reg_misc+42	;Este registro permite que solo
+												;se acepte una vez la orden de
+												;inc o dec el PWM, por cada
+												;ciclo de respiración
+
+.equ		reg_PWM0L_50p		=	Reg_misc+43
+.equ		reg_PWM0H_50p		=	Reg_misc+44
+
+;Sección agregada para FiO2
+.equ		FiO2					=	0x0800
+.equ		Acc_FiO2L				=	FiO2+0	;Acumulador de lecturas
+.equ		Acc_FiO2H				=	FiO2+1
+.equ		cont_muestras			=	FiO2+3
+
+.equ		tx_FiO2L				=	FiO2+4
+.equ		tx_FiO2M				=	FiO2+5
+.equ		tx_FiO2H				=	FiO2+6
+
+.equ		FiO2_nuevoL				=	FiO2+7
+.equ		FiO2_nuevoH				=	FiO2+8
+.equ		FiO2_valido				=	FiO2+9
+
+.equ		FiO2HEX_L				=	FiO2+10
+.equ		FiO2HEX_H				=	FiO2+11
+
+.equ		estado_21_O2			=	FiO2+11
+.equ		estado_100_O2			=	FiO2+12
+
+;Sección agregada para lectura de la bateria
+.equ		bateria					=	0x0900
+.equ		modo_alimentacion		=	bateria+0
+.equ		nivel_bat				=	bateria+1
+.equ		selector_O2_Bateria		=	bateria+2
+
+#define		modo_Bateria			'0'
+#define		modo_AC					'1'
+
+;Definición base de la libreria de punto flotante
+.equ		reg_lib				=	0x0D00
+
+;********************************************************************
+
+;********************************************************************
+init_io:	outi	ddra, 0b11111111
+			outi	porta,0b00000000
+
+			outi	ddrb, 0b10000000	;PB7 = OC1C = PWM0, control de la electrovalvula
+			outi	portb,0b01111111	;para el control del flujo.
+
+			outi	ddrc, 0b00000000	;PC0 Entrada de estado de la alimentacion AC o Bat
+			outi	portc,0b11111111
+
+			outi	ddrd, 0b11111000	;PD0 = Señal enviada por la tarjeta SV para indicar
+			outi	portd,0b00000111	;una sobrepresión, por lo cual se cancela la fase
+										;de inspiración y/o el tiempo pausa.
+										;PD1 = Señal enviada por la tarjeta SV para indicar
+										;que se debe de abrir la valvula PWM0
+										;(sin cancelar modo ni fase)
+										;PD2 y PD3 = Comunicacion con la tarjeta SV
+										;PD4 = Señal enviada por la tarjeta SV para indicar
+										;que se debe de cerrar la valvula PWM0
+										;PD6 y PD7 = Salidas para electrovalvulas
+
+			outi	ddre, 0b00000010	;PE0 y PE1 = Comunicación con la Raspberry
+			outi	porte,0b11111111
+
+			outi	ddrf, 0b00000000	;PF1 y PF2 = Entradas analogicas para
+			outi	portf,0b00000000	;digitalizar el valor de la bateria del no break
+										;y del sensor de O2
+            outi	didr0,0xFF			;Se deshabilita la entrada digital de los pines
+            outi	didr2,0xFF			;de los canales analogicos.
+
+			outi	ddrg, 0b00000001	;PG0 = pin del led indicador
+            outi	portg,0b00000001
+
+			outi	ddrl, 0b11111100	;PL0 = ICP4 = Interrupción externa.
+			outi	portl,0b00000011	;En modo volumen indica que se debe de aumentar
+										;el flujo con la valvula controlada con el PWM0,
+										;para el siguiente ciclo respiratorio.
+										;En modo presión indica que se debe de abrir la
+										;valvula controlada con el PWM0, para permitir el
+										;paso del aire.
+										;PL1 = ICP5 = Interrupción externa.
+										;En modo volumen indica que se debe de reducir el
+										;flujo con la valvula controlada con el PWM0, para
+										;el siguiente ciclo respiratorio.
+										;En modo presión indica que se debe de cerrar la
+										;valvula controlada con el PWM0, para no dejar
+										;pasar mas aire.
+										;PL4 = OC5B = PWM1 controla la electrovalvula
+										;para O2
+										;PL5 = OC5C = PWM2 controla la electrovalvula
+										;para paso el paso del aire
+										;PL6 = INSPIRACIÓN/EXHALACIÓN, le indica a la
+										;tarjeta SV en que fase esta (1/0 respectivaente)
+;***************************************
+
+;***************************************
+;Configura las interrupciones externas
+			outi		eicra,0b00001111	;INTF0 e INTF1 activas por flanco asc
+			outi		eifr, 0b00000011	;Borra bandera INTF0
+			outi		eimsk,0b00000011	;Habilita la interrupción
+;***************************************
+
+;***************************************
+;Configura los puertos de comunicaciones
+			usart0		115200,8,n,1,rxtx,no_irxtx
+			usart1		115200,8,n,1,rxtx,irx	;Usart para deteccion del Trigger
+			outi		tmr_debug,0x00
+
+;***************************************
+;Timer para base de tiempo de la salida de alarma
+;	tmp_ocr3a_0 + ocr3a_1 = 0.002272*fxtal
+            outiw	tcnt3h,tcnt3l,0x0000
+			outiw	tmp_ocr3ah_0,tmp_ocr3al_0,(0.003034*fxtal)*.9
+			outiw	tmp_ocr3ah_1,tmp_ocr3al_1,(0.003034*fxtal)*.1
+			outiw	ocr3ah,ocr3al,(0.003034*fxtal)*.1
+            outi	tccr3a,0x00
+            outi	tccr3c,0x00
+            outi	tccr3b,0x08		;Timer detenido
+            outi	timsk3,0x02		;Habilita la interrupcion de comparacion del Timer 3
+
+			outiw	tmr_alarma_onH,tmr_alarma_onL,440
+			outiw	tmr_alarma_muteH,tmr_alarma_muteL,440*5*10
+			outiw	tmr_alarmaH,tmr_alarmaL,440
+			outi	estado_mute,0x00
+
+;***************************************
+;Timer para los PWM's de control de O2 y paso de aire
+;Modo PWM con corrección de fase y frecuencia
+;El valor de OCR5A determina la frecuencia de PWM (20KHz)
+;El valor de OCR5B y OCR5C, depende del ajuste deseado para las electrovalvulas
+;Inicia el timer corriendo con PWM al 0%
+            outi        tccr5a,0b00101011		;Salidas B y C
+            outiw       tcnt5h,tcnt5l,0x0000
+			outiw		ocr5ah,ocr5al,0x0000
+            outiw       ocr5bh,ocr5bl,0x0000
+            outiw       ocr5ch,ocr5cl,0x0000
+            outi        tccr5b,0b11011001		;Configura la captura en flanco asc
+			outi		timsk5,0b00000000
+;***************************************
+
+;***************************************
+;Timer para el PWM de control flujo principal
+;Modo PWM con corrección de fase y frecuencia
+;El valor de OCR1A determina la frecuencia de PWM (20KHz)
+;El valor de OCR1C, depende del ajuste deseado para las electrovalvulas
+;Inicia el timer corriendo con PWM al 0%
+            outi        tccr1a,0b00001011		;Salida C
+            outiw       tcnt1h,tcnt1l,0x0000
+			outiw		ocr1ah,ocr1al,0x0000
+            outiw       ocr1ch,ocr1cl,0x0000
+            outi        tccr1b,0b11011001
+			outi		timsk1,0b00000000
+;***************************************
+
+			outiw		ocr1ah,ocr1al,Fxtal/Fpwm
+			outiw		ocr5ah,ocr5al,Fxtal/Fpwm
+
+;***************************************
+;Temporizador de 10ms
+;Para el led, para el tiempo de envio de dato "S" y demas temporizaciones basadas en 10ms
+.equ		tiempo_ping_10s	=	10000
+.equ		tiempo_ping_1s	=	1000
+			outi		tccr0a,0x02
+			outi		tcnt0,0x00
+			outi		ocr0a,0.010*(fxtal/1024)
+			outi		timsk0,0x02
+			outi		tmp_led,10
+			movr		tmr_led,tmp_led
+			outi		tccr0b,0x05
+			outi		tmr_debug,0x00
+
+			outi		tmr_pingL,low(tiempo_ping_10s/10)		;Temporizador para ping
+			outi		tmr_pingH,high(tiempo_ping_10s/10)		;0.1seg x tmr_ping
+			outi		tmr_ping_run,0x00
+
+;Inicializa parametros para el ADC
+;El canal a usar es el ADC2 (PF2) para O2
+;Se usa la interrupción del Timer para la frecuencia de muestreo
+;Se efectuta un promedio de las lecturas (sin eliminar valor mas alto y bajo)
+.equ		n_muestras	=	16
+.equ		n_shift		=	4
+			outi		tx_FiO2L,'0'	;Este registro conserva la lectura que se
+			outi		tx_FiO2M,'0'	;puede enviar (ASCII)
+			outi		tx_FiO2H,'0'	;puede enviar (ASCII)
+
+			outi		FiO2_nuevoL,0x00;En este registro se prepara la lectura
+			outi		FiO2_nuevoH,0x00;ya promediada antes de validarla (Hex)
+			outi		FiO2_valido,'0'	;Bandera para validar la lectura
+
+			outi		cont_muestras,n_muestras
+			outi		Acc_FiO2L,0x00
+			outi		Acc_FiO2H,0x00
+			outi		adcsra,0b10000111
+			outi		adcsrb,0b00000000
+			outi		admux, 0b00000010
+			outi		adcsra,0b11000111	;Arranque a la conversión A/D
+
+;Sección de inicialización para lectura de la bateria
+;Nota: ADC1 (PF1) para el voltaje de la bateria
+			outi		selector_O2_Bateria,'0'
+			outi		modo_alimentacion,modo_Bateria
+			outi		nivel_bat,'0'
+
+;Inicialización de variables generales
+			outi		estado_electrovalvulas,'1'		;Aun no se realiza el tst
+
+			outi		bandera_tx_estado,0x00
+			outi		stop_ventilador,0x00
+
+			outi		modo_op,'0'
+			outi		trigger,0x00			;Este registro puede ser 0x00, '0' ó '1'
+;			outiw		timer_ventanaH,timer_ventanaL,0x0001
+;			outi		run_timer_ventana,0x00
+
+;			outiw		add_cont_10msH,add_cont_10msL,0x0000
+
+			outi		tmr_sv,0x00
+			outi		alarma_sv,0x00
+			outi		cont_alarma_sv,0x00
+			outi		estado_alarmas,'0'
+			outi		ON_OFF,'0'
+			outi		alarmas_criticas,'0'
+;			outiw		alarma_cont_10msH,alarma_cont_10msL,0x0000
+;			outi		bandera_pasos_alarma,'0'
+
+			FASE_STANDBY
+
+			outi		estado_21_O2,'?'		;Valor inicial, que indica que no se ha
+			outi		estado_100_O2,'?'		;verificado la calibración del sensor de
+												;O2
+			outi		ventana,'0'
+
+			outi		presion_liberada,'0'
+
+			outi	start_exha,'0'
+
+			outi	inhibe_inc_dec_pwm,'1'
+
+            sei                                 ;Habilita de manera global las interrupciones
+            ret
+
+ 
+.equ		tmp_OCR5AL_A		=	Reg_misc+		;Registros para velocidad de inspiracion
+.equ		tmp_OCR5AH_A		=	Reg_misc+
+.equ		tmp_OCR5BL_A		=	Reg_misc+
+.equ		tmp_OCR5BH_A		=	Reg_misc+
+
+.equ		tmp_OCR5AL_R		=	Reg_misc+		;Registros para velocidad de expiracion
+.equ		tmp_OCR5AH_R		=	Reg_misc+
+.equ		tmp_OCR5BL_R		=	Reg_misc+
+.equ		tmp_OCR5BH_R		=	Reg_misc+
+
+.equ		tmp_tmr_TIEMPOpausaL	=	Reg_misc+
+.equ		tmp_tmr_TIEMPOpausaH	=	Reg_misc+
+
+.equ		tmp_tmr_TIEMPO_EXPL		=	Reg_misc+
+.equ		tmp_tmr_TIEMPO_EXPH		=	Reg_misc+
+ 
+
+ 
+.equ		rx_ventanaL			=	Reg_misc+30	;Ventana de tiempo para detección del trigger en modo 2
+.equ		rx_ventanaM			=	Reg_misc+31
+.equ		rx_ventanaH			=	Reg_misc+32
+.equ		ventanaL			=	Reg_misc+33
+.equ		ventanaM			=	Reg_misc+34
+.equ		ventanaH			=	Reg_misc+35
+.equ		tmp_tmr_ventanaL	=	Reg_misc+36
+.equ		tmp_tmr_ventanaH	=	Reg_misc+37
+ 
+
+;.equ		TIEMPO_EXP_ON		=	Reg_misc+38
+
+;.equ		add_cont_10msL		=	Reg_misc+
+;.equ		add_cont_10msH		=	Reg_misc+
+
+;.equ		timer_ventanaL		=	Reg_misc+	;Este timer en realidad esta en función del tiempo pausa de
+;.equ		timer_ventanaH		=	Reg_misc+	;expiración menos el valor de tiempo que se recibio de ventana
+;.equ		run_timer_ventana	=	Reg_misc+
+
+;.equ		alarma_cont_10msL	=	Reg_misc+62	;Este contador guarda los pasos que se deben de aplicar de regreso
+;.equ		alarma_cont_10msH	=	Reg_misc+63	;del mecanismo, cuando se cancelo el movimiento de inspiración por
+												;una alarma
+;.equ		bandera_pasos_alarma	=	Reg_misc+64
+
+;2.0
+;************************************************************
+int_Retroalimentacion:
+			pushw
+			pushr	sreg
+
+			cpri	presion_liberada,'0'	;Si se libero la presión, se
+			breq	tst_retro				;deshabilita durante el ciclo
+											;de respiración en curso.
+			popr	sreg
+			popw
+			reti
+
+tst_retro:	inr		r25,pinl
+			andi	r25,0b00000011
+			cpi		r25,0x00
+			breq	int_INC_PWM0
+			cpi		r25,0x01
+			rbreq	int_DEC_PWM0
+			cpi		r25,0x02
+			rbreq	int_ON_valvula
+;			cpi		r25,0x03
+;			breq	int_OFF_valvula
+			jmp		int_OFF_valvula
+;************************************************************
+
+;************************************************************
+int_INC_PWM0:
+			cpri	inhibe_inc_dec_pwm,'1'
+			rbreq	salir_int_inc
+
+			cpri	FASE,STANDBY
+			rbreq	salir_int_inc
+			cpri	FASE,ESPERA
+			rbreq	salir_int_inc
+			cpri	FASE,CALIBRA_O2_21
+			rbreq	salir_int_inc
+			cpri	FASE,CALIBRA_O2_100
+			rbreq	salir_int_inc
+
+			cpri	Modo_op,P_CMV
+			rbreq	salir_int_inc
+			cpri	Modo_op,P_SIMV
+			rbreq	salir_int_inc
+
+			cpri	Modo_op,V_CMV
+			rbreq	Incrementa_volumen
+			cpri	Modo_op,V_SIMV
+			rbreq	Incrementa_volumen
+ 
+			cpri	Modo_op,PSV
+			breq
+			cpri	Modo_op,CPRV
+			breq
+			cpri	Modo_op,CPAP
+			breq
+ 
+Incrementa_volumen:
+			INC_VOLUMEN
+
+salir_int_inc:
+			popr	sreg
+			popw
+			reti
+;************************************************************
+
+;************************************************************
+int_DEC_PWM0:
+			cpri	inhibe_inc_dec_pwm,'1'
+			rbreq	salir_int_dec
+
+			cpri	FASE,STANDBY
+			rbreq	salir_int_dec
+			cpri	FASE,ESPERA
+			rbreq	salir_int_dec
+			cpri	FASE,CALIBRA_O2_21
+			rbreq	salir_int_dec
+			cpri	FASE,CALIBRA_O2_100
+			rbreq	salir_int_dec
+
+			cpri	Modo_op,P_CMV
+			rbreq	salir_int_dec
+			cpri	Modo_op,P_SIMV
+			rbreq	salir_int_dec
+
+			cpri	Modo_op,V_CMV
+			rbreq	Decrementa_volumen
+			cpri	Modo_op,V_SIMV
+			rbreq	Decrementa_volumen
+ 
+			cpri	Modo_op,PSV
+			breq
+			cpri	Modo_op,CPRV
+			breq
+			cpri	Modo_op,CPAP
+			breq
+ 
+Decrementa_volumen:
+			DEC_VOLUMEN
+salir_int_dec:
+			popr	sreg
+			popw
+			reti
+;************************************************************
+
+;************************************************************
+int_ON_valvula:
+			cpri	FASE,STANDBY
+			rbreq	salir_int_ON_valvula
+			cpri	FASE,ESPERA
+			rbreq	salir_int_ON_valvula
+			cpri	FASE,CALIBRA_O2_21
+			rbreq	salir_int_ON_valvula
+			cpri	FASE,CALIBRA_O2_100
+			rbreq	salir_int_ON_valvula
+
+			cpri	FASE,EXHALACION
+			brne	tst_tiempo_pausa_int_on
+			cpri	start_exha,'1'
+			brne	Activa_valvula
+			jmp		salir_int_ON_valvula
+
+tst_tiempo_pausa_int_on:
+			cpri	FASE,TIEMPO_PAUSA
+			breq	Activa_valvula
+			cpri	FASE,PRESION_SOPORTE
+			breq	Activa_valvula
+
+			cpri	FASE,INSPIRACION
+			brne	salir_int_ON_valvula	;Posible error de operación
+;Si es fase de inspiración, se verifica el modo.
+;En caso de que sea modo volumen, se desecha la orden
+;En modo presión se procede
+			cpri	Modo_op,V_CMV
+			breq	salir_int_ON_valvula
+			cpri	Modo_op,V_SIMV
+			breq	salir_int_ON_valvula
+			cpri	Modo_op,P_CMV
+			breq	Activa_valvula
+			cpri	Modo_op,P_SIMV
+			breq	Activa_valvula
+ 
+			cpri	Modo_op,PSV
+			breq
+			cpri	Modo_op,CPRV
+			breq
+			cpri	Modo_op,CPAP
+			breq
+ 
+Activa_valvula:
+			ON_PRESION
+salir_int_ON_valvula:
+			popr	sreg
+			popw
+			reti
+;************************************************************
+
+;************************************************************
+int_OFF_valvula:
+			cpri	FASE,STANDBY
+			rbreq	salir_int_OFF_valvula
+			cpri	FASE,ESPERA
+			rbreq	salir_int_OFF_valvula
+			cpri	FASE,CALIBRA_O2_21
+			rbreq	salir_int_OFF_valvula
+			cpri	FASE,CALIBRA_O2_100
+			rbreq	salir_int_OFF_valvula
+
+			cpri	FASE,EXHALACION
+			brne	tst_tiempo_pausa_int_off
+			cpri	start_exha,'1'
+			brne	Desactiva_valvula
+			jmp		salir_int_OFF_valvula
+
+tst_tiempo_pausa_int_off:
+			cpri	FASE,TIEMPO_PAUSA
+			breq	Desactiva_valvula
+			cpri	FASE,PRESION_SOPORTE
+			breq	Desactiva_valvula
+
+			cpri	FASE,INSPIRACION
+			brne	salir_int_OFF_valvula	;Posible error de operación
+;Si es fase de inspiración, se verifica el modo.
+;En caso de que sea modo volumen, se desecha la orden
+;En modo presión se procede
+			cpri	Modo_op,V_CMV
+			breq	salir_int_OFF_valvula
+			cpri	Modo_op,V_SIMV
+			breq	salir_int_OFF_valvula
+			cpri	Modo_op,P_CMV
+			breq	Desactiva_valvula
+			cpri	Modo_op,P_SIMV
+			breq	Desactiva_valvula
+ 
+			cpri	Modo_op,PSV
+			breq
+			cpri	Modo_op,CPRV
+			breq
+			cpri	Modo_op,CPAP
+			breq
+ 
+Desactiva_valvula:
+			OFF_PRESION
+salir_int_OFF_valvula:
+			popr	sreg
+			popw
+			reti
+;************************************************************
+
+;************************************************************
+timer_10ms:	pushw
+			pushr	sreg
+			pushx
+
+;Sección agregada para FiO2 y lectura de Vbat
+			cpri	selector_O2_Bateria,'0'
+			breq	sigue_lee_O2
+lee_Bateria:inr		r24,ADCL
+			inr		r25,ADCH
+cp_nivel5:	ldiw	xh,xl,800
+			cp		r24,xl
+			cpc		r25,xh
+			brlo	cp_nivel4
+			outi	nivel_bat,'5'
+			rjmp	fin_adc_bat
+cp_nivel4:	ldiw	xh,xl,640
+			cp		r24,xl
+			cpc		r25,xh
+			brlo	cp_nivel3
+			outi	nivel_bat,'4'
+			rjmp	fin_adc_bat
+cp_nivel3:	ldiw	xh,xl,480
+			cp		r24,xl
+			cpc		r25,xh
+			brlo	cp_nivel2
+			outi	nivel_bat,'3'
+			rjmp	fin_adc_bat
+cp_nivel2:	ldiw	xh,xl,320
+			cp		r24,xl
+			cpc		r25,xh
+			brlo	cp_nivel1
+			outi	nivel_bat,'2'
+			rjmp	fin_adc_bat
+cp_nivel1:	ldiw	xh,xl,160
+			cp		r24,xl
+			cpc		r25,xh
+			brlo	es_nivel0
+			outi	nivel_bat,'1'
+			rjmp	fin_adc_bat
+es_nivel0:	outi	nivel_bat,'0'
+
+fin_adc_bat:outi	selector_O2_Bateria,'0'
+			outi	admux, 0b00000010	;Selecciona el canal de O2
+			rjmp	sigue_TMR0
+
+sigue_lee_O2:
+			inr		r24,ADCL
+			inr		r25,ADCH
+			inr		xl,Acc_FiO2L
+			inr		xh,Acc_FiO2H
+			add		xl,r24
+			adc		xh,r25
+			outr	Acc_FiO2L,xl
+			outr	Acc_FiO2H,xH
+			decr	cont_muestras
+			brne	sigue_TMR0
+			outi	cont_muestras,n_shift
+
+;el registro X, mantiene el valor acumulado
+siguiente_shift:
+			lsr		xh
+			ror		xl
+			decr	cont_muestras
+			brne	siguiente_shift
+			outr	FiO2_nuevoL,xl
+			outr	FiO2_nuevoH,xh
+			outi	FiO2_valido,'1'	;Bandera para validar la lectura
+			outi	cont_muestras,n_muestras
+			outi	Acc_FiO2L,0x00
+			outi	Acc_FiO2H,0x00
+
+			outi	selector_O2_Bateria,'1'
+			outi	admux, 0b00000001	;Selecciona el canal de la bateria
+
+sigue_TMR0:	outi	adcsra,0b11000111	;Arranque a la conversión A/D
+
+;Sección para verificar el time-out de la comunicación con la tarjeta SV
+			inr		r25,tmr_sv
+			cpi		r25,0x00
+			breq	dec_tmr_led
+			dec		r25
+			outr	tmr_sv,r25
+			rbrne	dec_tmr_led
+			outi	tmr_sv,50
+			outi	alarma_sv,0x01
+
+;Sección de la temporización para el parpadeo del led
+dec_tmr_led:
+			decr	tmr_led
+			brne	salir_tmr_led
+			movr	tmr_led,tmp_led
+			sbi		led_run
+salir_tmr_led:
+
+;Sección del time-out de la USART "debug"
+			cpri	tmr_debug,0x00
+			breq	fin_timer_debug
+			decr	tmr_debug
+fin_timer_debug:
+
+ 
+;Sección de la temporización del timer de la ventana de tiempo
+			inr		r25,run_timer_ventana
+			cpi		r25,0x01
+			brne	tst_ping_time
+			inr		r24,timer_ventanaL
+			inr		r25,timer_ventanaH
+			sbiw	r24,1
+			outr	timer_ventanaL,r24
+			outr	timer_ventanaH,r25
+			brne	tst_ping_time
+;PASO 5
+;			FASE_TRIGGER_SIMV
+			outi	run_timer_ventana,0x00
+ 
+
+;Sección de temporización del ping con la tarjeta Raspberry
+tst_ping_time:
+			cpri		tmr_ping_run,0x00
+			breq		tiempo_fase
+			inr			r24,tmr_pingL
+			inr			r25,tmr_pingH
+			sbiw		r24,1
+			outr		tmr_pingL,r24
+			outr		tmr_pingH,r25
+			brne		tiempo_fase
+			outi		tmr_pingL,low(tiempo_ping_10s/10)		;Temporizador para ping
+			outi		tmr_pingH,high(tiempo_ping_10s/10)	;0.01seg x tmr_ping
+			outi		tmr_ping_run,0x02
+
+;Sección de temporización de las FASES de operación
+tiempo_fase:
+					outi	start_exha,'0'
+
+			cpri		FASE,STANDBY		;Si la fase es STANDBY, se cancela el resto
+			rbreq		salir_contar_pulsos	;del proceso.
+			cpri		FASE,ESPERA			;Si la fase es ESPERA, se cancela el resto
+			rbreq		salir_contar_pulsos	;del proceso, para permitir que el programa
+											;principal pueda cargar los valores que rx
+											;con el comando 'M' o bien detener el
+											;ventilador.
+			cpri		FASE,CALIBRA_O2_21	;En caso de que se esten ejecutando alguna
+			rbreq		salir_contar_pulsos	;de las calibraciones de O2, tambien se
+			cpri		FASE,CALIBRA_O2_21	;cancela el resto del proceso.
+			rbreq		salir_contar_pulsos
+
+			cpri		Modo_op,P_SIMV
+			breq		temporizacion_ventana
+			cpri		Modo_op,V_SIMV
+			breq		temporizacion_ventana
+			jmp			temporizacion_general
+temporizacion_ventana:
+			inr			r24,tmr_ventanaSIMV_L
+			inr			r25,tmr_ventanaSIMV_H
+			sbiw		r24,1
+			outr		tmr_ventanaSIMV_L,r25
+			outr		tmr_ventanaSIMV_H,r24
+			rbrne		temporizacion_general
+
+			outi		ventana,'0'		;Este registro se usa para determinar a función
+										;del trigger en modo SIMV
+			inr			r24,tmp_tmr_ventanaSIMV_L
+			inr			r25,tmp_tmr_ventanaSIMV_H
+			outr		tmr_ventanaSIMV_L,r24
+			outr		tmr_ventanaSIMV_H,r25
+			cpri		FASE,PRESION_SOPORTE
+			brne		temporizacion_general
+			OFF_PRESION					;Si termina la ventana de tiempo,
+			PIN_PS0						;libera la presión, en caso de que
+										;estuviera la presion soporte
+
+temporizacion_general:
+			inr			r24,cont_10msL
+			inr			r25,cont_10msH
+			sbiw		r24,1
+			outr		cont_10msL,r24
+			outr		cont_10msH,r25
+			rbrne		salir_contar_pulsos
+
+;Se verifica el número de fase en curso, para cambiarla
+TST_FASE:	cpri		FASE,INSPIRACION
+			rbreq		inicia_tiempo_pausa
+			cpri		FASE,TIEMPO_PAUSA
+			rbreq		inicia_exhalacion
+			cpri		FASE,EXHALACION
+			rbreq		termino_exhalacion
+			cpri		FASE,PRESION_SOPORTE
+			rbreq		inicia_exhalacion
+			jmp			inicia_inspiracion
+
+termino_exhalacion:
+;			outi		ventana,'0'
+
+inicia_inspiracion:
+			cpri	stop_ventilador,0x01	;Antes de iniciar la fase de inspiración, se
+			rbrne	inicia_fase_inspiracion	;verifica si hay una solicitud para detener
+			outi	stop_ventilador,0x00	;el respirador o bien para actualizar valores
+			FASE_ESPERA						;Esta condición la indica el registro
+			rjmp	salir_contar_pulsos		;stop_ventilador = 0x01, de ser asi, se borra
+											;el registro y se da por terminada la
+											;interrupción, lo siguiente dependera de la
+											;ejecución del comando 'M'
+inicia_fase_inspiracion:
+			outi		presion_liberada,'0'
+
+			FASE_INSPIRACION
+;			outi		run_timer_ventana,0x00	;Se asegura que el timer para la ventana de tiempo se detenga
+												;esto se realiza independientemente del modo de operación.
+			rjmp		salir_contar_pulsos
+
+;PASO 2
+inicia_tiempo_pausa:
+			inr		r24,tmr_TIEMPOpausaL
+			inr		r25,tmr_TIEMPOpausaH
+			cpi		r24,0x00
+			cpci	r25,0x00
+			breq	no_hay_pausa
+;Asigna valores para Tpausa
+			FASE_TIEMPO_PAUSA
+			rjmp		salir_contar_pulsos
+
+;PASO 3
+no_hay_pausa:
+inicia_exhalacion:
+					outi	start_exha,'1'
+			FASE_EXHALACION
+			rjmp		salir_contar_pulsos
+
+salir_contar_pulsos:
+			popx
+			popr		sreg
+			popw
+			reti
+;************************************************************
+
+;************************************************************
+rx_trigger:	pushw
+			pushr	sreg
+			inr		r25,udr1
+			outr	tmp_udr1,r25
+
+			cpi		r25,'1'
+			rbreq	si_es_trigger
+			cpi		r25,'0'
+			rbreq	rx_ping_sv
+
+tst_alarma_sv:
+			inr		r25,cont_alarma_sv
+			cpi		r25,0x05		;5 intentos consecutivos
+			rbreq	salir_int_rx1
+			inc		r25
+			outr	cont_alarma_sv,r25
+			outi	tmr_sv,50
+			outi	alarma_sv,0x01
+			jmp		salir_int_rx1
+
+si_es_trigger:
+			cpri	FASE,EXHALACION		;Solo si esta en la fase de exhalacion se acepta
+			rbrne	rx_ping_sv			;el trigger
+ 
+			cpri	FASE,INSPIRACION	;Si se recibe el dato del trigger, pero esta en la
+			breq	rx_ping_sv			;fase de inspiración o tiempo pausa, solo se
+			cpri	FASE,TIEMPO_PAUSA	;considera como ping con la tarjeta sv
+			breq	rx_ping_sv
+ 
+tst_CMV:
+			outi	trigger,'1'
+
+			cpri	Modo_op,V_CMV
+			breq	asigna_inspiracion
+			cpri	Modo_op,P_CMV
+			breq	asigna_inspiracion
+			jmp		tst_SIMV
+asigna_inspiracion:
+			outi		presion_liberada,'0'
+
+			FASE_INSPIRACION
+			jmp		rx_ping_sv
+
+;*************************************************************
+;*************************************************************
+;*************************************************************
+;FALTA AGREGAR LA VENTANA DUAL EN SIMV, PARA CAMBIAR EL VALOR
+;DEL REGISTRO "ventana"
+;*************************************************************
+;*************************************************************
+;*************************************************************
+tst_SIMV:	cpri	Modo_op,V_SIMV
+			breq	tst_ventana
+			cpri	Modo_op,P_SIMV
+			breq	tst_ventana
+			jmp		tst_PSV
+tst_ventana:cpri	ventana,'0'			;En SIMV si ventana = '0', se aplica un ciclo
+			rbreq	asigna_inspiracion_asistida	;normal de inspiración, de no ser asi, se
+
+			outi		presion_liberada,'0'
+			FASE_PRESION_SOPORTE		;aplica presion soporte
+			jmp		rx_ping_sv
+
+asigna_inspiracion_asistida:
+			outi		ventana,'1'
+			inr			r24,tmp_tmr_ventanaSIMV_L
+			inr			r25,tmp_tmr_ventanaSIMV_H
+			outr		tmr_ventanaSIMV_L,r24
+			outr		tmr_ventanaSIMV_H,r25
+			jmp			asigna_inspiracion
+;*************************************************************
+;*************************************************************
+;*************************************************************
+;FALTA AJUSTAR LA FUNCIONALIDAD DEL TRIGGER EN LOS SIGUIENTES MODOS
+;*************************************************************
+;*************************************************************
+;*************************************************************
+tst_PSV:	cpri	Modo_op,PSV
+			rbreq	asigna_inspiracion
+tst_CPRV:	cpri	Modo_op,CPRV
+			rbreq	asigna_inspiracion
+tst_CPAP:	cpri	Modo_op,CPAP
+			rbreq	asigna_inspiracion
+			jmp		asigna_inspiracion
+
+rx_ping_sv:
+			outi		tmr_sv,50
+			outi		alarma_sv,0x00
+			outi		cont_alarma_sv,0x00
+
+			inr		r25,tmp_udr1
+			outr	udr1,r25
+salir_int_rx1:
+			popr	sreg
+			popw
+			reti
+
+alarma_nivel1:
+			outr		alarmas_criticas,r25
+
+			rjmp	rx_ping_sv
+;************************************************************
+
+;************************************************************
+timer_frecuencia:
+			pushw
+			pushr	sreg
+			sbis	ALARMA
+			rjmp	pin_alarma_0
+			cbi		ALARMA
+			inr		r24,tmp_ocr3al_0
+			inr		r25,tmp_ocr3ah_0
+			outr	ocr3ah,r25
+			outr	ocr3al,r24
+			rjmp	salir_alarma
+
+pin_alarma_0:
+			inr		r24,tmr_alarmaL
+			inr		r25,tmr_alarmaH
+			subi	r24,0x01
+			sbci	r25,0x00
+			outr	tmr_alarmaL,r24
+			outr	tmr_alarmaH,r25
+			brne	set_pin
+			inr		r25,estado_mute
+			cpi		r25,0x01
+			breq	desactiva_mute
+			outi		estado_mute,0x01
+			inr			r24,tmr_alarma_muteL
+			inr			r25,tmr_alarma_muteH
+			outr		tmr_alarmaL,r24
+			outr		tmr_alarmaH,r25
+			rjmp		set_pin
+desactiva_mute:
+			outi		estado_mute,0x00
+			inr			r24,tmr_alarma_onL
+			inr			r25,tmr_alarma_onH
+			outr		tmr_alarmaL,r24
+			outr		tmr_alarmaH,r25
+			rjmp		set_pin
+
+set_pin:	inr		r25,estado_mute
+			cpi		r25,0x01
+			breq	solo_carga
+			sbi		ALARMA
+solo_carga:	inr		r24,tmp_ocr3al_1
+			inr		r25,tmp_ocr3ah_1
+			outr	ocr3ah,r25
+			outr	ocr3al,r24
+			rjmp	salir_alarma
+salir_alarma:
+			popr	sreg
+			popw
+			reti
+;************************************************************
+
+;************************************************************
+int_cancela_inspiracion:
+			pushw
+			pushr	sreg
+;			cpri	FASE,INSPIRACION	;La interrupción solo se admite si el ventilador
+;			breq	cancela_inspiracion	;se encuentra en la fase de inspiración o de
+;			cpri	FASE,TIEMPO_PAUSA	;tiempo pausa.
+;			breq	cancela_tiempo_pausa
+;			rjmp	salir_int0
+;cancela_inspiracion:
+;cancela_tiempo_pausa:
+			ASIGNA_PWM_FLUJO					0,0
+			ELECTROVALVULAS						0b00
+			outi	presion_liberada,'1'
+;			FASE_EXHALACION
+;			FASE_STANDBY
+salir_int0:	popr	sreg
+			popw
+			reti
+;************************************************************
+
+;PASO 4
+;inicia_trigger:
+;			inr		r24,tmp_tmr_TIEMPO_EXPL
+;			inr		r25,tmp_tmr_TIEMPO_EXPH
+;			cpi		r24,0x00
+;			cpci	r25,0x00
+;			rbreq	no_hay_TIEMPO_EXP		;No hay pausa de expiración (ni ventana, en caso de modo 2)
+											;Salta a iniciar la Fase 1
+
+			cpri		modo_op,CMV
+			rbreq		asigna_tiempo_modo0
+;			cpi			r25,'2'
+;			breq		asigna_tiempo_modo2
+			rjmp		asigna_tiempo_modo2
+
+;PASO 5, MODO 0		EL MODO 0 NO USA VENTANA PARA EL TRIGGER, POR LO CUAL PASA DIRECTO A LA FASE 5
+asigna_tiempo_modo0:
+;			FASE_TRIGGER
+;			inr			r24,tmp_tmr_TIEMPO_EXPL
+;			inr			r25,tmp_tmr_TIEMPO_EXPH
+asigna_conteo:
+			rjmp		salir_contar_pulsos
+
+;PASO 4, MODO 2
+asigna_tiempo_modo2:
+;			FASE_TRIGGER_SIMV
+;			inr			r24,tmp_tmr_TIEMPO_EXPL
+;			inr			r25,tmp_tmr_TIEMPO_EXPH
+			pushx
+;			inr			xl,add_cont_10msL
+;			inr			xh,add_cont_10msH
+;			add			r24,xl
+;			adc			r25,xh
+;			outr		cont_10msL,r24
+;			outr		cont_10msH,r25
+
+;Calcula la diferencia entre el valor de tmp_tmr_TIEMPO_EXPL - tmp_tmr_ventana
+;El resultado de esta resta, es el tiempo en el cual no se toma el trigger
+			inr			r24,tmp_tmr_TIEMPO_EXPL
+			inr			r25,tmp_tmr_TIEMPO_EXPH
+			inr			xl,tmp_tmr_ventanaL
+			inr			xh,tmp_tmr_ventanaH
+			cp			r24,xl
+			cpc			r25,xh
+			brlo		error_de_ventana	;Si el valor de la pausa de expiracion es menor o igual al valor
+			breq		error_de_ventana	;de la ventana -> error, en ese caso se asegura que la ventana sea
+												;de 10ms
+;tmp_tmr_TIEMPO_EXPL > tmp_tmr_ventana
+			sub			r24,xl
+			sbc			r25,xh
+			outr		timer_ventanaL,r24
+			outr		timer_ventanaH,r25
+			jmp			arranque_ventana
+error_de_ventana:
+			outiw		timer_ventanaH,timer_ventanaL,0x0001	;1 -> 10ms
+arranque_ventana:
+			outi		run_timer_ventana,0x01
+
+recupera_x:	popx
+			jmp		salir_contar_pulsos
+ 
+
+;2.0
+;************************************************************
+.macro		tx_debug_reg
+			push		r25
+
+wait_tx_prev:		inr		r25,ucsra_debug
+					sbrs	r25,udre_debug
+					rjmp	wait_tx_prev
+
+			inr			r25,@0
+			outr		udr_debug,r25
+wait_tx_debug1:
+			inr			r25,ucsra_debug
+			sbrs		r25,txc_debug
+			rjmp		wait_tx_debug1
+			outi		ucsra_debug,0x40
+			pop			r25
+.endm
+;************************************************************
+
+;************************************************************
+.macro		tx_debug_r
+			push		r25
+
+wait_tx_prev:		inr		r25,ucsra_debug
+					sbrs	r25,udre_debug
+					rjmp	wait_tx_prev
+
+			mov			r25,@0
+			outr		udr_debug,r25
+wait_tx_debug1:
+			inr			r25,ucsra_debug
+			sbrs		r25,txc_debug
+			rjmp		wait_tx_debug1
+			outi		ucsra_debug,0x40
+			pop			r25
+.endm
+;************************************************************
+
+;************************************************************
+.macro		rx_debug_reg
+			push	r25
+			outi	tmr_debug,100
+wait_debug:	ldi		r25,'T'
+			cpi		r25,@1
+			brne	test_ucsra
+			cpri	tmr_debug,0x00
+			breq	fin_macro
+test_ucsra:	inr		r25,ucsra_debug
+			sbrs	r25,rxc_debug
+			rjmp	wait_debug
+			inr		r25,udr_debug
+					;OUTR	UDR0,R25
+			outr	@0,r25
+fin_macro:	pop		r25
+.endm
+;************************************************************
+
+;************************************************************
+.macro		tx_debug_k
+			push		r25
+
+wait_tx_prev:		inr		r25,ucsra_debug
+					sbrs	r25,udre_debug
+					rjmp	wait_tx_prev
+
+			ldi			r25,@0
+			outr		udr_debug,r25
+wait_tx_debug1a:
+			inr			r25,ucsra_debug
+			sbrs		r25,txc_debug
+			rjmp		wait_tx_debug1a
+			outi		ucsra_debug,0x40
+			pop			r25
+.endm
+;************************************************************
+
+;************************************************************
+.macro		tx_debug_string
+			push		zl
+			push		zh
+			push		r24
+			push		r25
+
+wait_tx_prev:		inr		r25,ucsra_debug
+					sbrs	r25,udre_debug
+					rjmp	wait_tx_prev
+
+			ldi			zl,low((salto*2)+2)
+			ldi			zh,high((salto*2)+2)
+salto:		rjmp		next_byte
+			.db			@0,@1
+next_byte:	lpm			r25,z+
+			cpi			r25,0x0A
+			breq		fin_tx_string
+			outr		udr_debug,r25
+wait_tx_debug2:
+			inr			r25,ucsra_debug
+			sbrs		r25,txc_debug
+			rjmp		wait_tx_debug2
+			outi		ucsra_debug,0x40
+			rjmp		next_byte
+fin_tx_string:
+			outr		udr_debug,r25
+wait_tx_debug4:
+			inr			r25,ucsra_debug
+			sbrs		r25,txc_debug
+			rjmp		wait_tx_debug4
+			outi	ucsra_debug,0x40
+			pop		r25
+			pop		r24
+			pop		zh
+			pop		zl
+.endm
+;************************************************************
+
+;************************************************************
+.macro		tx_debug_string_hex
+			push		zl
+			push		zh
+			push		r24
+			push		r25
+
+wait_tx_prev:		inr		r25,ucsra_debug
+					sbrs	r25,udre_debug
+					rjmp	wait_tx_prev
+
+			ldi			zl,low((salto+1)*2)
+			ldi			zh,high((salto+1)*2)
+salto:		rjmp		carga_contador
+			.db			@0,@1
+carga_contador:
+			lpm			r24,z+
+next_byte:	lpm			r25,z+
+			outr		udr_debug,r25
+wait_tx_debug2:
+			inr			r25,ucsra_debug
+			sbrs		r25,txc_debug
+			rjmp		wait_tx_debug2
+			outi		ucsra_debug,0x40
+			dec			r24
+			brne		next_byte
+fin_tx_string:
+			pop		r25
+			pop		r24
+			pop		zh
+			pop		zl
+.endm
+;************************************************************
+
+;************************************************************
+;@0 Indica la dirección del buffer a tx (sram)
+;@1 Especifica el caracter (dato) que se debe de encontrar en la cadena para terminar la Tx
+.macro		tx_debug_string_sram
+			push		yl
+			push		yh
+			push		r24
+			push		r25
+
+wait_tx_prev:		inr		r25,ucsra_debug
+					sbrs	r25,udre_debug
+					rjmp	wait_tx_prev
+
+			ldiw		yh,yl,@0
+next_tx:	ld			r25,y+
+			cpi			r25,@1
+			breq		fin_tx
+			outr		udr_debug,r25
+wait_tx_debug5:
+			inr			r25,ucsra_debug
+			sbrs		r25,txc_debug
+			rjmp		wait_tx_debug5
+			outi		ucsra_debug,0x40
+;			delay_us	100
+			rjmp		next_tx
+fin_tx:		tx_debug_string	0x0D,0x0A,0x00
+			pop			r25
+			pop			r24
+			pop			yh
+			pop			yl
+.endm
+;************************************************************
+
+;**********************************************************************************************
+;* Macros de operaciones aritmeticas
+;* ACC1=ACC1-(Z)
+.MACRO   FSUBM
+         RCALL FSUBMEM
+.ENDM
+
+;* ACC1=ACC1-ACC2
+.MACRO   FSUB
+         RCALL FSUBS
+.ENDM
+
+;* ACC1=ACC1+0.5
+.MACRO   FADDP5
+         RCALL FADP5
+.ENDM
+
+;* ACC1=ACC1+(Z)
+.MACRO   FADDM
+         RCALL FADDMEM
+.ENDM
+
+;* ACC1=ACC1+ACC2
+.MACRO   FADD
+         RCALL FSUMA
+.ENDM
+
+;* ACC1=-ACC1
+.MACRO   FNEG
+         RCALL FLTNEG
+.ENDM
+
+;* ACC1=1/(Z)
+.MACRO   FINVM
+         RCALL F1OVERMEM
+.ENDM
+
+;* ACC1=1/ACC1
+.MACRO   FINV
+         RCALL F1OVERX
+.ENDM
+
+;* ACC1=ACC1/(Z)
+.MACRO   FDIVM
+         RCALL FDIVMEM
+.ENDM
+
+;* ACC1=ACC1/10
+.MACRO   FDIV10
+         RCALL FDIV_10
+.ENDM
+
+;* ACC1=ACC1/ACC2
+.MACRO   FDIV
+         CALL F_DIV
+.ENDM
+
+;* ACC1=ACC1*(Z)
+.MACRO   FMULTM
+         RCALL FMULMEM
+.ENDM
+
+;* ACC1=ACC1*10
+.MACRO   FMULT10
+         RCALL FMUL_10
+.ENDM
+
+;* ACC1=ACC1*ACC2
+.MACRO   FMULT
+         RCALL F_MUL
+.ENDM
+
+;* ACC1=(Z)*(Z)
+.MACRO   FSQRM
+         RCALL FSQRMEM
+.ENDM
+
+;* ACC1=ACC1*ACC1
+.MACRO   FSQR
+         RCALL F_SQR
+.ENDM
+
+;* ACC1=Raiz cudrada de (Z)
+.MACRO   FSQRTM
+         RCALL FSQRTMEM
+.ENDM
+
+;* ACC1=Raiz cudrada de ACC1
+.MACRO   FSQRT
+         RCALL F_SQRT
+.ENDM
+;**********************************************************************************************
+
+;**********************************************************************************************
+;* Macros para movimiento de datos
+
+;* ACC1=(Z)
+.MACRO   FLDA1
+         RCALL FSRAMA1
+.ENDM
+
+;* ACC2=(Z)
+.MACRO   FLDA2
+         RCALL FSRAMA2
+.ENDM
+
+;* (Z)=ACC1
+.MACRO   FSTA1
+         RCALL FSRAMA_1
+.ENDM
+
+;* (Z)=ACC2
+.MACRO   FSTA2
+         RCALL FSRAMA_2
+.ENDM
+
+;* ACC1<=ACC2
+.MACRO   FMOVA1A2
+         RCALL AC2TOAC1
+.ENDM
+
+;* ACC2<=ACC1
+.MACRO   FMOVA2A1
+         RCALL AC1TOAC2
+.ENDM
+
+;* Intercambia Acumuladores
+.MACRO   FSWAP
+         RCALL SWAPACC
+.ENDM
+
+;* ACC1=Constante encontrada por Z en la memoria Flash
+.MACRO   FLDKA1
+         CALL KTOAC1
+.ENDM
+
+;* ACC2=Constante encontrada por Z en la memoria Flash
+.MACRO   FLDKA2
+         RCALL KTOAC2
+.ENDM
+
+;* Guarda ACC1 en el stack virtual
+.MACRO   FPUSHA1
+         RCALL PUSH1
+.ENDM
+
+;* Guarda ACC2 en el stack virtual
+.MACRO   FPUSHA2
+         RCALL PUSH2
+.ENDM
+
+;* Recupera ACC1 del stack virtual
+.MACRO   FPOPA1
+         RCALL POP1
+.ENDM
+
+;* Recupera ACC2 del stack virtual
+.MACRO   FPOPA2
+         RCALL POP2
+.ENDM
+;**********************************************************************************************
+
+;****************************************************************************
+;* Macroinstrucciones para salvar y recuperar registros usados en las rutinas
+;* de punto flotante (R10 a R25). 16 bytes de stack+bytes reuqridos para la
+;* aplicación.
+.MACRO	FSAVEREG
+	push	R10
+	push	R11
+	push	R12
+	push	R13
+	push	R14
+	push	R15
+	push	R16
+	push	R17
+	push	R18
+	push	R19
+	push	R20
+	push	R21
+	push	R22
+	push	R23
+	push	R24
+	push	R25
+	push	R30
+	push	R31
+.ENDM
+
+.MACRO	FRESTOREREG
+	pop	R31
+	pop	R30
+	pop	R25
+	pop	R24
+	pop	R23
+	pop	R22
+	pop	R21
+	pop	R20
+	pop	R19
+	pop	R18
+	pop	R17
+	pop	R16
+	pop	R15
+	pop	R14
+	pop	R13
+	pop	R12
+	pop	R11
+	pop	R10
+.ENDM
+;****************************************************************************
+
+;**********************************************************************************************
+;* Macros de comparacion de datos en F.P.
+;* El registro "TEMP" regresa con el resultado de la comparacion.
+;* TEMP = $00 El dato 1 es = al dato 2
+;* TEMP = $01 El dato 1 es > el dato 2
+;* TEMP = $FF El dato 1 es < el dato 2
+
+;* Compara ACC1 con el dato en F.P. encontrado por Z en la memoria Flash (ACC1=dato 1)
+.MACRO   FCPFLASH
+         RCALL FLTCPFLASH
+.ENDM
+
+;* Compara ACC1 con el dato en F.P. encontrado por Z en la memoria RAM (ACC1=dato 1)
+.MACRO   FCPM
+         RCALL FLTCPMEM
+.ENDM
+
+;* Compara el dato encontrado por Y en la memoria RAM con el dato encontrado por Z en la
+;* memoria RAM (Y apunta al dato 1)
+.MACRO   FCPRAM
+         RCALL FLTCP2
+.ENDM
+
+;* Compara ACC1 con el ACC2 (ACC1=dato1)
+.MACRO   FCP
+         RCALL FLTCP
+.ENDM
+;**********************************************************************************************
+
+;****************************************************************************
+;* Macroinstrucciones para normalizar numeros.
+.MACRO	NORMHEX
+	CALL NORM_HEX
+.ENDM
+
+.MACRO	NORMDEC
+	CALL DECTOHEX
+	CALL FDECTOHEX
+	CALL NORM_HEX
+.ENDM
+
+.MACRO	NORMHEXTOA1
+	CALL NORM_HEX
+	LDS R13,HEX0
+	LDS R14,HEX1
+	LDS R15,HEX2
+	LDS R16,HEX3
+.ENDM
+
+.MACRO	NORMHEXTOA2
+	CALL NORM_HEX
+	LDS R18,HEX0
+	LDS R19,HEX1
+	LDS R20,HEX2
+	LDS R21,HEX3
+.ENDM
+
+.MACRO	NORMDECTOA1
+	CALL DECTOHEX
+	CALL FDECTOHEX
+	CALL NORM_HEX
+	LDS R13,HEX0
+	LDS R14,HEX1
+	LDS R15,HEX2
+	LDS R16,HEX3
+.ENDM
+
+.MACRO	NORMDECTOA2
+	CALL DECTOHEX
+	CALL FDECTOHEX
+	CALL NORM_HEX
+	LDS R18,HEX0
+	LDS R19,HEX1
+	LDS R20,HEX2
+	LDS R21,HEX3
+.ENDM
+;****************************************************************************
+
+;****************************************************************************
+;* Macroinstrucciones para denormalizar numeros.
+.MACRO	DENORMHEX
+	RCALL DENORM_HEX
+.ENDM
+
+.MACRO	DENORMDEC
+	RCALL DENORM_HEX
+	RCALL HEXTODEC
+	RCALL FHEXTODEC
+.ENDM
+
+.MACRO	DENORMA1TOHEX
+	STS HEX0,R13
+	STS HEX1,R14
+	STS HEX2,R15
+	STS HEX3,R16
+	CALL DENORM_HEX
+.ENDM
+
+.MACRO	DENORMA2TOHEX
+	STS HEX0,R18
+	STS HEX1,R19
+	STS HEX2,R20
+	STS HEX3,R21
+	RCALL DENORM_HEX
+.ENDM
+
+.MACRO	DENORMA1TODEC
+	STS HEX0,R13
+	STS HEX1,R14
+	STS HEX2,R15
+	STS HEX3,R16
+	CALL DENORM_HEX
+	CALL HEXTODEC
+	CALL FHEXTODEC
+.ENDM
+
+.MACRO	DENORMA2TODEC
+	STS HEX0,R18
+	STS HEX1,R19
+	STS HEX2,R20
+	STS HEX3,R21
+	CALL DENORM_HEX
+	CALL HEXTODEC
+	CALL FHEXTODEC
+.ENDM
+;****************************************************************************
+
+;****************************************************************************
+;Macros para realizar conversiones entre sistemas numericos
+;****************************************************************************
+;Macroinstrucciones para conversion entre sistemas (enteros).
+;Convierte el contenido de las localidades 60-63 a decimal.
+.MACRO	DTOH
+	CALL DECTOHEX
+.ENDM
+
+;Convierte el contenido de las localidades 64-68 a hexadecimal.
+.MACRO	HTOD
+	RCALL HEXTODEC
+.ENDM
+;****************************************************************************
+
+;****************************************************************************
+;Macroinstrucciones para conversion entre sistemas (fraccion).
+;Convierte el contenido de las localidades        a decimal.
+.MACRO	FDTOH
+	RCALL FDECTOHEX
+.ENDM
+
+;Convierte el contenido de las localidades a hexadecimal.
+.MACRO	FHTOD
+	RCALL FHEXTODEC
+.ENDM
+;****************************************************************************
+
+;****************************************************************************
+;Subrutina de normalizacion de numeros en punto flotante
+;Registros entregados por las subrutinas de conversion:
+;  HEX_H HEX_MH HEXML HEX_L . FHEX_H FHEX_MH FHEX_ML FHEX_L
+;		   Punto no normalizado.
+;Registros empleados:
+;       HEX7 HEX6 HEX5 HEX4 . HEX3 HEX2 HEX1 HEX0
+;		   Punto no normalizado.
+;
+;Resultado normalizado:
+;	HEX3		Signo+7 bits del exponente
+;	HEX2		1 bit del exponente + 7 bits de mantisa
+;	HEX1:HEX0	16 bits de mantisa
+;
+;El signo del numero se debera de encontrar en la bandera T
+;.equ	HEX7	= $0065		;Entero Hex
+;.equ	HEX6	= $0066
+;.equ	HEX5	= $0067
+;.equ	HEX4	= $0068
+;.equ	HEX3	= $0069		;Fraccion Hex
+;.equ	HEX2	= $006A
+;.equ	HEX1	= $006B
+;.equ	HEX0	= $006C
+;.def	EXPONENTE=R20
+.equ	BITS_HEX = $40         		;Numero de bits hex.
+
+NORM_HEX:	PUSH R16
+		PUSH R17
+		PUSH R18
+		PUSH R19
+		PUSH ZL
+		PUSH ZH
+		PUSH EXPONENTE		
+		LDS R16,HEX_L
+		STS HEX4,R16
+		LDS R16,HEX_ML
+		STS HEX5,R16
+		LDS R16,HEX_MH
+		STS HEX6,R16
+		LDS R16,HEX_H
+		STS HEX7,R16
+		LDI EXPONENTE,$9E	;Exponente mas alto
+		LDI R18,BITS_HEX
+NORM_HEX1:	LDI	ZL,LOW(HEX0)
+			LDI	ZH,HIGH(HEX0)
+		LDI R17,$08		;Numero de registros
+		CLC
+		IN R19,SREG	;Lectura dummy                    
+NORM_HEX2:	OUT SREG,R19
+		LD R16,Z
+                ROL R16
+                ST Z,R16
+		IN R19,SREG
+                SBIW ZL,1
+                DEC R17
+		BRNE NORM_HEX2
+		OUT SREG,R19
+		BRCS NORM_HEX3
+		DEC EXPONENTE
+		DEC R18
+		BRNE NORM_HEX1
+		RJMP END_NORM_HEX			;Resultado = 0.0
+NORM_HEX3:	BRTS NORM_HEX4
+		CLC
+		RJMP NORM_HEX5
+NORM_HEX4:	SEC
+NORM_HEX5:	ROR EXPONENTE
+		STS HEX3,EXPONENTE
+		LDS R16,HEX7
+		ROR R16
+		STS HEX2,R16
+		LDS R16,HEX6
+		ROR R16
+		STS HEX1,R16
+		LDS R16,HEX5
+		ROR R16
+		STS HEX0,R16
+END_NORM_HEX:	POP EXPONENTE
+		POP ZH
+		POP ZL
+		POP R19
+		POP R18
+		POP R17
+		POP R16
+		RET
+;****************************************************************************
+
+;****************************************************************************
+;Subrutina de denormalizacion de numeros en punto flotante
+;Numero de entrada normalizado:
+;	HEX3		Signo+7 bits del exponente
+;	HEX2		1 bit del exponente + 7 bits de mantisa
+;	HEX1:HEX0	16 bits de mantisa
+;
+;Resultado no normalizado:
+;  HEX_H HEX_MH HEXML HEX_L . FHEX_H FHEX_MH FHEX_ML FHEX_L
+;		   Punto no normalizado.
+;
+;El signo del numero se encontrara en la bandera T
+;Si el numero es muy grande (no se puede representar la parte entera en 32
+;bits) C=1, en caso contrario C=0
+
+DENORM_HEX:	PUSH R16
+		PUSH R17
+		PUSH R19
+		PUSH ZL
+		PUSH ZH
+		PUSH EXPONENTE		
+		LDS R16,HEX2
+		ROL R16
+		STS HEX2,R16
+		LDS EXPONENTE,HEX3	;Obtencion del exp.
+		ROL EXPONENTE
+		BRCS DENORM_HEX1	;Asigna el signo
+		CLT
+		RJMP DENORM_HEX2
+DENORM_HEX1:	SET
+DENORM_HEX2:	SEC
+		LDS R16,HEX2		;Ajusta la mantisa
+		ROR R16
+		STS HEX2,R16
+		CPI EXPONENTE,$5F	;Verifica que el exp se encuentre
+		BRSH DENORM_HEX8	;en el rango de $5F a $9E
+		RJMP DENORM_HEX3
+DENORM_HEX8:	CPI EXPONENTE,$9F
+		BRLO DENORM_HEX4
+		SEC			;C=1 error de desbordamiento
+		RJMP END_DENORM_HEX
+DENORM_HEX4:	LDS R16,HEX2		;Valor valido (prepara los registros
+		STS HEX7,R16		;para la denormalizacion)
+		LDS R16,HEX1
+		STS HEX6,R16
+		LDS R16,HEX0
+		STS HEX5,R16
+		LDI	R25,0X00
+		STS HEX4,R25
+		STS HEX3,R25
+		STS HEX2,R25
+		STS HEX1,R25
+		STS HEX0,R25
+DENORM_HEX6:	LDI	ZL,LOW(HEX7)
+				LDI	ZH,HIGH(HEX7)
+		LDI R17,$08
+		CLC
+		IN R19,SREG	;Lectura dummy
+DENORM_HEX5:	CPI EXPONENTE,$9E
+		BREQ DENORM_HEX10
+		OUT SREG,R19
+		LD R16,Z
+		ROR R16
+		ST Z+,R16
+		IN R19,SREG
+		DEC R17
+		BRNE DENORM_HEX5
+		INC EXPONENTE
+		RJMP DENORM_HEX6
+DENORM_HEX10:	LDS R16,HEX7
+		STS HEX_H,R16
+		LDS R16,HEX6
+		STS HEX_MH,R16
+		LDS R16,HEX5
+		STS HEX_ML,R16
+		LDS R16,HEX4
+		STS HEX_L,R16
+		RJMP DENORM_HEX9
+DENORM_HEX3:	LDI R17,$08		;Valor Hex = 0
+		LDI		ZL,LOW(HEX_L)
+		LDI		ZH,HIGH(HEX_L)
+		CLR R19
+DENORM_HEX7:	ST Z+,R19
+		DEC R17
+		BRNE DENORM_HEX7
+DENORM_HEX9:	CLC
+END_DENORM_HEX: POP EXPONENTE
+		POP ZH
+		POP ZL
+		POP R19
+		POP R17
+		POP R16
+		RET
+;****************************************************************************
+
+;****************************************************************************
+;ESTE PROGRAMA CONVIERTE DATOS DE 10 DIGITOS DECIMALES (QUE NO EXCEDA A
+;4,294,967,295) A HEXADECIMAL DE 32 BITS.
+;.equ	HEX_L 	=  $0060
+;.equ	HEX_ML	=  $0061
+;.equ	HEX_MH	=  $0062
+;.equ	HEX_H 	=  $0063  
+;.equ	DEC_L   =  $0064
+;.equ	DEC_ML  =  $0065
+;.equ	DEC_M   =  $0066
+;.equ	DEC_MH  =  $0067
+;.equ	DEC_H   =  $0068
+.equ	BITS    =  $20          ;NUMERO DE BITS.
+.equ	N_REG   =  $09          ;NUMERO DE REGISTROS (TOTAL).
+.equ	N_REGDEC=  $05          ;NUMERO DE REGISTROS DECIMALES.
+
+DECTOHEX:           PUSH R16
+		    PUSH R17
+		    PUSH R18
+		    PUSH R19
+		    PUSH ZL
+		    PUSH ZH
+			LDI	R25,0X00
+		    STS HEX_L,R25
+            STS HEX_ML,R25
+            STS HEX_MH,R25
+            STS HEX_H,R25
+                    LDI R18,BITS
+DH1:                LDI	ZL,LOW(DEC_H)
+					LDI	ZH,HIGH(DEC_H)
+                    LDI R17,N_REG
+		    CLC
+		    IN R19,SREG	;Lectura dummy                    
+DH2:		    OUT SREG,R19
+		    LD R16,Z
+                    ROR R16
+                    ST Z,R16
+		    IN R19,SREG
+                    SBIW ZL,1
+                    DEC R17
+		    BRNE DH2
+                    DEC R18
+		    BRNE DH3
+		    POP ZH
+		    POP ZL
+		    POP R19
+		    POP	R18
+		    POP R17
+		    POP R16
+                    RET
+DH3:                LDI	ZL,LOW(DEC_L)
+					LDI ZH,HIGH(DEC_L)
+                    LDI R17,N_REGDEC
+DH4:                LD R16,Z
+                    ANDI R16,$0F
+                    CPI R16,$05
+		    BRLO DH5
+                    SUBI R16,$03
+DH5:                MOV R19,R16
+                    LD R16,Z
+                    ANDI R16,$F0
+		    CPI R16,$50
+		    BRLO DH6
+                    SUBI R16,$30
+DH6:                ADD R16,R19
+                    ST Z+,R16
+                    DEC R17
+		    BRNE DH4
+                    RJMP DH1
+;****************************************************************************
+
+;****************************************************************************
+;ESTE PROGRAMA CONVIERTE DATOS DE 10 DIGITOS DECIMALES (QUE NO EXCEDA A
+;4,294,967,295) A HEXADECIMAL DE 32 BITS.
+HEXTODEC:           PUSH R16
+		    PUSH R17
+		    PUSH R18
+		    PUSH R19
+		    PUSH ZL
+		    PUSH ZH
+			LDI	R25,0X00
+		    STS DEC_L,R25
+            STS DEC_ML,R25
+            STS DEC_M,R25
+            STS DEC_MH,R25
+		    STS DEC_H,R25
+                    LDI R18,BITS
+HD1:                LDI	ZL,LOW(HEX_L)
+					LDI	ZH,HIGH(HEX_L)
+                    LDI R17,N_REG
+		    CLC
+		    IN R19,SREG	;Lectura dummy
+HD2:		    OUT SREG,R19
+	            LD R16,Z
+                    ROL R16
+                    ST Z,R16
+		    IN R19,SREG
+                    ADIW ZL,1
+                    DEC R17
+		    BRNE HD2
+                    DEC R18
+		    BRNE HD3
+		    POP ZH
+		    POP ZL
+		    POP R19
+		    POP	R18
+		    POP R17
+		    POP R16
+                    RET
+HD3:                LDI	ZL,LOW(DEC_L)
+					LDI	ZH,HIGH(DEC_L)
+                    LDI R17,N_REGDEC
+HD4:                LD R16,Z
+                    ANDI R16,$0F
+                    CPI R16,$05
+		    BRLO HD5
+                    SUBI R16,$FD		;= ADDI A,$03
+HD5:                MOV R19,R16
+                    LD R16,Z
+                    ANDI R16,$F0
+		    CPI R16,$50
+		    BRLO HD6
+                    SUBI R16,$D0		;= ADDI R16,$30
+HD6:                ADD R16,R19
+                    ST Z,R16
+                    ADIW ZL,1
+                    DEC R17
+		    BRNE HD4
+                    RJMP HD1
+;****************************************************************************
+
+;****************************************************************************
+;ESTE PROGRAMA CONVIERTE DATOS DE 32 DIGITOS DECIMALES FRACCIONARIOS
+;REPRESENTADOS EN BCD, A HEXADECIMAL DE 32 BITS.
+;.equ		FHEX_H    = $0069
+;.equ		FHEX_MH   = $006A
+;.equ		FHEX_ML   = $006B
+;.equ		FHEX_L    = $006C
+;.equ		FDEC_15   = $006D
+;.equ		FDEC_14   = $006E
+;.equ		FDEC_13   = $006F
+;.equ		FDEC_12   = $0070
+;.equ		FDEC_11   = $0071
+;.equ		FDEC_10   = $0072
+;.equ		FDEC_9    = $0073
+;.equ		FDEC_8    = $0074
+;.equ		FDEC_7    = $0075
+;.equ		FDEC_6    = $0076
+;.equ		FDEC_5    = $0077
+;.equ		FDEC_4    = $0078
+;.equ		FDEC_3    = $0079
+;.equ		FDEC_2    = $007A
+;.equ		FDEC_1	  = $007B
+;.equ		FDEC_0	  = $007C
+.equ		BITSF     = $20	 ;Numero de bits de la conversion
+.equ		N_FREG    = $14  ;NUMERO DE REGISTROS (TOTAL).
+.equ		N_REGFHEX = $4   ;NUMERO DE REGISTROS HEXADECIMALES.
+.equ		N_REGFDEC = $10  ;NUMERO DE REGISTROS DECIMALES.
+
+FDECTOHEX:      PUSH R16
+		PUSH R17
+		PUSH R18
+		PUSH R19
+		PUSH ZL
+		PUSH ZH
+		LDI	ZL,LOW(FHEX_H)
+		LDI	ZH,HIGH(FHEX_H)	;Borra los registros FDEC
+		LDI R18,N_REGFHEX
+		CLR R19
+FPDH11:         ST Z+,R19
+                DEC R18
+		BRNE FPDH11
+		LDI R18,BITSF
+FPDH3:        	LDI	ZL,LOW(FDEC_15)
+				LDI	ZH,HIGH(FDEC_15)
+                LDI R17,N_REGFDEC
+FPDH4:          LD R16,Z
+                ANDI R16,$F0
+		CPI R16,$50
+		BRLO FPDH7
+	        SUBI R16,$D0		;ADDI R16,#30H
+FPDH7:          MOV R19,R16
+                LD R16,Z
+                ANDI R16,$0F
+		CPI R16,$05
+		BRLO FPDH10
+	        SUBI R16,$FD		;ADDI R16,#03H
+FPDH10:         OR R16,R19
+                ST Z+,R16
+		DEC R17
+		BRNE FPDH4
+FPDH1:		LDI	ZL,LOW(FDEC_0)
+			LDI	ZH,HIGH(FDEC_0)
+                LDI R17,N_FREG
+                CLC
+		IN R19,SREG	;Lectura dummy
+FPDH2:          OUT SREG,R19
+		LD R16,Z
+                ROL R16
+                ST Z,R16
+		IN R19,SREG
+                SBIW ZL,1
+                DEC R17
+		BRNE FPDH2
+		DEC R18
+		BRNE FPDH3
+		POP ZH
+		POP ZL
+		POP R19
+		POP R18
+		POP R17
+		POP R16
+		RET
+;****************************************************************************
+
+;****************************************************************************
+;ESTE PROGRAMA CONVIERTE DATOS DE 32 BITS HEXADECIMALES QUE REPRESENTEN FRACCION, A
+;DECIMAL REPRESENTADOS EN BCD.
+FHEXTODEC:	PUSH R16
+		PUSH R17
+		PUSH R18
+		PUSH R19
+		PUSH ZL
+		PUSH ZH
+		LDI	ZL,LOW(FDEC_15)
+		LDI	ZH,HIGH(FDEC_15)	;Borra los registros FDEC
+		LDI R18,N_REGFDEC
+		CLR R19
+FPHD11:         ST Z+,R19
+                DEC R18
+		BRNE FPHD11
+                LDI R18,BITSF
+FPHD1:		LDI	ZL,LOW(FHEX_H)
+			LDI	ZH,HIGH(FHEX_H)
+                LDI R17,N_FREG
+                CLC
+		IN R19,SREG	;Lectura dummy
+FPHD2:          OUT SREG,R19
+		LD R16,Z
+                ROR R16
+                ST Z+,R16
+		IN R19,SREG
+                DEC R17
+		BRNE FPHD2
+FPHD3:          LDI	ZL,LOW(FDEC_15)
+				LDI	ZH,HIGH(FDEC_15)
+                LDI R17,N_REGFDEC
+FPHD4:          LD R16,Z
+                ANDI R16,$F0
+		CPI R16,$50
+		BRLO FPHD7
+	        SUBI R16,$30
+FPHD7:          MOV R19,R16
+                LD R16,Z
+                ANDI R16,$0F
+		CPI R16,$05
+		BRLO FPHD10
+	        SUBI R16,$03
+FPHD10:         OR R16,R19
+                ST Z+,R16
+                DEC R17
+		BRNE FPHD4
+                DEC R18
+		BRNE FPHD1
+		POP ZH
+		POP ZL
+		POP R19
+		POP R18
+		POP R17
+		POP R16
+                RET
+;****************************************************************************
+
+;****************************************************************************
+; NOTA: Todas las funciones con memoria: por ejemplo; FADDMEM
+; emplean al puntero Z para especificar la direcció del dato en FP de 32 bits
+; que se encuentra en SRAM
+;.def     QUOT =r10
+;.def     QUOTM =r11
+;.def     QUOTH =r12
+;.def     A1_L =r13           ; Accumulador 1
+;.def     A1_ML =r14
+;.def     A1_MH =r15
+;.def     A1_H =r16
+;.def     SIGN1 =r17
+;.def     A2_L =r18           ; Accumulador 2
+;.def     A2_ML =r19
+;.def     A2_MH =r20
+;.def     A2_H =r21
+;.def     SIGN2 =r22
+;.def     A1_LT =r23
+;.def     COUNTFP32 =r24
+;.def     TEMPFP32 =r25
+;.equ     MATHTMP=$0080
+
+;**************************************************************************
+;** ACC1 - (Z) **
+FSUBMEM: rcall FSRAMA2
+;** ACC1 - ACC2 **
+FSUBS:   rcall UNPACK
+         cpi A2_H,0x80
+         breq LOOP_FP
+         ldi TEMPFP32,0x80
+         eor sign2,TEMPFP32
+         rjmp FADD1
+FSUNDER: brmi LOOP_FP
+FRET2:   rcall SWAPACC
+LOOP_FP: rjmp REPACK
+;** ACC1 + 0.5f **
+FADp5:   ldi A2_H,0x3f
+         clr A2_L
+         clr A2_ML
+         clr A2_MH
+         rjmp FSUMA
+;** ACC1 + (Z) **
+FADDMEM: rcall FSRAMA2
+;** ACC1 + ACC2 **
+FSUMA:   rcall UNPACK
+         cpi A2_H,0x80
+         breq LOOP_FP
+FADD1:   cpi A1_H,0x80
+         breq FRET2
+FADD2:   mov TEMPFP32,A1_H
+         sub TEMPFP32,A2_H
+         brvs LOOP_FP
+         brpl FADD3
+         rcall SWAPACC
+         rjmp FADD2
+FADD3:   cpi TEMPFP32,24
+         brlo FADD3a
+         clr A2_L
+         clr A2_ML
+         clr A2_MH
+FADD3a:  cpi TEMPFP32,8
+         brlo FADD3b
+         mov A2_L,A2_ML
+         mov A2_ML,A2_MH
+         clr A2_MH
+         subi TEMPFP32,8
+         rjmp FADD3a
+FADD3b:  tst TEMPFP32
+         breq FADD3d
+FADD3c:  lsr A2_MH
+         ror A2_ML
+         ror A2_L
+         dec TEMPFP32
+         brne FADD3c
+FADD3d:  mov TEMPFP32,sign1
+         eor TEMPFP32,sign2
+         brmi FADD4
+         rcall UADD
+         brcc LOOP_FP
+         ror A1_MH
+         ror A1_ML
+         ror A1_L
+         subi A1_H,-1         ; Add +1
+         brvc LOOP_FP
+         rjmp MAXRES
+FADD4:   rcall USUB
+         breq FCLR
+         brcc FADD5
+         rcall NEGMANT
+FADD5:   tst A1_MH
+         brmi LOOP_FP
+         lsl A1_L
+         rol A1_ML
+         rol A1_MH
+         subi A1_H,1
+         brvc FADD5
+         rjmp MAXRES
+FCLR:    rjmp MINRES
+;
+UADD:    add A1_L,A2_L
+         adc A1_ML,A2_ML
+         adc A1_MH,A2_MH
+         ret
+;
+USUB:    sub A1_L,A2_L
+         sbc A1_ML,A2_ML
+         sbc A1_MH,A2_MH
+         ret
+;
+;** ACC1 = -ACC1 ** Calcula el inverso aditivo
+FLTNEG:  rcall UNPACK
+         com sign1
+         rjmp REPACK
+;
+NEGMANT: ldi TEMPFP32,-1
+         sub A1_L,TEMPFP32
+         sbc A1_ML,TEMPFP32
+         sbc A1_MH,TEMPFP32
+         ret
+;
+;** A1_L <<= 1 **
+RLA1_L: lsl A1_L
+         rol A1_ML
+         rol A1_MH
+         rol A1_Lt
+         ret
+;
+UDIVMANT:clr quot
+         clr quotm
+         clr quoth
+         ldi COUNTFP32,24
+UDIVLP:  cp A1_L,A2_L
+         cpc A1_ML,A2_ML
+         cpc A1_MH,A2_MH
+         brlo UDIV1
+         sub A1_L,A2_L
+         sbc A1_ML,A2_ML
+         sbc A1_MH,A2_MH
+         sec
+         rjmp UDIV2
+UDIV1:   clc
+UDIV2:   rol quot
+         rol quotm
+         rol quoth
+         lsl A1_L
+         rol A1_ML
+         rol A1_MH
+         dec COUNTFP32
+         brne UDIVLP
+         push A1_L
+         mov A1_L,quot
+         mov A1_ML,quotm
+         mov A1_MH,quoth
+         pop TEMPFP32
+         lsr TEMPFP32
+         brcc udivx
+         inc A1_L
+         brne udivx
+         inc A1_ML
+         brne udivx
+         inc A1_MH
+udivx:   
+         ret
+;
+;** ACC1 = 1/(Z) **
+F1OVERMEM:rcall FSRAMA1
+;** ACC1 = 1/ACC1 **
+F1OVERX: rcall AC1TOAC2
+         clr A1_L
+         clr A1_ML
+         ldi TEMPFP32,0x80
+         mov A1_MH,TEMPFP32
+         ldi A1_H,0x3f        ; ieee 1.0f
+         rjmp F_DIV
+;
+;** Acc1 / (Z) **
+FDIVMEM: rcall FSRAMA2
+         rjmp F_DIV
+;** ACC1 /= 10.0f */
+FDIV_10: clr A2_L
+         clr A2_ML
+         ldi A2_MH,0x20
+         ldi A2_H,0x41        ;Put 10.0 -> Acc2
+;** ACC1 /= ACC2 **
+F_DIV:   tst A2_H
+         breq FDIVZ
+         tst A1_H
+         breq MINRES
+FDIVa:   rcall UNPACK
+         breq MINRES
+         eor sign1,sign2
+         sec
+         sbc A1_H,A2_H
+         brvs MAXRES
+         lsr A2_MH
+         ror A2_ML
+         ror A2_L
+         lsr A1_MH
+         ror A1_ML
+         ror A1_L
+         rcall UDIVMANT
+         tst A1_MH
+         brmi FDIVX
+         lsl A1_L
+         rol A1_ML
+         rol A1_MH
+         subi A1_H,1
+         brvs MAXRES
+FDIVX:   rjmp REPACK
+FDIVZ:   rjmp MINRES
+MAXRES:  ldi TEMPFP32,0x7f
+         mov A1_H,TEMPFP32
+         or A1_MH,TEMPFP32
+         ldi TEMPFP32,0xff
+         mov A1_L,TEMPFP32
+         mov A1_ML,TEMPFP32
+         ret
+MINRES:  clr A1_L
+         clr A1_ML
+         clr A1_MH
+         clr A1_H
+         clr sign1
+         ret
+;
+;** ACC1 *= *r30 **
+FMULMEM: rcall FSRAMA2        ; Acc1 *= *r30
+         rjmp F_MUL
+;** ACC1 *= 10.0f **
+FMUL_10: ldi A2_H,0x41        ; IEEE 10.0f
+         ldi A2_MH,0x20
+         clr A2_ML
+         clr A2_L
+;** ACC1 *= ACC2 **
+F_MUL:   rcall UNPACK
+         breq MINRES
+         cpi A2_H,0x80
+         breq MINRES
+         eor sign1,sign2
+         sec
+         adc A1_H,A2_H
+         brvs MAXRES          ;FMULMAX
+         rcall UMUL
+         tst A1_MH
+         brmi FXMULX
+         lsl quoth
+         rol A1_L
+         rol A1_ML
+         rol A1_MH
+         rjmp REPACK
+FXMULX:  subi A1_H,-1
+         brvs MAXRES          ;FMULMAX
+         rjmp REPACK
+;
+;** Multiplicacion sin signo de 24 bits
+UMUL:    push TEMPFP32
+         push COUNTFP32
+         clr quot
+         clr quotm
+         clr quoth
+         clr TEMPFP32
+         ldi COUNTFP32,24
+UMULLP:  lsl quot
+         rol quotm
+         rol quoth
+         rol A1_L
+         rol A1_ML
+         rol A1_MH
+         brcc UMUL1
+         add quot,A2_L
+         adc quotm,A2_ML
+         adc quoth,A2_MH
+         adc A1_L,TEMPFP32
+         adc A1_ML,TEMPFP32
+         adc A1_MH,TEMPFP32
+UMUL1:   dec COUNTFP32
+         brne UMULLP
+         pop COUNTFP32
+         pop TEMPFP32
+         ret
+;
+;** ACC1 = (*r30) * (*r30) **
+FSQRMEM: rcall FSRAMA1
+;** ACC1 *= ACC1 **
+F_SQR:   rcall AC1TOAC2
+         rjmp F_MUL
+;
+sqrthalf:
+         clr A2_L
+         clr A2_ML
+         clr A2_MH
+         ldi A2_H,0x40
+         rjmp FDIVa
+SQERR:   rjmp MINRES
+;** ACC1 = sqrt(*r30) **
+FSQRTMEM:rcall FSRAMA1
+;** ACC1 = sqrt(ACC1) **
+F_SQRT:  tst A1_H
+         breq SQERR
+         brmi SQERR
+         mov r5,A1_L
+         mov r6,A1_ML
+         mov r7,A1_MH
+         mov r8,A1_H
+         rcall sqrthalf
+         rcall AC1TOAC2
+         ldi TEMPFP32,5
+SQRTLP:  push TEMPFP32
+         rcall PUSH2
+         mov A1_L,r5
+         mov A1_ML,r6
+         mov A1_MH,r7
+         mov A1_H,r8
+         rcall F_DIV
+         rcall POP2
+         rcall FSUMA
+         rcall sqrthalf
+         rcall AC1TOAC2
+         pop TEMPFP32
+         dec TEMPFP32
+         brne SQRTLP
+         ret
+;
+;** Compara ACC1 == ACC2 **
+;** Regresa TEMPFP32 = 0,1,or -1 (Z,N flags set) **
+FLTCPFLASH:rcall KTOAC2
+         rjmp FLTCP
+;** compara dos flotantes en sram **
+FLTCP2:  push zl
+         push zh
+         mov zl,yl
+         mov zh,yh
+         rcall FSRAMA1
+         pop zh
+         pop zl
+FLTCPMEM:rcall FSRAMA2
+FLTCP:   rcall FCMP
+         tst TEMPFP32
+         ret
+
+FCMP:    tst A1_H
+         brmi FCMP1
+         tst A2_H
+         brmi A1GTA2
+         cp A1_H,A2_H
+         brlo A1LTA2
+         brne A1GTA2
+         cp A1_L,A2_L
+         cpc A1_ML,A2_ML
+         cpc A1_MH,A2_MH
+         brlo A1LTA2
+         breq A1EQA2
+A1GTA2:  ldi TEMPFP32,1           ; ac1 > ac2
+         ret
+A1LTA2:  ldi TEMPFP32,0xff        ; ac1 < ac2
+         ret
+A1EQA2:  clr TEMPFP32             ; ac1 = ac2
+         ret
+;** acc1 -> '-' **
+FCMP1:   tst A2_H             ; Si acc1 es '-' & acc2 is '+'
+         brpl A1LTA2          ; entonces acc1 is < acc2
+         cp A2_H,A1_H         ; si ambos son '-', es A1_H más negativo?
+         brlo A1GTA2
+         brne A1LTA2
+         cp A2_L,A1_L
+         cpc A2_ML,A1_ML
+         cpc A2_MH,A1_MH
+         brlo A1GTA2
+         breq A1EQA2          ; return acc1 == acc2
+         rjmp A1LTA2
+
+;** convierte un entero a FP **
+ITOFMEM: rcall FSRAMA1
+         mov A1_Lt,A1_H
+ITOF:    mov TEMPFP32,A1_L
+         or TEMPFP32,A1_ML
+         or TEMPFP32,A1_MH
+         or TEMPFP32,A1_Lt
+         brne ITOF1
+         rjmp MINRES
+ITOF1:   tst A1_Lt
+         brpl ITOF2
+         rcall NEGMANT
+ITOF2:   ldi A1_H,30
+         tst A1_Lt
+ITOF3:   brmi ITOF4
+         dec A1_H
+         lsl A1_L
+         rol A1_ML
+         rol A1_MH
+         rol A1_Lt
+         rjmp ITOF3
+ITOF4:   mov A1_L,A1_ML
+         mov A1_ML,A1_MH
+         mov A1_MH,A1_Lt
+         rjmp REPACK
+
+;********************************************************************
+;** Copia SRAM Flotante -> Acc1 **
+FSRAMA1: ld A1_L,z+
+         ld A1_ML,z+
+         ld A1_MH,z+
+         ld A1_H,z+
+         ret
+
+;** Copia SRAM Flotante -> Acc2 **
+FSRAMA2: ld A2_L,z+
+         ld A2_ML,z+
+         ld A2_MH,z+
+         ld A2_H,z+
+         ret
+
+;** Copia ACC1 a SRAM
+FSRAMA_1:st z+,A1_L
+         st z+,A1_ML
+         st z+,A1_MH
+         st z+,A1_H
+         ret
+;
+;** Copia ACC2 a SRAM
+FSRAMA_2:st z+,A2_L
+         st z+,A2_ML
+         st z+,A2_MH
+         st z+,A2_H
+         ret
+;
+;** Copia ACC1 al ACC2 **
+AC1TOAC2:
+         mov A2_H,A1_H
+         mov A2_L,A1_L
+         mov A2_ML,A1_ML
+         mov A2_MH,A1_MH
+         mov sign2,sign1
+         ret
+
+AC2TOAC1:
+         mov A1_H,A2_H
+         mov A1_L,A2_L
+         mov A1_ML,A2_ML
+         mov A1_MH,A2_MH
+         mov sign1,sign2
+         ret
+;
+;** ACC1 <-> ACC2 **
+SWAPACC: push A1_L
+         push A1_ML
+         push A1_MH
+         push A1_H
+         push sign1
+         mov A1_L,A2_L
+         mov A1_ML,A2_ML
+         mov A1_MH,A2_MH
+         mov A1_H,A2_H
+         mov sign1,sign2
+         pop sign2
+         pop A2_H
+         pop A2_MH
+         pop A2_ML
+         pop A2_L
+         ret
+;
+;** Toma un byte de la memoria de programa e incrementa el apuntador **
+_lpmbyte:lpm
+         adiw zl,1
+         ret
+;
+;** Lee una constante de la Flash -> ACC1
+KTOAC1:  rcall _lpmbyte
+         mov A1_L,r0
+         rcall _lpmbyte
+         mov A1_ML,r0
+         rcall _lpmbyte
+         mov A1_MH,r0
+         rcall _lpmbyte
+         mov A1_H,r0
+         ret
+;
+;** Lee una constante de la Flash -> ACC2
+KTOAC2:  rcall _lpmbyte
+         mov A2_L,r0
+         rcall _lpmbyte
+         mov A2_ML,r0
+         rcall _lpmbyte
+         mov A2_MH,r0
+         rcall _lpmbyte
+         mov A2_H,r0
+         ret
+;
+;** Guarda Acc1 en sram **
+PUSH1:   sts MATHTMP,A1_L
+         sts MATHTMP+1,A1_ML
+         sts MATHTMP+2,A1_MH
+         sts MATHTMP+3,A1_H
+         ret
+;
+;** Recupera el Acc1 de la sram **
+POP1:    lds A1_L,MATHTMP
+         lds A1_ML,MATHTMP+1
+         lds A1_MH,MATHTMP+2
+         lds A1_H,MATHTMP+3
+         ret
+;
+;** Guarda Acc2 en sram **
+PUSH2:   sts MATHTMP+4,A2_L
+         sts MATHTMP+5,A2_ML
+         sts MATHTMP+6,A2_MH
+         sts MATHTMP+7,A2_H
+         ret
+;
+;** Recupera el Acc2 de la sram **
+POP2:    lds A2_L,MATHTMP+4
+         lds A2_ML,MATHTMP+5
+         lds A2_MH,MATHTMP+6
+         lds A2_H,MATHTMP+7
+         ret
+;
+;********************************************************************
+;** IEEE convertions **
+;** Convierte ACC1 & ACC2 del formato IEEE al formato de trabajo **
+UNPACK:  push TEMPFP32
+         mov sign1,A1_H
+         ldi TEMPFP32,0x80
+         lsl A1_MH
+         rol A1_H
+         eor A1_H,TEMPFP32
+         lsl TEMPFP32
+         ror A1_MH           ;Restaura el bit oculto '1'
+         andi sign1,0x80
+;** Desempaqueta Acc2 **
+         mov sign2,A2_H
+         ldi TEMPFP32,0x80
+         lsl A2_MH
+         rol A2_H
+         eor A2_H,TEMPFP32
+         lsl TEMPFP32
+         ror A2_MH
+         andi sign2,0x80
+         pop TEMPFP32
+         cpi A1_H,0x80        ; return w/ACC1=0 ?
+         ret
+;
+;** Convierte Acc1 del formato de trabajo a IEEE **
+REPACK:  push TEMPFP32
+         lsl A1_MH 
+         ldi TEMPFP32,0x80
+         eor TEMPFP32,A1_H
+         lsl sign1
+         ror TEMPFP32
+         ror A1_MH
+         mov A1_H,TEMPFP32
+         pop TEMPFP32
+         ret
+
+;* Macros de operaciones aritmeticas
+;* ACC1=ACC1-(Z)		FSUBM
+;* ACC1=ACC1-ACC2		FSUB
+;* ACC1=ACC1+0.5		FADDP5
+;* ACC1=ACC1+(Z)		FADDM
+;* ACC1=ACC1+ACC2		FADD
+;* ACC1=-ACC1			FNEG
+;* ACC1=1/(Z)			FINVM
+;* ACC1=1/ACC1			FINV
+;* ACC1=ACC1/(Z)		FDIVM
+;* ACC1=ACC1/10			FDIV10
+;* ACC1=ACC1/ACC2		FDIV
+;* ACC1=ACC1*(Z)		FMULTM
+;* ACC1=ACC1*10			FMULT10
+;* ACC1=ACC1*ACC2		FMULT
+;* ACC1=(Z)*(Z)			FSQRM
+;* ACC1=ACC1*ACC1		FSQR
+;* ACC1=Raiz cudrada de (Z)	FSQRTM
+;* ACC1=Raiz cudrada de ACC1	FSQRT
+;**********************************************************************************************
+;* Macros para movimiento de datos
+;* ACC1=(Z)			FLDA1
+;* ACC2=(Z)			FLDA2
+;* (Z)=ACC1			FSTA1
+;* (Z)=ACC2			FSTA2
+;* ACC1<=ACC2			FMOVA1A2
+;* ACC2<=ACC1			FMOVA2A1
+;* Intercambia Acumuladores	FSWAP
+;* ACC1=Constante encontrada por Z en la memoria Flash	FLDKA1
+;* ACC2=Constante encontrada por Z en la memoria Flash	FLDKA2
+;* Guarda ACC1 en el stack virtual			FPUSHA1
+;* Guarda ACC2 en el stack virtual			FPUSHA2
+;* Recupera ACC1 del stack virtual			FPOPA1
+;* Recupera ACC2 del stack virtual			FPOPA2
+;**********************************************************************************************
+;* Macroinstrucciones para salvar y recuperar registros usados en las rutinas
+;* de punto flotante (R10 a R25). 16 bytes de stack+bytes reuqridos para la
+;* aplicación.
+;*				FSAVEREG
+;*				FRESTOREREG
+;**********************************************************************************************
+;* Macros de comparacion de datos en F.P.
+;* El registro "TEMP" regresa con el resultado de la comparacion.
+;* TEMP = $00 El dato 1 es = al dato 2
+;* TEMP = $01 El dato 1 es > el dato 2
+;* TEMP = $FF El dato 1 es < el dato 2
+;* Compara ACC1 con el dato en F.P. encontrado por Z en la memoria Flash (ACC1=dato 1)	FCPFLASH
+;* Compara ACC1 con el dato en F.P. encontrado por Z en la memoria RAM (ACC1=dato 1)	FCPM
+;* Compara el dato encontrado por Y en la memoria RAM con el dato encontrado por Z
+;* en la memoria RAM (Y apunta al dato 1)						FCPRAM
+;* Compara ACC1 con el ACC2 (ACC1=dato1)						FCP
+;**********************************************************************************************
+;* Macroinstrucciones para normalizar numeros.
+;*	NORMHEX
+;*	NORMDEC
+;*	NORMHEXTOA1
+;*	NORMHEXTOA2
+;*	NORMDECTOA1
+;*	NORMDECTOA2
+;**********************************************************************************************
+;* Macroinstrucciones para denormalizar numeros.
+;*	DENORMHEX
+;*	DENORMDEC
+;*	DENORMA1TOHEX
+;*	DENORMA2TOHEX
+;*	DENORMA1TODEC
+;*	DENORMA2TODEC
+;**********************************************************************************************
+;Macros para realizar conversiones entre sistemas numericos
+;Convierte el contenido de las localidades 60-63 a decimal.
+;*	DTOH
+;Convierte el contenido de las localidades 64-68 a hexadecimal.
+;*	HTOD
+;**********************************************************************************************
+;Macroinstrucciones para conversion entre sistemas (fraccion).
+;Convierte el contenido de las localidades        a decimal.
+;*	FDTOH
+;Convierte el contenido de las localidades a hexadecimal.
+;*	FHTOD
+;**********************************************************************************************
+;Definiciones usadas:
+;
+;Valor no normalizado:
+;  HEX_H HEX_MH HEXML HEX_L . FHEX_H FHEX_MH FHEX_ML FHEX_L
+;		   Punto no normalizado.
+;
+;Registros empleados para normalizar y denormalizar:
+;       HEX7 HEX6 HEX5 HEX4 . HEX3 HEX2 HEX1 HEX0
+;		   Punto no normalizado.
+;
+;Registros con el contenido normalizado:
+;	HEX3		Signo+7 bits del exponente
+;	HEX2		1 bit del exponente + 7 bits de mantisa
+;	HEX1:HEX0	16 bits de mantisa
+;
+;El signo del numero se debera de encontrar en la bandera T antes de normalizar y también se
+;encontrara en esta bandera al final de la denormalización.
+;
+;Si al denormaliar el numero es muy grande (no se puede representar la parte entera en 32
+;bits) C=1, en caso contrario C=0
+;
+;****************************************************************************
+;Registros y definiciones para el manejo de enteros hex y dec
+.equ	HEX_L 	=  reg_lib
+.equ	HEX_ML	=  reg_lib+1
+.equ	HEX_MH	=  reg_lib+2
+.equ	HEX_H 	=  reg_lib+3
+.equ	DEC_L   =  reg_lib+4
+.equ	DEC_ML  =  reg_lib+5
+.equ	DEC_M   =  reg_lib+6
+.equ	DEC_MH  =  reg_lib+7
+.equ	DEC_H   =  reg_lib+8
+;****************************************************************************
+;Registros y definiciones para el manejo de fracciones hex y dec
+.equ		FHEX_H    = reg_lib+9
+.equ		FHEX_MH   = reg_lib+10
+.equ		FHEX_ML   = reg_lib+11
+.equ		FHEX_L    = reg_lib+12
+.equ		FDEC_15   = reg_lib+13
+.equ		FDEC_14   = reg_lib+14
+.equ		FDEC_13   = reg_lib+15
+.equ		FDEC_12   = reg_lib+16
+.equ		FDEC_11   = reg_lib+17
+.equ		FDEC_10   = reg_lib+18
+.equ		FDEC_9    = reg_lib+19
+.equ		FDEC_8    = reg_lib+20
+.equ		FDEC_7    = reg_lib+21
+.equ		FDEC_6    = reg_lib+22
+.equ		FDEC_5    = reg_lib+23
+.equ		FDEC_4    = reg_lib+24
+.equ		FDEC_3    = reg_lib+25
+.equ		FDEC_2    = reg_lib+26
+.equ		FDEC_1	  = reg_lib+27
+.equ		FDEC_0	  = reg_lib+28
+;****************************************************************************
+;Registros y definiciones especificos de las subrutinas y macros de normalización y denormalización
+.equ	HEX7	= reg_lib+5		;Entero Hex
+.equ	HEX6	= reg_lib+6
+.equ	HEX5	= reg_lib+7
+.equ	HEX4	= reg_lib+8
+.equ	HEX3	= reg_lib+9	;Fraccion Hex
+.equ	HEX2	= reg_lib+10
+.equ	HEX1	= reg_lib+11
+.equ	HEX0	= reg_lib+12
+.def	EXPONENTE=	R20
+
+;Registros especificos de punto flotante
+;****************************************************************************
+; NOTA: Todas las funciones con memoria: por ejemplo; FADDMEM
+; emplean al puntero Z para especificar la direcció del dato en FP de 32 bits
+; que se encuentra en SRAM
+.def     QUOT		=	r10
+.def     QUOTM		=	r11
+.def     QUOTH		=	r12
+.def     A1_L		=	r13           ; Accumulador 1
+.def     A1_ML		=	r14
+.def     A1_MH		=	r15
+.def     A1_H		=	r16
+.def     SIGN1		=	r17
+.def     A2_L		=	r18           ; Accumulador 2
+.def     A2_ML		=	r19
+.def     A2_MH		=	r20
+.def     A2_H		=	r21
+.def     SIGN2		=	r22
+.def     A1_LT		=	r23
+.def     COUNTFP32	=	r24
+.def     TEMPFP32	=	r25
+.equ     MATHTMP	=	reg_lib+29	;8 bytes reservados para FP
+.equ     MATHTMPb	=	reg_lib+30
+.equ     MATHTMPc	=	reg_lib+31
+.equ     MATHTMPd	=	reg_lib+32
+.equ     MATHTMPe	=	reg_lib+33
+.equ     MATHTMPf	=	reg_lib+34
+.equ     MATHTMPg	=	reg_lib+35
+.equ     MATHTMPh	=	reg_lib+36
+
+.macro		CLR_DEC
+		call	CLR_DECIMAL
+.endm
+
+.macro		CLR_HEX
+		call	CLR_HEXADECIMAL
+.endm
+
+;************************************************************
+CLR_DECIMAL:
+			OUTI	DEC_H,0x00
+			OUTI	DEC_MH,0x00
+			OUTI	DEC_M,0x00
+			OUTI	DEC_ML,0x00
+			OUTI	DEC_L,0x00
+			OUTI	FDEC_15,0x00
+			OUTI	FDEC_14,0x00
+			OUTI	FDEC_13,0x00
+			OUTI	FDEC_12,0x00
+			OUTI	FDEC_11,0x00
+			OUTI	FDEC_10,0x00
+			OUTI	FDEC_9,0x00
+			OUTI	FDEC_8,0x00
+			OUTI	FDEC_7,0x00
+			OUTI	FDEC_6,0x00
+			OUTI	FDEC_5,0x00
+			OUTI	FDEC_4,0x00
+			OUTI	FDEC_3,0x00
+			OUTI	FDEC_2,0x00
+			OUTI	FDEC_1,0x00
+			OUTI	FDEC_0,0x00
+			RET
+
+;************************************************************
+CLR_HEXADECIMAL:
+			OUTI	HEX_H,0x00
+			OUTI	HEX_MH,0x00
+			OUTI	HEX_ML,0x00
+			OUTI	HEX_L,0x00
+			OUTI	FHEX_H,0x00
+			OUTI	FHEX_MH,0x00
+			OUTI	FHEX_ML,0x00
+			OUTI	FHEX_L,0x00
+			RET
+;************************************************************
