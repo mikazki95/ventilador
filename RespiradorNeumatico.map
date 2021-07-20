@@ -2,6 +2,7 @@
 AVRASM ver. 2.1.42  C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm Tue Jul 20 10:05:25 2021
 
 
+
 EQU  SIGNATURE_000 0000001e
 EQU  SIGNATURE_001 00000098
 EQU  SIGNATURE_002 00000001
