@@ -63,19 +63,6 @@ skip_inc_Acc_H:
 			ror		yh
 			ror		yl
 
-;			lsr		xl
-;			ror		yh
-;			ror		yl
-;			lsr		xl
-;			ror		yh
-;			ror		yl
-
-;			lsr		xl
-;			ror		yh
-;			ror		yl
-;			lsr		xl
-;			ror		yh
-;			ror		yl
 
 			outr	Presion_NPA700L,yl
 			outr	Presion_NPA700H,yh
@@ -194,17 +181,12 @@ rd_i2c_NPA:	ldi		r25,(0x28*2)+1		;ID de la memoria
 			scl0
 			scl1
 			delay_I2C
-;			sbic	SDAI
-;			rjmp	@0
-;			delay_I2C
+
 			scl0
 ;read_i2c:
 			rcall	rdbyte_i2c
 			outr	NPA_700H,r24
-/*
-						outr	udr_debug,r24
-						outi	cont_tx0,0x00
-*/
+
 
 			scl0			;Envia ACK
 			sda0
@@ -216,10 +198,7 @@ rd_i2c_NPA:	ldi		r25,(0x28*2)+1		;ID de la memoria
 
 			rcall	rdbyte_i2c
 			outr	NPA_700L,r24
-/*
-						outr	udr_debug,r24
-						outi	cont_tx0,0x00
-*/
+
 
 			scl0			;Envia NAK
 			sda1
@@ -246,13 +225,7 @@ rd_i2c_NPA:	ldi		r25,(0x28*2)+1		;ID de la memoria
 lectura_NPA_OK:
 			outi	estado_i2cNPA,'0'
 
-/*
-					inr		XL,NPA_700L
-					inr		XH,NPA_700H
-					outi	cont_tx0,0
-					outr	udr_debug,XH
-					outr	udr_debug,XL
-*/
+
 
 			ret
 
