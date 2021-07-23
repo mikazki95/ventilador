@@ -1,6 +1,5 @@
 
-AVRASM ver. 2.1.42  C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm Tue Jul 20 10:05:25 2021
-
+AVRASM ver. 2.1.42  C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm Fri Jul 23 09:26:03 2021
 
 
 EQU  SIGNATURE_000 0000001e
@@ -2672,7 +2671,7 @@ CSEG salto@rbreq@61626 00008897
 CSEG borra_insp_exha@INSP_EXHA@61664 000088ab
 CSEG salir_macro_insp_exha@INSP_EXHA@61664 000088b0
 CSEG fin_macro_standby@FASE_STANDBY@61634 000088d8
-CSEG retorno_control_O2 00008cf6
+CSEG retorno_control_O2 00008cf9
 CSEG salto@rbreq@63144 00008a31
 CSEG fiO2_21      00008c8a
 CSEG salto@rbreq@63177 00008a3b
@@ -2685,7 +2684,7 @@ CSEG salto@rbreq@63287 00008a5c
 CSEG aumentar_fio2 00008b5a
 CSEG salto@rbrlo@63293 00008a5f
 CSEG disminuir_fio2 00008a5f
-CSEG salir_control_O2 00008ce7
+CSEG salir_control_O2 00008cea
 CSEG salto@rbreq@63305 00008a65
 CSEG salto@rbrlo@63311 00008a68
 CSEG cp_o2_mas_5  00008a91
@@ -2707,7 +2706,7 @@ CSEG cp_o2_mas_10 00008b35
 CSEG salto@rbrsh@63672 00008adc
 CSEG salto@rbreq@63690 00008ae2
 CSEG salto@rbrlo@63720 00008aec
-CSEG salir_control_O2_2 00008ce4
+CSEG salir_control_O2_2 00008ce7
 CSEG salto@rbrsh@63832 00008b0d
 CSEG salto@rbrsh@63922 00008b28
 CSEG salto@rbreq@64002 00008b3b

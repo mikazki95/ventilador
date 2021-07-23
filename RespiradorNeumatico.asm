@@ -16,7 +16,7 @@
 #define	version_firmwareP	'.'
 #define	version_firmwareM	'1'
 ;#define	version_firmwareLP	'.'
-#define	version_firmwareL	'S'
+#define	version_firmwareL	'T'
 
 .equ	fxtal		=	11059200		;Frecuencia del cristal
 
@@ -1575,7 +1575,7 @@ R_control_FiO2:
 		outr	C_X_FiO2,yl
 
 		inr		yl,C_A_FiO2
-		cpi		yl,5
+		cpi		yl,7
 		brsh	R_control_FiO2_Carga
 		rjmp	sigue_control_FiO2
 ;************************************************************
@@ -1583,6 +1583,7 @@ R_control_FiO2:
 R_control_FiO2_Carga:
 			movr		FiO2_A_L,FiO2HEX_L	
 			movr		FiO2_A_H,FiO2HEX_H
+			outi 		C_A_FiO2,0
 		rjmp	sigue_control_FiO2
 ;************************************************************
 ;************************************************************
