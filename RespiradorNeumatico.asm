@@ -16,7 +16,7 @@
 #define	version_firmwareP	'.'
 #define	version_firmwareM	'1'
 ;#define	version_firmwareLP	'.'
-#define	version_firmwareL	'S'
+#define	version_firmwareL	'T'
 
 .equ	fxtal		=	11059200		;Frecuencia del cristal
 
@@ -1467,25 +1467,6 @@ cp_o2_menos_10:
 
 
 
-dc_aire_a:	
-			;sbi		led_run
-			outi	B_ox_max,0x01
-			cli
-			inr		xh,reg_PWM2_AireH
-			inr		xl,reg_PWM2_AireL
-			sei
-
-			cpi		xl,low(30)
-			cpci	xh,high(30)
-			rbrlo	fiO2_aire_min
-			subi	xl,low(1)
-			sbci	xh,high(1)
-
-			outr	reg_PWM2_AireH,xh
-			outr	reg_PWM2_AireL,xl
-			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
-			rjmp	salir_control_O2
-
 dc_aire_b:	
 
 			sbi		led_run
@@ -1575,7 +1556,7 @@ R_control_FiO2:
 		outr	C_X_FiO2,yl
 
 		inr		yl,C_A_FiO2
-		cpi		yl,5
+		cpi		yl,7
 		brsh	R_control_FiO2_Carga
 		rjmp	sigue_control_FiO2
 ;************************************************************
@@ -1583,6 +1564,7 @@ R_control_FiO2:
 R_control_FiO2_Carga:
 			movr		FiO2_A_L,FiO2HEX_L	
 			movr		FiO2_A_H,FiO2HEX_H
+			outi 		C_A_FiO2,0
 		rjmp	sigue_control_FiO2
 ;************************************************************
 ;************************************************************
