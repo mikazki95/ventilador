@@ -1467,25 +1467,6 @@ cp_o2_menos_10:
 
 
 
-dc_aire_a:	
-			;sbi		led_run
-			outi	B_ox_max,0x01
-			cli
-			inr		xh,reg_PWM2_AireH
-			inr		xl,reg_PWM2_AireL
-			sei
-
-			cpi		xl,low(30)
-			cpci	xh,high(30)
-			rbrlo	fiO2_aire_min
-			subi	xl,low(1)
-			sbci	xh,high(1)
-
-			outr	reg_PWM2_AireH,xh
-			outr	reg_PWM2_AireL,xl
-			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
-			rjmp	salir_control_O2
-
 dc_aire_b:	
 
 			sbi		led_run

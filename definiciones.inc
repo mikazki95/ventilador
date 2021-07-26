@@ -1647,6 +1647,7 @@ init_io:	outi	ddra, 0b11111111
 			outi		B_FIO2_BAJO,'0'				
 			outi		B_FIO2_ALTO,'0'	
 			outi		C_A_FiO2,0
+			outi		B_ox_max,0
 
 
             sei                                 ;Habilita de manera global las interrupciones
