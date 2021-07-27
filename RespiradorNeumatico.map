@@ -1,9 +1,5 @@
 
-<<<<<<< HEAD
-AVRASM ver. 2.1.42  C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm Wed Jul 21 15:51:01 2021
-=======
-AVRASM ver. 2.1.42  C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm Mon Jul 26 09:38:32 2021
->>>>>>> espera_fio2
+AVRASM ver. 2.1.42  C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm Mon Jul 26 10:38:31 2021
 
 
 EQU  SIGNATURE_000 0000001e
@@ -2698,41 +2694,41 @@ CSEG salto@rbreq@63347 00008a77
 CSEG fiO2_oxigeno_min 00008c51
 CSEG salto@rbrlo@63377 00008a81
 CSEG skip_D_FiO2  00008aaf
-CSEG salto@rbreq@63478 00008a9a
+CSEG salto@rbreq@63477 00008a9a
 CSEG R_D_Fio2     00008a9a
 CSEG SC_D_Fio2    00008ac2
-CSEG salto@rbrlo@63584 00008abc
+CSEG salto@rbrlo@63583 00008abc
 CSEG aire_inc_b   00008b1d
-CSEG salto@rbreq@63622 00008ac8
-CSEG salto@rbreq@63666 00008ad6
-CSEG salto@rbrlo@63672 00008ad9
+CSEG salto@rbreq@63621 00008ac8
+CSEG salto@rbreq@63665 00008ad6
+CSEG salto@rbrlo@63671 00008ad9
 CSEG cp_o2_mas_10 00008b38
-CSEG salto@rbrsh@63681 00008adf
-CSEG salto@rbreq@63699 00008ae5
-CSEG salto@rbrlo@63729 00008aef
+CSEG salto@rbrsh@63680 00008adf
+CSEG salto@rbreq@63698 00008ae5
+CSEG salto@rbrlo@63728 00008aef
 CSEG salir_control_O2_2 00008ccc
-CSEG salto@rbrsh@63841 00008b10
-CSEG salto@rbrsh@63931 00008b2b
-CSEG salto@rbreq@64011 00008b3e
-CSEG salto@rbrlo@64042 00008b48
-CSEG salto@rbrsh@64135 00008b63
+CSEG salto@rbrsh@63840 00008b10
+CSEG salto@rbrsh@63930 00008b2b
+CSEG salto@rbreq@64010 00008b3e
+CSEG salto@rbrlo@64041 00008b48
+CSEG salto@rbrsh@64134 00008b63
 CSEG cp_o2_menos_5 00008b8a
-CSEG salto@rbrlo@64146 00008b69
+CSEG salto@rbrlo@64145 00008b69
 CSEG dc_aire_b    00008c14
-CSEG salto@rbrsh@64178 00008b77
+CSEG salto@rbrsh@64177 00008b77
 CSEG skip_A_FiO2  00008ba5
-CSEG salto@rbreq@64273 00008b90
+CSEG salto@rbreq@64272 00008b90
 CSEG R_A_Fio2     00008b90
 CSEG SC_A_Fio2    00008bb8
-CSEG salto@rbrlo@64379 00008bb2
-CSEG salto@rbreq@64418 00008bbe
-CSEG salto@rbrsh@64462 00008bcc
+CSEG salto@rbrlo@64378 00008bb2
+CSEG salto@rbreq@64417 00008bbe
+CSEG salto@rbrsh@64461 00008bcc
 CSEG cp_o2_menos_10 00008bf3
-CSEG salto@rbrlo@64473 00008bd2
-CSEG salto@rbrsh@64505 00008be0
-CSEG salto@rbrsh@64618 00008c01
+CSEG salto@rbrlo@64472 00008bd2
+CSEG salto@rbrsh@64504 00008be0
+CSEG salto@rbrsh@64617 00008c01
 CSEG fiO2_aire_min 00008c33
-CSEG salto@rbrlo@64739 00008c24
+CSEG salto@rbrlo@64738 00008c24
 CSEG fiO2_aire_maximo 00008c42
 CSEG fiO2_oxigeno_maximo 00008c60
 CSEG R_control_FiO2 00008cb6

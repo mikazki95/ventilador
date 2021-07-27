@@ -1213,7 +1213,6 @@ disminuir_fio2:
 
 
 cp_o2_mas_5:
-			
 			cpri		B_FIO2_ALTO,'1'
 			rbreq		skip_D_FiO2
 R_D_Fio2:	movr		FiO2_A_L,FiO2HEX_L	;Lectura del sensor, el valor ya esta
