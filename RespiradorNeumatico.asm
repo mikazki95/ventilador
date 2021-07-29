@@ -16,7 +16,7 @@
 #define	version_firmwareP	'.'
 #define	version_firmwareM	'1'
 ;#define	version_firmwareLP	'.'
-#define	version_firmwareL	'T'
+#define	version_firmwareL	'U'
 
 .equ	fxtal		=	11059200		;Frecuencia del cristal
 
