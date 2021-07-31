@@ -1415,7 +1415,7 @@ init_io:	outi	ddra, 0b11111111
 			outiw		ocr5ah,ocr5al,0x0000
             outiw       ocr5bh,ocr5bl,0x0000
             outiw       ocr5ch,ocr5cl,0x0000
-            outi        tccr5b,0b11011010		;Configura la captura en flanco asc prescaler PWM
+            outi        tccr5b,0b11011011		;Configura la captura en flanco asc prescaler PWM
 			outi		timsk5,0b00000000
 ;***************************************
 
