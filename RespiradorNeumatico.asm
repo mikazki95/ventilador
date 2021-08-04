@@ -16,10 +16,10 @@
 #define	version_firmwareP	'.'
 #define	version_firmwareM	'1'
 ;#define	version_firmwareLP	'.'
-#define	version_firmwareL	'T'
+#define	version_firmwareL	'U'
 
 .equ	fxtal		=	11059200		;Frecuencia del cristal
-
+  
 .equ	udr_debug	=	udr0
 .equ	txc_debug	=	txc0
 .equ	rxc_debug	=	rxc0
@@ -1062,7 +1062,7 @@ tx_respuesta_M:
 			movr		buffer_tx0+41	,rx_PmaxH
 			movr		buffer_tx0+42	,rx_PmaxM
 			movr		buffer_tx0+43	,rx_PmaxL
-
+ 
 			movr		buffer_tx0+44	,rx_ON_OFF
 
 			outi		buffer_tx0+45	,0x0A
@@ -1546,7 +1546,7 @@ Fio2_Ok:
 			outi		B_FIO2_ALTO,'0'
 			outi		C_A_FiO2,0
 			outi		C_X_FiO2,0
-			rjmp	salir_control_O2
+			rjmp	salir_control_O2	
 ;************************************************************
 ;************************************************************
 R_control_FiO2:
