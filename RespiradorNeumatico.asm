@@ -868,7 +868,8 @@ verifica_M:	;outi	cmd_pendiente,0x00
 			cpri		b_act,'1'
 			rbreq		wait_rx
 arranque_inicial:
-			outi	cmd_pendiente,0x00
+			outi		C_A_FiO2,0
+			outi		cmd_pendiente,0x00
 
 			CLI
 
@@ -1407,19 +1408,21 @@ SC_A_Fio2:
 			cpri	B_ox_max,0x01
 			rbreq	dc_aire_b
 
-
+/*
 			inr		xl,FiO2HEX_L	;Lectura del sensor, el valor ya esta
 			inr		xh,FiO2HEX_H	;convertido de ADC a % de Oxigeno en Hex
+*/
 			inr		zl,reg_O2L		;Valor programado para FiO2 (hex)
 			inr		zh,reg_O2H
-
+/*
 			sbiw	zl,5
 			cp		xl,zl
 			cpc		xh,zh
 			rbrsh	salir_control_O2
+*/
 ;Sensor < %O2 -5% programado
 ;Se debe de incrementar el valor de PWM de O2
-			sbiw	zl,5
+			sbiw	zl,10;5
 			cp		xl,zl
 			cpc		xh,zh
 			rbrlo	cp_o2_menos_10

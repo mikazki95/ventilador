@@ -224,18 +224,18 @@
   <calcula_PWM2_Aire><FILE>C:\Ventilador\control\Control_R\ventilador\Calculos.inc</FILE><LINE>722</LINE></calcula_PWM2_Aire>
   <calcula_FiO2_BCD><FILE>C:\Ventilador\control\Control_R\ventilador\Calculos.inc</FILE><LINE>750</LINE></calcula_FiO2_BCD>
   <N_FiO2_HX><FILE>C:\Ventilador\control\Control_R\ventilador\Calculos.inc</FILE><LINE>774</LINE></N_FiO2_HX>
-  <dt_O2_21><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1589</LINE></dt_O2_21>
+  <dt_O2_21><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1590</LINE></dt_O2_21>
   <FIO2_21_BCD><FILE>C:\Ventilador\control\Control_R\ventilador\Calculos.inc</FILE><LINE>818</LINE></FIO2_21_BCD>
   <FIO2_ER><FILE>C:\Ventilador\control\Control_R\ventilador\Calculos.inc</FILE><LINE>798</LINE></FIO2_ER>
   <cont_fio2><FILE>C:\Ventilador\control\Control_R\ventilador\Calculos.inc</FILE><LINE>822</LINE></cont_fio2>
   <OL_FIO2_ER><FILE>C:\Ventilador\control\Control_R\ventilador\Calculos.inc</FILE><LINE>811</LINE></OL_FIO2_ER>
-  <dt_O2_G><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1595</LINE></dt_O2_G>
+  <dt_O2_G><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1596</LINE></dt_O2_G>
   <s_cont_fio2><FILE>C:\Ventilador\control\Control_R\ventilador\Calculos.inc</FILE><LINE>834</LINE></s_cont_fio2>
   <OL_CONT><FILE>C:\Ventilador\control\Control_R\ventilador\Calculos.inc</FILE><LINE>845</LINE></OL_CONT>
   <calcula_FiO2_HEX><FILE>C:\Ventilador\control\Control_R\ventilador\Calculos.inc</FILE><LINE>851</LINE></calcula_FiO2_HEX>
   <K100><FILE>C:\Ventilador\control\Control_R\ventilador\Calculos.inc</FILE><LINE>864</LINE></K100>
   <calculo_G_FIO2><FILE>C:\Ventilador\control\Control_R\ventilador\Calculos.inc</FILE><LINE>866</LINE></calculo_G_FIO2>
-  <dt_O2_100><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1592</LINE></dt_O2_100>
+  <dt_O2_100><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1593</LINE></dt_O2_100>
   <guarda_G><FILE>C:\Ventilador\control\Control_R\ventilador\Calculos.inc</FILE><LINE>893</LINE></guarda_G>
   <sumar_G><FILE>C:\Ventilador\control\Control_R\ventilador\Calculos.inc</FILE><LINE>892</LINE></sumar_G>
   <sigue_PWM><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>13</LINE></sigue_PWM>
@@ -431,9 +431,9 @@
   <sum_PS_PWM><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1316</LINE></sum_PS_PWM>
   <Dec_PS_PWM><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1375</LINE></Dec_PS_PWM>
   <inicio2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>110</LINE></inicio2>
-  <tx_listo><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1109</LINE></tx_listo>
+  <tx_listo><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1110</LINE></tx_listo>
   <wait_rx><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>124</LINE></wait_rx>
-  <control_FiO2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1131</LINE></control_FiO2>
+  <control_FiO2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1132</LINE></control_FiO2>
   <SECCION_CAL_O2_100><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>367</LINE></SECCION_CAL_O2_100>
   <SECCION_CAL_O2_21><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>474</LINE></SECCION_CAL_O2_21>
   <SECCION_TST_ELECTROVALVULAS><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>582</LINE></SECCION_TST_ELECTROVALVULAS>
@@ -486,45 +486,45 @@
   <error_O2_0><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>534</LINE></error_O2_0>
   <retardo><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>571</LINE></retardo>
   <skip_cp_1><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>590</LINE></skip_cp_1>
-  <tx_error_rango_rx><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1082</LINE></tx_error_rango_rx>
+  <tx_error_rango_rx><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1083</LINE></tx_error_rango_rx>
   <carga_modo_bat><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>683</LINE></carga_modo_bat>
   <carga_modo_AC><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>680</LINE></carga_modo_AC>
   <tx_modo_alimentacion><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>686</LINE></tx_modo_alimentacion>
-  <detener_ventilador><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>997</LINE></detener_ventilador>
+  <detener_ventilador><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>998</LINE></detener_ventilador>
   <arranque_inicial><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>870</LINE></arranque_inicial>
-  <modo_ok><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>922</LINE></modo_ok>
-  <skip_cambia_PWM_O2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>954</LINE></skip_cambia_PWM_O2>
-  <inicia_CPAP><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>988</LINE></inicia_CPAP>
-  <tx_respuesta_M><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1007</LINE></tx_respuesta_M>
-  <skip_stop_v><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1005</LINE></skip_stop_v>
-  <retorno_control_O2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1583</LINE></retorno_control_O2>
-  <fiO2_21><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1524</LINE></fiO2_21>
-  <fiO2_100><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1534</LINE></fiO2_100>
-  <sigue_control_FiO2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1164</LINE></sigue_control_FiO2>
-  <Fio2_Ok><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1544</LINE></Fio2_Ok>
-  <aumentar_fio2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1346</LINE></aumentar_fio2>
-  <disminuir_fio2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1177</LINE></disminuir_fio2>
-  <salir_control_O2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1572</LINE></salir_control_O2>
-  <cp_o2_mas_5><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1215</LINE></cp_o2_mas_5>
-  <aire_inc_a><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1284</LINE></aire_inc_a>
-  <fiO2_oxigeno_min><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1509</LINE></fiO2_oxigeno_min>
-  <skip_D_FiO2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1227</LINE></skip_D_FiO2>
-  <R_D_Fio2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1218</LINE></R_D_Fio2>
-  <SC_D_Fio2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1241</LINE></SC_D_Fio2>
-  <aire_inc_b><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1299</LINE></aire_inc_b>
-  <cp_o2_mas_10><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1316</LINE></cp_o2_mas_10>
-  <salir_control_O2_2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1570</LINE></salir_control_O2_2>
-  <cp_o2_menos_5><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1376</LINE></cp_o2_menos_5>
-  <dc_aire_b><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1469</LINE></dc_aire_b>
-  <skip_A_FiO2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1390</LINE></skip_A_FiO2>
-  <R_A_Fio2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1381</LINE></R_A_Fio2>
-  <SC_A_Fio2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1406</LINE></SC_A_Fio2>
-  <cp_o2_menos_10><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1444</LINE></cp_o2_menos_10>
-  <fiO2_aire_min><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1494</LINE></fiO2_aire_min>
-  <fiO2_aire_maximo><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1502</LINE></fiO2_aire_maximo>
-  <fiO2_oxigeno_maximo><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1516</LINE></fiO2_oxigeno_maximo>
-  <R_control_FiO2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1552</LINE></R_control_FiO2>
-  <R_control_FiO2_Carga><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1563</LINE></R_control_FiO2_Carga>
-  <dt_O2_G_FP><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1598</LINE></dt_O2_G_FP>
+  <modo_ok><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>923</LINE></modo_ok>
+  <skip_cambia_PWM_O2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>955</LINE></skip_cambia_PWM_O2>
+  <inicia_CPAP><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>989</LINE></inicia_CPAP>
+  <tx_respuesta_M><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1008</LINE></tx_respuesta_M>
+  <skip_stop_v><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1006</LINE></skip_stop_v>
+  <retorno_control_O2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1584</LINE></retorno_control_O2>
+  <fiO2_21><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1525</LINE></fiO2_21>
+  <fiO2_100><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1535</LINE></fiO2_100>
+  <sigue_control_FiO2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1165</LINE></sigue_control_FiO2>
+  <Fio2_Ok><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1545</LINE></Fio2_Ok>
+  <aumentar_fio2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1347</LINE></aumentar_fio2>
+  <disminuir_fio2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1178</LINE></disminuir_fio2>
+  <salir_control_O2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1573</LINE></salir_control_O2>
+  <cp_o2_mas_5><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1216</LINE></cp_o2_mas_5>
+  <aire_inc_a><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1285</LINE></aire_inc_a>
+  <fiO2_oxigeno_min><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1510</LINE></fiO2_oxigeno_min>
+  <skip_D_FiO2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1228</LINE></skip_D_FiO2>
+  <R_D_Fio2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1219</LINE></R_D_Fio2>
+  <SC_D_Fio2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1242</LINE></SC_D_Fio2>
+  <aire_inc_b><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1300</LINE></aire_inc_b>
+  <cp_o2_mas_10><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1317</LINE></cp_o2_mas_10>
+  <salir_control_O2_2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1571</LINE></salir_control_O2_2>
+  <cp_o2_menos_5><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1377</LINE></cp_o2_menos_5>
+  <dc_aire_b><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1470</LINE></dc_aire_b>
+  <skip_A_FiO2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1391</LINE></skip_A_FiO2>
+  <R_A_Fio2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1382</LINE></R_A_Fio2>
+  <SC_A_Fio2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1407</LINE></SC_A_Fio2>
+  <cp_o2_menos_10><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1445</LINE></cp_o2_menos_10>
+  <fiO2_aire_min><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1495</LINE></fiO2_aire_min>
+  <fiO2_aire_maximo><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1503</LINE></fiO2_aire_maximo>
+  <fiO2_oxigeno_maximo><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1517</LINE></fiO2_oxigeno_maximo>
+  <R_control_FiO2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1553</LINE></R_control_FiO2>
+  <R_control_FiO2_Carga><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1564</LINE></R_control_FiO2_Carga>
+  <dt_O2_G_FP><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1599</LINE></dt_O2_G_FP>
  </LABELS>
 </ASSEMBLER_INFO>
