@@ -16,7 +16,7 @@
 #define	version_firmwareP	'.'
 #define	version_firmwareM	'1'
 ;#define	version_firmwareLP	'.'
-#define	version_firmwareL	'T'
+#define	version_firmwareL	'U'
 
 .equ	fxtal		=	11059200		;Frecuencia del cristal
 
@@ -870,6 +870,7 @@ verifica_M:	;outi	cmd_pendiente,0x00
 arranque_inicial:
 			outi		C_A_FiO2,0
 			outi		cmd_pendiente,0x00
+			outi		B_ox_max,0x00
 
 			CLI
 
@@ -1525,22 +1526,22 @@ fiO2_oxigeno_maximo:
 ;************************************************************
 ;************************************************************
 fiO2_21:
-		outi	reg_PWM2_AireH,0x01
-		outi	reg_PWM2_AireL,0xE0
-		outi	reg_PWM1_O2H,0x00
-		outi	reg_PWM1_O2L,0x00
-		ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
-		ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
+		outi	tmp_reg_PWM2_AireH,0x01
+		outi	tmp_reg_PWM2_AireL,0xE0
+		outi	tmp_reg_PWM1_O2H,0x00
+		outi	tmp_reg_PWM1_O2L,0x00
+		ASIGNA_PWM_AIRE						tmp_reg_PWM2_AireH,tmp_reg_PWM2_AireL
+		ASIGNA_PWM_O2						tmp_reg_PWM1_O2H,tmp_reg_PWM1_O2L
 		rjmp	salir_control_O2
 ;************************************************************
 ;************************************************************
 fiO2_100:
-		outi	reg_PWM2_AireH,0x00
-		outi	reg_PWM2_AireL,0x00
+		outi	tmp_reg_PWM2_AireH,0x00
+		outi	tmp_reg_PWM2_AireL,0x00
 		outi	tmp_reg_PWM1_O2H,0x01
 		outi	tmp_reg_PWM1_O2L,0xE0
-		ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
-		ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
+		ASIGNA_PWM_AIRE						tmp_reg_PWM2_AireH,tmp_reg_PWM2_AireL
+		ASIGNA_PWM_O2						tmp_reg_PWM1_O2H,tmp_reg_PWM1_O2L
 		rjmp	salir_control_O2
 ;************************************************************
 ;************************************************************
