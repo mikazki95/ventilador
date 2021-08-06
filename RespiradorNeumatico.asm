@@ -16,7 +16,7 @@
 #define	version_firmwareP	'.'
 #define	version_firmwareM	'1'
 ;#define	version_firmwareLP	'.'
-#define	version_firmwareL	'U'
+#define	version_firmwareL	'V'
 
 .equ	fxtal		=	11059200		;Frecuencia del cristal
 
@@ -870,8 +870,7 @@ verifica_M:	;outi	cmd_pendiente,0x00
 arranque_inicial:
 			outi		C_A_FiO2,0
 			outi		cmd_pendiente,0x00
-			outi		B_ox_max,0x00
-
+			
 			CLI
 
 ;Copia el buffer rx hacia los registros para calcular y convertir los valores
@@ -1134,8 +1133,8 @@ control_FiO2:
 
 			call	calcula_FiO2_HEX
 
-			cpri	habilita_control_O2,'0'
-			rbreq	retorno_control_O2
+;			cpri	habilita_control_O2,'0'
+;			rbreq	retorno_control_O2
 			
 			;call	calcula_FiO2_HEX
 
@@ -1160,6 +1159,10 @@ control_FiO2:
 ;************************************************************
 			cpri	rx_Ctrl_FiO2,'1'
 			rbreq	fiO2_21
+;************************************************************
+;************************************************************
+			cpri	habilita_control_O2,'0'
+			rbreq	retorno_control_O2
 ;************************************************************
 ;************************************************************
 			movr	C_X_FiO2,C_A_FiO2
@@ -1189,8 +1192,17 @@ disminuir_fio2:
 			rbrsh	cp_o2_mas_5
 ;Sensor > %O2 +5% programado
 ;Se debe de decrementar el valor de PWM de O2
-			cpri	B_ox_max,0x01
-			rbreq	aire_inc_a
+			
+
+			inr		xh,reg_PWM2_AireH
+			inr		xl,reg_PWM2_AireL
+			sei
+			subi	xl,low(-10)
+			sbci	xh,high(-10)
+			cpi		xl,low(480)
+			cpci	xh,high(480)
+			rbrlo	aire_inc_a
+
 			inr		xh,reg_PWM1_O2H
 			inr		xl,reg_PWM1_O2L
 			
@@ -1242,8 +1254,6 @@ skip_D_FiO2:
 
 SC_D_Fio2:
 
-			cpri	B_ox_max,0x01
-			rbreq	aire_inc_b
 
 			inr		xl,FiO2HEX_L	;Lectura del sensor, el valor ya esta
 			inr		xh,FiO2HEX_H	;convertido de ADC a % de Oxigeno en Hex
@@ -1262,8 +1272,16 @@ SC_D_Fio2:
 			rbrsh	cp_o2_mas_10
 ;Sensor > %O2 +5% programado
 ;Se debe de decrementar el valor de PWM de O2
-			cpri	B_ox_max,0x01
-			rbreq	aire_inc_b
+
+			inr		xh,reg_PWM2_AireH
+			inr		xl,reg_PWM2_AireL
+			sei
+			subi	xl,low(-10)
+			sbci	xh,high(-10)
+			cpi		xl,low(480)
+			cpci	xh,high(480)
+			rbrlo	aire_inc_b
+
 			inr		xh,reg_PWM1_O2H
 			inr		xl,reg_PWM1_O2L
 			
@@ -1288,11 +1306,8 @@ aire_inc_a:
 			inr		xh,reg_PWM2_AireH
 			inr		xl,reg_PWM2_AireL
 			sei
-			subi	xl,low(-4)
-			sbci	xh,high(-4)
-			cpi		xl,low(480)
-			cpci	xh,high(480)
-			rbrsh	salir_control_O2_2
+			subi	xl,low(-1)
+			sbci	xh,high(-1)
 			outr	reg_PWM2_AireL,xl
 			outr	reg_PWM2_AireH,xh
 			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
@@ -1303,11 +1318,21 @@ aire_inc_b:
 			inr		xh,reg_PWM2_AireH
 			inr		xl,reg_PWM2_AireL
 			sei
+			subi	xl,low(-4)
+			sbci	xh,high(-4)
+			outr	reg_PWM2_AireL,xl
+			outr	reg_PWM2_AireH,xh
+			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
+
+			rjmp	salir_control_O2
+
+aire_inc_c:	
+			cli
+			inr		xh,reg_PWM2_AireH
+			inr		xl,reg_PWM2_AireL
+			sei
 			subi	xl,low(-8)
 			sbci	xh,high(-8)
-			cpi		xl,low(480)
-			cpci	xh,high(480)
-			rbrsh	salir_control_O2_2
 			outr	reg_PWM2_AireL,xl
 			outr	reg_PWM2_AireH,xh
 			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
@@ -1319,10 +1344,16 @@ cp_o2_mas_10:
 			
 
 ;Sensor > %O2 +5% programado
-;Se debe de decrementar el valor de PWM de O2
-			cpri	B_ox_max,0x01
-			rbreq	aire_inc_b
-			
+;Se debe de decrementar el valor de PWM de O2			
+			inr		xh,reg_PWM2_AireH
+			inr		xl,reg_PWM2_AireL
+			sei
+			subi	xl,low(-10)
+			sbci	xh,high(-10)
+			cpi		xl,low(480)
+			cpci	xh,high(480)
+			rbrlo	aire_inc_c
+
 			inr		xh,reg_PWM1_O2H
 			inr		xl,reg_PWM1_O2L
 			
@@ -1406,21 +1437,11 @@ skip_A_FiO2:
 
 
 SC_A_Fio2:
-			cpri	B_ox_max,0x01
-			rbreq	dc_aire_b
 
-/*
-			inr		xl,FiO2HEX_L	;Lectura del sensor, el valor ya esta
-			inr		xh,FiO2HEX_H	;convertido de ADC a % de Oxigeno en Hex
-*/
+
 			inr		zl,reg_O2L		;Valor programado para FiO2 (hex)
 			inr		zh,reg_O2H
-/*
-			sbiw	zl,5
-			cp		xl,zl
-			cpc		xh,zh
-			rbrsh	salir_control_O2
-*/
+
 ;Sensor < %O2 -5% programado
 ;Se debe de incrementar el valor de PWM de O2
 			sbiw	zl,10;5
@@ -1472,8 +1493,7 @@ cp_o2_menos_10:
 
 dc_aire_b:	
 
-			sbi		led_run
-			outi	B_ox_max,0x01
+;			sbi		led_run
 			cli
 			inr		xh,reg_PWM2_AireH
 			inr		xl,reg_PWM2_AireL
@@ -1526,23 +1546,25 @@ fiO2_oxigeno_maximo:
 ;************************************************************
 ;************************************************************
 fiO2_21:
-		outi	tmp_reg_PWM2_AireH,0x01
+	/*	outi	tmp_reg_PWM2_AireH,0x01
 		outi	tmp_reg_PWM2_AireL,0xE0
 		outi	tmp_reg_PWM1_O2H,0x00
 		outi	tmp_reg_PWM1_O2L,0x00
 		ASIGNA_PWM_AIRE						tmp_reg_PWM2_AireH,tmp_reg_PWM2_AireL
 		ASIGNA_PWM_O2						tmp_reg_PWM1_O2H,tmp_reg_PWM1_O2L
-		rjmp	salir_control_O2
+	*/
+		sbi		led_run
+		outiw		PWM_AIREH,PWM_AIREL,0x01E0
+		outiw		PWM_O2H,PWM_O2L,0x0000
+		outi		habilita_control_O2,'1'
+		rjmp		retorno_control_O2;salir_control_O2
 ;************************************************************
 ;************************************************************
 fiO2_100:
-		outi	tmp_reg_PWM2_AireH,0x00
-		outi	tmp_reg_PWM2_AireL,0x00
-		outi	tmp_reg_PWM1_O2H,0x01
-		outi	tmp_reg_PWM1_O2L,0xE0
-		ASIGNA_PWM_AIRE						tmp_reg_PWM2_AireH,tmp_reg_PWM2_AireL
-		ASIGNA_PWM_O2						tmp_reg_PWM1_O2H,tmp_reg_PWM1_O2L
-		rjmp	salir_control_O2
+		outiw		PWM_AIREH,PWM_AIREL,0x0000
+		outiw		PWM_O2H,PWM_O2L,0x01E0
+		outi		habilita_control_O2,'1'
+		rjmp		retorno_control_O2;salir_control_O2
 ;************************************************************
 ;************************************************************
 Fio2_Ok:
@@ -1571,8 +1593,7 @@ R_control_FiO2_Carga:
 		rjmp	sigue_control_FiO2
 ;************************************************************
 ;************************************************************
-salir_control_O2_2:	
-			outi	B_ox_max,0x00
+
 salir_control_O2:
 
 			inr		yl,C_X_FiO2
