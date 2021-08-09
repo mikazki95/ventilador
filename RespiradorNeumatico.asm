@@ -724,7 +724,7 @@ OFF:
 							;Time out
 										;El resto de la tx depende de la int de tx
 			;outi		cmd_pendiente,'X'
-			rjmp		OFF
+			rjmp		OFF 
 ;************************************************************************************
 tx_APAG:
 			outi		cmd_pendiente,0x00
