@@ -16,7 +16,7 @@
 #define	version_firmwareP	'.'
 #define	version_firmwareM	'1'
 ;#define	version_firmwareLP	'.'
-#define	version_firmwareL	'V'
+#define	version_firmwareL	'W'
 
 .equ	fxtal		=	11059200		;Frecuencia del cristal
 
@@ -123,6 +123,7 @@ inicio2:
 
 wait_rx:	call	rd_NPA700
 			call	control_FiO2
+			call	control_Parker_in
 			;sbi		led_run
 			cpri	FASE,CALIBRA_O2_100
 			rbreq	SECCION_CAL_O2_100
@@ -1158,7 +1159,7 @@ control_FiO2:
 ;************************************************************
 ;************************************************************
 			cpri	rx_Ctrl_FiO2,'1'
-			rbreq	fiO2_21
+			rbreq	Falla_gases
 ;************************************************************
 ;************************************************************
 			cpri	habilita_control_O2,'0'
@@ -1553,16 +1554,32 @@ fiO2_21:
 		ASIGNA_PWM_AIRE						tmp_reg_PWM2_AireH,tmp_reg_PWM2_AireL
 		ASIGNA_PWM_O2						tmp_reg_PWM1_O2H,tmp_reg_PWM1_O2L
 	*/
-		sbi		led_run
-		outiw		PWM_AIREH,PWM_AIREL,0x01E0
-		outiw		PWM_O2H,PWM_O2L,0x0000
+		outi	reg_PWM2_AireH,0x01
+		outi	reg_PWM2_AireL,0xE0
+		outi	reg_PWM1_O2H,0x00
+		outi	reg_PWM1_O2L,0x01
+		ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
+		ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
 		outi		habilita_control_O2,'1'
 		rjmp		retorno_control_O2;salir_control_O2
 ;************************************************************
 ;************************************************************
 fiO2_100:
-		outiw		PWM_AIREH,PWM_AIREL,0x0000
-		outiw		PWM_O2H,PWM_O2L,0x01E0
+		outi	reg_PWM2_AireH,0x00
+		outi	reg_PWM2_AireL,0x01
+		outi	reg_PWM1_O2H,0x01
+		outi	reg_PWM1_O2L,0xE0
+		ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
+		ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
+		outi		habilita_control_O2,'1'
+		rjmp		retorno_control_O2;salir_control_O2
+;************************************************************
+;************************************************************
+falla_gases:
+		outi	PWM_AIREH,0x01
+		outi	PWM_AIREL,0xE0
+		outi	PWM_O2H,0x00
+		outi	PWM_O2L,0x00
 		outi		habilita_control_O2,'1'
 		rjmp		retorno_control_O2;salir_control_O2
 ;************************************************************
@@ -1593,7 +1610,6 @@ R_control_FiO2_Carga:
 		rjmp	sigue_control_FiO2
 ;************************************************************
 ;************************************************************
-
 salir_control_O2:
 
 			inr		yl,C_X_FiO2
@@ -1608,7 +1624,24 @@ salir_control_O2:
 retorno_control_O2:
 			ret
 ;************************************************************
-
+;************************************************************
+control_Parker_in:
+			inr		XL,portl
+			sbrs	XL,6	
+			jmp		sin_gases
+			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
+			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
+			ret
+;************************************************************
+;************************************************************
+sin_gases:
+			outi	PWM_AIREH,0x00
+			outi	PWM_AIREL,0x00
+			outi	PWM_O2H,0x00
+			outi	PWM_O2L,0x00
+			ret
+;************************************************************
+;************************************************************
 			.eseg
 			.org	0x0100
 dt_O2_21:	.dw		0x00D3
