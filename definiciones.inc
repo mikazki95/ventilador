@@ -353,6 +353,7 @@ fin_macro_presion_soporte:
 			outi		B_PEEP_UP,'0'
 			outi		B_PEEP_DC,'0'	
 			outi		B_Cont,'0'
+			outi		Cont_VV,50
 			movr		VV_X,VV_OFF
 			outi		Cont_VV,50
 							

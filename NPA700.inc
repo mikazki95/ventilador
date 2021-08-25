@@ -755,130 +755,19 @@ tst_PEEP:
 
 peep_CPAP:
 
-
 ;Si es algún modo de volumen, se considera que en los primeros ciclos respiratorios
 ;se debe de alcanzar el nivel de PEEP, independientemente de si aun no se alcanza
 ;el volumen programado
 
-			cjeq_modo_presion	skip_tst_primer_PEEP
-			cpri				reg_primer_PEEP,'1'
-			rbreq				primer_PEEP
-
-skip_tst_primer_PEEP:
-
-						cpri	B_PEEP_D,'1'
-						rbreq	peep_control
-skip_CPAP://		cp_Presion_cmH2OH	reg_PEEPH_100porciento,reg_PEEPL_100porciento
-
-						inr		r17,Presion_cmH2OH
-						inr		r16,Presion_cmH2OL
-						inr		r25,reg_PEEPH_100porciento
-						inr		r24,reg_PEEPL_100porciento
-						subi	r24,low(100)						;modificacion
-						sbci	r25,high(100)
-						cp		r16,r24
-						cpc		r17,r25
-						rbrlo	Primer_PEEP_D;peep_control;
-
-
-
-						ELECTROVALVULAS		0						
-						inr		XH,Presion_cmH2OH
-						inr		XL,Presion_cmH2OL
-						inr		r16,reg_PEEPL_100porciento
-						inr		r17,reg_PEEPH_100porciento
-						subi	r16,low(-1000)						;modificacion
-						sbci	r17,high(-1000)
-						rbrsh	salir_control;Mayor
-						
-
-						cpri	primer_cruce,'1'
-						breq	dec_CF
-						outi	primer_cruce,'1'
-						movr	PWM_FLUJOH,Ctrl_CF_H;(PWMmin)
-						movr	PWM_FLUJOL,Ctrl_CF_L;
-						rjmp	salir_control
-
-
-dec_CF:					
-						inr		XL,Cont_CF_L
-						inr		XH,Cont_CF_H
-						cpi		XL,low(2)
-						cpci	XH,high(2)	
-						rbrlo	amr_curva
-						subi	XL,low(1)
-						sbci	XH,high(1)
-						outr	Cont_CF_H,XH
-						outr	Cont_CF_L,XL
-						rjmp	salir_control
-
-amr_curva:
-						;call	valv_on
-						;rjmp	salir_control
-						inr		ZL,PWM_FLUJOL
-						inr		ZH,PWM_FLUJOH
-						cpi		ZL,low(60)
-						cpci	ZH,high(60)
-						rbrlo	salir_control
-						sbiw	Z,1
-						outr	PWM_FLUJOH,ZH
-						outr	PWM_FLUJOL,ZL
-						rjmp	salir_control
-;************************************************************
-;************************************************************
-
-Primer_PEEP_D:			;ELECTROVALVULAS		200
-						;call	Valv_ON
-;************************************************************
-						inr		r25,Presion_cmH2OH
-						inr		r24,Presion_cmH2OL
-						inr		xl,reg_PEEPL_100porciento
-						inr		xh,reg_PEEPH_100porciento
-						subi	XL,low(200)
-						sbci	XH,high(200)
-						cp		R24,XL
-						cpc		R25,XH
-						rbrsh	PEEP_Control_in
-;************************************************************
-						inr		XL,Cont_CF_L
-						inr		XH,Cont_CF_H
-						cpi		XL,low(2)
-						cpci	XH,high(2)	
-						rbrlo	PEEP_Control
-						subi	XL,low(2)
-						sbci	XH,high(2)
-						outr	Cont_CF_H,XH
-						outr	Cont_CF_L,XL
-						cpri	B_PEEP_UP,'1'
-						breq	amr_curva
-;************************************************************
-						outi	B_PEEP_UP,'1'
-						outi	Cont_CF_H,high(200)
-						outi	Cont_CF_L,low(200)
-						rjmp	amr_curva
-						//delay_ms	35
-						;outi		PWM_FLUJOH,high(40);(PWMmin)
-						;outi		PWM_FLUJOL,low(40);(PWMmin)
-
-						;outi 	B_PEEP_D,'1'
-						rjmp		salir_control
-
-;************************************************************
-PEEP_Control_in:		
-						outi	B_PEEP_D,'1'
-						rjmp	sin_flujo
+		
 ;************************************************************
 PEEP_control:
-			;outi	inhibe_compensacion,'1'
-			;call	CARGA_PR_OFFSET
-			outi	B_PEEP_D,'1'
-			;rjmp	salir_control
 			inr		r24,Presion_cmH2OL
 			inr		r25,Presion_cmH2OH
 			inr		xl,reg_PEEPL_100porciento
 			inr		xh,reg_PEEPH_100porciento
-			subi	XL,low(-10)
-			sbci	XH,high(-10)
+			subi	XL,low(-100)
+			sbci	XH,high(-100)
 			cp		R24,XL
 			cpc		R25,XH
 			rbrsh	PEEP_Alta
@@ -916,98 +805,24 @@ PEEP_Ok_out:
 ;************************************************************
 ;************************************************************
 PEEP_Baja:
-			;electrovalvulas		200
-			;rjmp	salir_control
-			;outi	B_C_VV,'0'
 
 			call	Valv_ON
-			;rjmp	salir_control
-			;electrovalvulas		200
-			cpri	B_PEEP_DOWN,'1'
-			breq	Inc_PWM_PEEP
-			;movr	PWM_FLUJOL,Ctrl_CF_L;offset_COMFLPIPL
-			;movr	PWM_FLUJOH,Ctrl_CF_H;offset_COMFLPIPH
-			inr		ZL,offset_COMFLPEEPL
-			inr		ZH,offset_COMFLPEEPH
-			outr	PWM_FLUJOH,ZH
-			outr	PWM_FLUJOL,ZL
-			outi	B_PEEP_DOWN,'1'
-			outi	Cont_CF_H,high(50)
-			outi	Cont_CF_L,low(50)
-			;rjmp	salir_control
-;************************************************************
-;************************************************************
-Inc_PWM_PEEP:
-			inr		ZL,Cont_CF_L
-			inr		ZH,Cont_CF_H
-			cpi		ZL,low(2)
-			cpci	ZH,high(2)
-			brlo	R_PWM_PEEP
-			sbiw	Z,1
-			outr	Cont_CF_L,ZL
-			outr	Cont_CF_H,ZH
-
-			inr		r24,Presion_cmH2OL
-			inr		r25,Presion_cmH2OH
-			inr		xl,reg_PEEPL_100porciento
-			inr		xh,reg_PEEPH_100porciento
-			subi	XL,low(200)
-			sbci	XH,high(200)
-			cp		R24,XL
-			cpc		R25,XH
-			rbrlo	cerrar_valvula
-			rjmp	salir_control
-;************************************************************
-cerrar_valvula:
-			electrovalvulas	200
-			rjmp	salir_control
-;************************************************************
-R_PWM_PEEP:		
-;			sbi		led_run	
-			outi	Cont_CF_H,high(50)
-			outi	Cont_CF_L,low(50)
-			;rjmp	salir_control
-
-;************************************************************			
-			
-			;call	CARGA_PR_OFFSET
-			inr		r24,Presion_cmH2OL
-			inr		r25,Presion_cmH2OH
-			inr		xl,reg_PEEPL_100porciento
-			inr		xh,reg_PEEPH_100porciento
-			sub		XL,r24
-			sbc		XH,r25	
-			ldiw	zh,zl,tabla_PIP*2
-			;outr		xl,low(500)
-			;outr		xl,low(500)
-			lsl		xl
-			rol		xh
-			add		zl,xl
-			adc		zh,xh
-			outi	rampz,0x00
-			lpm		xl,z+
-			lpm		xh,z
-
-;************************************************************
-			
 			inr		ZL,PWM_FLUJOL
 			inr		ZH,PWM_FLUJOH
-			;adiw	XL,3			;subi	XL,low(-10)
-			;sbci	XH,high(-10)
-			add		zl,XL
-			adc		zh,XH
-			cpi		ZL,low(250)
-			cpci	ZH,high(250)
-			rbrsh	PMW_Inc_out_PEEP
+			cpi		ZL,low(450)
+			cpci	ZH,high(450)
+			rbrsh	salir_control;CHK_PEEP_Baja
+			adiw	Z,3
 			outr	PWM_FLUJOH,ZH
 			outr	PWM_FLUJOL,ZL
+			;rjmp	salir_control	
+
 			rjmp	salir_control
-			
 ;************************************************************
-PMW_Inc_out_PEEP:
-			outi	PWM_FLUJOH,high(254)
-			outi	PWM_FLUJOL,low(254)
+;************************************************************
+CHK_PEEP_Baja:
 			rjmp	salir_control
+;************************************************************
 ;************************************************************
 PEEP_Alta:
 			
@@ -1041,7 +856,6 @@ CHK_PEEP_Alta:
 			rjmp	salir_control
 ;************************************************************
 Valv_ON:	
-			outi	B_C_VV,'0'
 			inr		xl,recarga_PWM
 			cpi		xl,199
 			brsh	skip_valv_on
@@ -1054,105 +868,20 @@ skip_valv_on:
 			ret
 ;************************************************************
 valv_off:
-;B_Cont
-			;movr	recarga_PWM,VV_X
-			;ret
-
-
-			
-
-			cpri	B_C_VV,'0'
-			breq	Valv_off_s_mod
-
-			inr		ZL,Cont_CF_L
-			inr		ZH,Cont_CF_H
-			cpi		ZL,low(2)
-			cpci	ZH,high(2)
-			brlo	dec_vv
-			sbiw	Z,1
-			outr	Cont_CF_L,ZL
-			outr	Cont_CF_H,ZH
-			ret
-
-
-;************************************************************
-;************************************************************
-dec_vv:
-			
-			outi	Cont_CF_H,high(20)
-			outi	Cont_CF_L,low(20)
 			inr		xl,recarga_PWM
-			cpi		xl,20
+			cpi		xl,160
 			brlo	skip_valv_off
-			inr		xl,recarga_PWM
-			subi	xl,1
+			dec		xl
 			outr	recarga_PWM,xl
 			ret
 ;************************************************************
-;************************************************************
 skip_valv_off:
-			outi	recarga_PWM,10
+			outi	recarga_PWM,150
 			ret
-;************************************************************
-AR_valv_on:	movr	recarga_PWM,VV_OFF
-			ret
-;************************************************************
-Valv_off_s_mod:
-			outi	Cont_CF_H,high(15)
-			outi	Cont_CF_L,low(15)
-			outi	B_C_VV,'1'
-			movr	recarga_PWM,VV_OFF
-			ret
+
+
 ;************************************************************
 ;************************************************************
-Cp_PEEP_UP:				
-					//	rjmp	salir_control
-						cpri	B_PEEP_UP,'2'
-						rbrne	salir_control //Cp_PEEP_UP_2
-						outi	B_PEEP_UP,'3'
-						rjmp	salir_control
-
-
-
-D_CCF:					;rjmp	salir_control
-						;delay_ms	1
-						inr		xl,Cont_CF_L
-						inr		xh,Cont_CF_H
-						cpi		xl,0x01
-						cpci	xh,0x00
-						rbrlo	D_CF
-						sbiw	xl,1
-						outr	Cont_CF_L,xl
-						outr	Cont_CF_H,xh
-						rjmp	salir_control
-D_CF:					outi	Cont_CF_H,high(20)
-						outi	Cont_CF_L,low(20)
-						inr		xl,CCF_L
-						inr		xh,CCF_H
-						subi	xl,low(90)
-						sbci	xh,high(90)
-						rbreq	salir_control//sin_modificar_flujo
-						rbrlo	salir_control//sin_modificar_flujo
-
-						inr		xl,CCF_L
-						inr		xh,CCF_H
-						sbiw	xl,3
-						outr	CCF_L,xl
-						outr	CCF_H,xh
-						;outi	PWM_FLUJOH,high(0)
-						;outi	PWM_FLUJOL,low(0)
-						movr	PWM_FLUJOH,CCF_H	
-						movr	PWM_FLUJOL,CCF_L
-						//ret
-
-						rjmp		salir_control
-
-PEEP_BAJO:
-						//outi	B_PEEP_BAJO_AC,'1'
-						outi	CCF_H,high(150)
-						outi	CCF_L,low(150)
-						rjmp		salir_control	
-
 
 sin_modificar_flujo:	;outi		bandera_inc_compensacion,'0'
 						outi		reg_FLUJO_compensacionH,high(flujo_inicial_compensacion)
@@ -1163,74 +892,7 @@ sin_modificar_flujo:	;outi		bandera_inc_compensacion,'0'
 						rjmp		salir_control
 
 ;Presion es igual al umbral superior                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-cierra_valvula_PEEP:
-						;outi		bandera_inc_compensacion,'0'
-						outi		B_PEEP_AC,'1'
-						ELECTROVALVULAS		200
-						delay_ms	30
-						outi		PWM_FLUJOH,high(PWMmin)
-						outi		PWM_FLUJOL,low(PWMmin)
-;						delay_ms	100
-						rjmp		salir_control
 
-;Presion es menor al umbral superior, se procede a verificar el umbral inferior
-
-
-
-
-
-
-
-
-;Presion es menor al umbral inferior
-activa_flujo:			cpri	bandera_inc_compensacion,'0'
-						breq	skip_inc_compensacion
-						inr		r17,reg_FLUJO_compensacionH
-						inr		r16,reg_FLUJO_compensacionL
-						subi	r16,low(-1)		;(-10)
-						sbci	r17,high(-1)	;(-10)
-						cpi		r16,low(limite_de_compensacion)
-						cpci	r17,high(limite_de_compensacion)
-						brsh	skip_actualiza
-						outr	reg_FLUJO_compensacionH,r17
-						outr	reg_FLUJO_compensacionL,r16
-skip_actualiza:			rjmp	skip_bandera_1
-
-skip_inc_compensacion:	;outi	bandera_inc_compensacion,'1'
-skip_bandera_1:			ELECTROVALVULAS		200
-;////////////////////delay
-;						delay_ms	100
-						inr		r17,reg_FLUJO_compensacionH
-						inr		r16,reg_FLUJO_compensacionL
-						outr	PWM_FLUJOH,r17
-						outr	PWM_FLUJOL,r16
-;						outi		PWM_FLUJOH,high(PWMmin)	;420 para 5 a 10 PEEP
-;						outi		PWM_FLUJOL,low(PWMmin)
-						rjmp				salir_control
-;************************************************************
-
-;************************************************************
-;La siguiente sección se ejecuta solo en la siguientes condiciónes:
-;	1. Algún modo de volumen
-;	2. Aun no se alcanza la primera vez el nivel de PEEP
-primer_PEEP:
-			ELECTROVALVULAS						200
-			inr		XH,Presion_cmH2OH
-			inr		XL,Presion_cmH2OL
-			inr		ZL,reg_PEEPL_100porciento
-			inr		ZH,reg_PEEPH_100porciento
-			cp		XL,ZL
-			cpc		XH,ZH
-			rbrsh	primer_PEEP_ok
-			outi		PWM_FLUJOH,high(160)/////modifica
-			outi		PWM_FLUJOL,low(160)			
-			rjmp	salir_control
-
-primer_PEEP_ok:
-			outi		PWM_FLUJOH,high(PWMmin)
-			outi		PWM_FLUJOL,low(PWMmin)
-			outi	reg_primer_PEEP,'0'
-			rjmp	salir_control
 ;************************************************************
 ;************************************************************
 
