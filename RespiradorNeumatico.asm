@@ -1133,12 +1133,6 @@ tx_listo:	outi	cont_rx0,0x00	;Desecha los datos que se Rx
 control_FiO2:
 
 			call	calcula_FiO2_HEX
-
-;			cpri	habilita_control_O2,'0'
-;			rbreq	retorno_control_O2
-			
-			;call	calcula_FiO2_HEX
-
 ;************************************************************
 ;************************************************************
 			inr		ZL,reg_O2L		;compara si es 21% de oxigeno (hex)
@@ -1146,9 +1140,6 @@ control_FiO2:
 			cpi		ZL,0x15
 			cpci	ZH,0x00
 			rbreq	fiO2_21
-;************************************************************
-;************************************************************
-
 ;************************************************************
 ;************************************************************
 			inr		ZL,reg_O2L		;compara si es 100% de oxigeno (hex)
@@ -1547,30 +1538,19 @@ fiO2_oxigeno_maximo:
 ;************************************************************
 ;************************************************************
 fiO2_21:
-	/*	outi	tmp_reg_PWM2_AireH,0x01
-		outi	tmp_reg_PWM2_AireL,0xE0
-		outi	tmp_reg_PWM1_O2H,0x00
-		outi	tmp_reg_PWM1_O2L,0x00
-		ASIGNA_PWM_AIRE						tmp_reg_PWM2_AireH,tmp_reg_PWM2_AireL
-		ASIGNA_PWM_O2						tmp_reg_PWM1_O2H,tmp_reg_PWM1_O2L
-	*/
-		outi	reg_PWM2_AireH,0x01
-		outi	reg_PWM2_AireL,0xE0
-		outi	reg_PWM1_O2H,0x00
-		outi	reg_PWM1_O2L,0x01
-		ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
-		ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
+		outi	PWM_AIREH,0x01
+		outi	PWM_AIREL,0xE0
+		outi	PWM_O2H,0x00
+		outi	PWM_O2L,0x00
 		outi		habilita_control_O2,'1'
 		rjmp		retorno_control_O2;salir_control_O2
 ;************************************************************
 ;************************************************************
 fiO2_100:
-		outi	reg_PWM2_AireH,0x00
-		outi	reg_PWM2_AireL,0x01
-		outi	reg_PWM1_O2H,0x01
-		outi	reg_PWM1_O2L,0xE0
-		ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
-		ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
+		outi	PWM_AIREH,0x00
+		outi	PWM_AIREL,0x00
+		outi	PWM_O2H,0x01
+		outi	PWM_O2L,0xE0
 		outi		habilita_control_O2,'1'
 		rjmp		retorno_control_O2;salir_control_O2
 ;************************************************************
@@ -1629,6 +1609,26 @@ control_Parker_in:
 			inr		XL,portl
 			sbrs	XL,6	
 			jmp		sin_gases
+;************************************************************
+;************************************************************
+			inr		ZL,reg_O2L		;compara si es 21% de oxigeno (hex)
+			inr		ZH,reg_O2H
+			cpi		ZL,0x15
+			cpci	ZH,0x00
+			rbreq	fiO2_21
+;************************************************************
+;************************************************************
+			inr		ZL,reg_O2L		;compara si es 100% de oxigeno (hex)
+			inr		ZH,reg_O2H
+			cpi		ZL,0x64
+			cpci	ZH,0x00
+			rbreq	fiO2_100
+;************************************************************
+;************************************************************
+			cpri	rx_Ctrl_FiO2,'1'
+			rbreq	Falla_gases
+;************************************************************
+;************************************************************
 			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
 			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
 			ret
