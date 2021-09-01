@@ -1,65 +1,7 @@
 ;3.0
 ;14 de Octubre de 2020 - CMV SIMV CPAP PRESION DE ENTRADA
 ;************************************************************
-int_PWM_exhalacion:
-			pushw
-			pushr	sreg
-			cpri	Periodo_exhalacion,0
-			brne	sigue_PWM
-			outi	Periodo_exhalacion,200
-			cbi		ELECTROVALVULA0
-			rjmp	salir_int_PWM
 
-sigue_PWM:	
-			inr		r24,recarga_PWM
-			inr		r25,Periodo_exhalacion
-			cp		r25,r24
-			breq	set_ELECTROVALVULA0
-			brlo	set_ELECTROVALVULA0
-			cbi		ELECTROVALVULA0
-			decr	Periodo_exhalacion
-			rjmp	salir_int_PWM
-
-set_ELECTROVALVULA0:
-			decr	Periodo_exhalacion
-			sbi		ELECTROVALVULA0
-			rjmp	salir_int_PWM
-
-
-			/*
-			cpri	recarga_PWM,0
-			brne	sigue_PWM
-			outi	Periodo_exhalacion,100
-			movr	PWM_exhalacion,recarga_PWM
-			cbi		ELECTROVALVULA0
-			rjmp	salir_int_PWM
-
-sigue_PWM:	cbi		ELECTROVALVULA0
-			decr	Periodo_exhalacion
-			rjmp	salir_int_PWM
-
-			cpri	PWM_exhalacion,0
-			breq	skip_desactiva_PWM
-			decr	PWM_exhalacion
-			decr	PWM_exhalacion
-			brmi	borra_pin
-			brne	skip_desactiva_PWM
-borra_pin:
-			cbi		ELECTROVALVULA0
-
-skip_desactiva_PWM:
-			decr	Periodo_exhalacion
-			decr	Periodo_exhalacion
-			brne	salir_int_PWM
-			sbi		ELECTROVALVULA0
-			outi	Periodo_exhalacion,200
-			movr	PWM_exhalacion,recarga_PWM
-			rjmp	salir_int_PWM
-*/
-salir_int_PWM:
-			popr	sreg
-			popw
-			reti
 ;************************************************************
 
 ;************************************************************

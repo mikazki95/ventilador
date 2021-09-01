@@ -8,8 +8,8 @@
 #define		SCK					pinb,1	;SCK, MOSI y MISO, son solo para programación
 #define		MOSI				pinb,2
 #define		MISO				portb,3
+#define		PCINT_4				pinb,4	;Int para validar el control de volumen
 #define		PCINT_5				pinb,5	;Int de sobrepresíón
-#define		PCINT_6				pinb,6	;Int para validar el control de volumen
 #define		PWM0				portb,7	;OC1C, control de flujo y presión
 
 #define		NO_BREAK_AC_BAT		pinc,0
@@ -25,7 +25,7 @@
 #define		T_PAUSA				portd,4	;Indica que esta activo el tiempo pausa
 #define		ALARMA				portd,5	;Salida de alarma audible
 #define		ELECTROVALVULA0		portd,6
-#define		ELECTROVALVULA1		portd,7
+;#define		ELECTROVALVULA1		portd,7
 
 #define		RXD_Raspberry		pine,0
 #define		TXD_Raspberry		porte,1
@@ -67,12 +67,15 @@
 #define		CALIBRA_O2_21		'H'
 #define		CALIBRA_O2_100		'L'
 
+#define		PWM_V_exH			ocr1bh
+#define		PWM_V_exL			ocr1bl
 #define		PWM_FLUJOH			ocr1ch
 #define		PWM_FLUJOL			ocr1cl
 #define		PWM_O2H				ocr5bh
 #define		PWM_O2L				ocr5bl
 #define		PWM_AIREH			ocr5ch
 #define		PWM_AIREL			ocr5cl
+
 
 .macro		INSP_EXHA
 			push		r25
@@ -130,6 +133,19 @@ salir_macro_insp_exha:
 					inr			r25,@0
 					outr		PWM_FLUJOH,r25
 					outr		PWM_FLUJOL,r24
+			.endif
+.endm
+
+.macro		ASIGNA_PWM_V_ex
+			.if		@0==0 & @1==0
+					outiw		PWM_V_exH,PWM_V_exL,0x0000
+			.else
+				/*	inr			r24,@1
+					inr			r25,@0
+					outr		PWM_V_exH,r25
+					outr		PWM_V_exL,r24
+				*/
+					outiw		PWM_V_exH,PWM_V_exL,0x01F4
 			.endif
 .endm
 
@@ -210,7 +226,8 @@ salir_macro_insp_exha:
 			outi	inhibe_compensacion_primer_PEEP,'0'
 
 			ASIGNA_PWM_FLUJO					0,0
-			ELECTROVALVULAS						0
+			ASIGNA_PWM_V_ex  					0,0
+			;ELECTROVALVULAS						0
 			ASIGNA_PWM_O2						0,0
 			ASIGNA_PWM_AIRE						0,0
 fin_macro_standby:
@@ -260,7 +277,8 @@ asigna_inspiracion_0:
 			movr	PWM_FLUJOL,offset_PiPL
 			;ASIGNA_PWM_FLUJO					0,0
 skip_asigna_0:
-			ELECTROVALVULAS						PWM_VV_Max
+			;ELECTROVALVULAS						PWM_VV_Max
+			ASIGNA_PWM_V_ex  					0x01,0x00
 			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
 			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
 
@@ -290,7 +308,7 @@ c_PS:		outi	tmr_inhibe_on_off_pwm,		3
 			
 			;outiw		cont_10msH,cont_10msL,0x0196
 			ASIGNA_TIEMPO						tmr_TIEMPO_INSH,tmr_TIEMPO_INSL;0x01,0x90;0x17,0x2F;
-			ELECTROVALVULAS						PWM_VV_Max
+			ASIGNA_PWM_V_ex  					0,0;ELECTROVALVULAS						PWM_VV_Max
 			ASIGNA_PWM_O2					  	reg_PWM1_O2H,reg_PWM1_O2L
 			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
 fin_macro_presion_soporte:
@@ -310,7 +328,8 @@ fin_macro_presion_soporte:
 			;ELECTROVALVULAS						100
 			outi	primer_cruce,'0'
 
-			ELECTROVALVULAS		0
+			ASIGNA_PWM_V_ex  					0,0
+			;ELECTROVALVULAS		0
 			;delay_ms	30
 			;outi		PWM_FLUJOH,high(0)
 			;outi		PWM_FLUJOL,low(0)
@@ -382,7 +401,8 @@ fin_macro_sin_apnea:
 
 			outi	PWM_FLUJOH,high(PWMmin);(PWMmin)
 			outi	PWM_FLUJOL,low(PWMmin)
-			ELECTROVALVULAS		PWM_VV_Max;
+			ASIGNA_PWM_V_ex  					0x01,0x00
+			;ELECTROVALVULAS		PWM_VV_Max;
 fin_macro_tiempo_pausa:
 			.endm
 
@@ -407,9 +427,9 @@ fin_macro_tiempo_pausa:
 			.endm
 
 ;*********************************************************************
-.macro		electrovalvulas
-			outi	recarga_PWM,@0
-.endm
+;.macro		electrovalvulas
+;			outi	recarga_PWM,@0
+;.endm
 ;*********************************************************************
 
 .macro		FASE_EXHALACION
@@ -426,7 +446,8 @@ fin_macro_tiempo_pausa:
 			
 					outi	primer_cruce,'0'
 
-					ELECTROVALVULAS		0
+					ASIGNA_PWM_V_ex  			0,0
+					;ELECTROVALVULAS		0
 					outi		B_C_VV,'0'
 					;delay_ms	30
 					;outi		PWM_FLUJOH,high(0)
@@ -506,7 +527,7 @@ fin_macro_exhalacion:
 			outi		PWM_FLUJOH,high(170)
 			outi		PWM_FLUJOL,low(170)
 		;	ASIGNA_PWM_FLUJO					90,90
-			ELECTROVALVULAS						0	;Fase de expiración
+			ASIGNA_PWM_V_ex  					0,0;ELECTROVALVULAS						0	;Fase de expiración
 			ASIGNA_PWM_O2						0,0
 			ASIGNA_PWM_AIRE						ocr5ah,ocr5al
 fin_macro_o2_21:
@@ -521,7 +542,7 @@ fin_macro_o2_21:
 
 			outi		PWM_FLUJOH,high(170)
 			outi		PWM_FLUJOL,low(170)
-			ELECTROVALVULAS						0	;Fase de expiración
+			ASIGNA_PWM_V_ex  					0,0;ELECTROVALVULAS						0	;Fase de expiración
 			ASIGNA_PWM_O2						ocr5ah,ocr5al
 			ASIGNA_PWM_AIRE						0,0
 fin_macro_o2_100:
@@ -544,10 +565,10 @@ fin_macro_o2_100:
 			outi	B_PR_TST,'1'
 			cpri	tst_electro_exp,'1'
 			breq	activa_exp_tst
-			ELECTROVALVULAS						0
+			ASIGNA_PWM_V_ex  				0,0;ELECTROVALVULAS						0
 			jmp		fin_macro_tst
 activa_exp_tst:
-			ELECTROVALVULAS						PWM_VV_Max
+			ASIGNA_PWM_V_ex  				0x01,0x00;ELECTROVALVULAS						PWM_VV_Max
 			
 			;delay_ms	30
 			;sbi		led_run
@@ -563,7 +584,7 @@ fin_macro_tst:
 ;				outi	PWM_FLUJOL,low(337)
 			;outi	B_PR_TST,'0'
 			ASIGNA_PWM_FLUJO					0,0
-			ELECTROVALVULAS						PWM_VV_Max
+			ASIGNA_PWM_V_ex  					0x01,0x00;ELECTROVALVULAS						PWM_VV_Max
 			ASIGNA_PWM_O2						0,0
 			ASIGNA_PWM_AIRE						0,0
 fin_macro_off_presion:
@@ -1310,8 +1331,8 @@ fin_macro_dec_volumen:
 init_io:	outi	ddra, 0b11111111
 			outi	porta,0b00000000
 
-			outi	ddrb, 0b10000000	;PB7 = OC1C = PWM0, control de la electrovalvula
-			outi	portb,0b01111111	;para el control del flujo.
+			outi	ddrb, 0b11000000	;PB7 = OC1C = PWM0, control de la electrovalvula
+			outi	portb,0b00111111	;para el control del flujo.
 										;PB5 = Entrada de interrupción
 										;PB6 = Entrada de interrupción
 
@@ -1411,7 +1432,7 @@ init_io:	outi	ddra, 0b11111111
 ;El valor de OCR5A determina la frecuencia de PWM (20KHz)
 ;El valor de OCR5B y OCR5C, depende del ajuste deseado para las electrovalvulas
 ;Inicia el timer corriendo con PWM al 0%
-            outi        tccr5a,0b00101011		;Salidas B y C
+            outi        tccr5a,0b00101011		;Salidas 5 B y C
             outiw       tcnt5h,tcnt5l,0x0000
 			outiw		ocr5ah,ocr5al,0x0000
             outiw       ocr5bh,ocr5bl,0x0000
@@ -1426,9 +1447,10 @@ init_io:	outi	ddra, 0b11111111
 ;El valor de OCR1A determina la frecuencia de PWM (20KHz)
 ;El valor de OCR1C, depende del ajuste deseado para las electrovalvulas
 ;Inicia el timer corriendo con PWM al 0%
-            outi        tccr1a,0b00001011		;Salida C
+            outi        tccr1a,0b00101011		;Salida 1 B y C
             outiw       tcnt1h,tcnt1l,0x0000
 			outiw		ocr1ah,ocr1al,0x0000
+			outiw       ocr1bh,ocr1bl,0x0000
 			outiw       ocr1ch,ocr1cl,0x0000
             outi        tccr1b,0b11011001
 			outi		timsk1,0b00000000
@@ -1572,19 +1594,9 @@ init_io:	outi	ddra, 0b11111111
 ;****************************************************
 ;****************************************************
 
-				outi	tccr2a,0b00000010	;El timer 2 se usa para el PWM de la
-				outi	tcnt2,0x00			;electrovalvula de exhalacion
-				outi	timsk2,0x02
-				outi	ocr2a,69;Val_ocr2a
 
 
-				outi	PWM_exhalacion,0
-				outi	recarga_PWM,0
-				outi	Periodo_exhalacion,200
-				outi	tccr2b,0b00000010
-				ELECTROVALVULAS 0
-
-				outi	cmd_pendiente,0x00
+			outi	cmd_pendiente,0x00
 
 			outi	envia_trama_U,'0';Se habilita el envió de la trama U para la primera vez
 			outi	tx_U,'0'		;Validación de tx cada (ya transcurrieron los 300ms)

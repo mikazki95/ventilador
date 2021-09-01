@@ -1,14 +1,14 @@
 ;3.0
 ;14 de Octubre de 2020 - CMV SIMV CPAP PRESION DE ENTRADA
 ;************************************************************
-int_PCINT5y6:
+int_PCINT4y5:
 			pushw
 			pushr	sreg
-
+			sbic	PCINT_4
+			rjmp	tst_retro
 			sbic	PCINT_5
 			rjmp	int_cancela_inspiracion
-			sbic	PCINT_6
-			rjmp	tst_retro
+
 
 salir_int_PCINT:
 			popr	sreg
@@ -165,7 +165,7 @@ int_cancela_inspiracion:
 ;Si durante el test se presenta una presión excesiva y al parecer la Raspberry no dio
 ;la orden de liberar, se ejecuta el siguiente código
 libera_tst:	ASIGNA_PWM_FLUJO					0,0
-			ELECTROVALVULAS						0b00
+			ASIGNA_PWM_V_ex  					0,0;ELECTROVALVULAS						0b00
 			ASIGNA_PWM_O2						0,0
 			ASIGNA_PWM_AIRE						0,0
 			rjmp	salir_int0

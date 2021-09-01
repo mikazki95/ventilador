@@ -14,9 +14,9 @@
 
 #define	version_firmwareH	'4'
 #define	version_firmwareP	'.'
-#define	version_firmwareM	'1'
+#define	version_firmwareM	'2'
 ;#define	version_firmwareLP	'.'
-#define	version_firmwareL	'Y'
+#define	version_firmwareL	'1'
 
 .equ	fxtal		=	11059200		;Frecuencia del cristal
 
@@ -65,9 +65,7 @@
             .org	0x0000
             jmp		inicio
 			.org	0x0012
-			jmp		int_PCINT5y6
-			.org	0x001A
-			jmp		int_PWM_exhalacion
+			jmp		int_PCINT4y5
 			.org	0x002A
 			jmp		timer_10ms
 			.org	0x0032

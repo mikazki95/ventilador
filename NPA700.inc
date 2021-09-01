@@ -18,7 +18,7 @@ rd_NPA700:	pushw
 ;Si se deja de detectar el sensor de presion, se procede a liberar la presion
 ;error_liberar_presion:
 			ASIGNA_PWM_FLUJO					0,0
-			ELECTROVALVULAS						0
+			ASIGNA_PWM_V_ex  					0,0;ELECTROVALVULAS						0
 			outi	presion_liberada,'1'
 			jmp		fin_NPA700
 
@@ -505,7 +505,8 @@ pip_OK_out:
 PIP_Baja:
 			;rjmp	salir_control
 			;call	Valv_ON
-			electrovalvulas		200
+			;ASIGNA_PWM_V_ex  	200,200
+			ASIGNA_PWM_V_ex  				0x01,0x00;electrovalvulas		200
 			;inr		yl,CNT_P_PIP
 			;cpi		yl,0x03
 			;brsh	PIP_Baja_C
@@ -605,7 +606,7 @@ CHK_PIP_Alta:
 			cp		R24,XL
 			cpc		R25,XH
 			rbrlo	salir_control
-			electrovalvulas	0
+			ASIGNA_PWM_V_ex  				0,0
 			rjmp	salir_control
 ;************************************************************
 ;************************************************************
@@ -652,7 +653,7 @@ pip_nul:
 			brne	sigue_control_PEEP
 			cpri	reg_PEEPL,0x00
 			brne	sigue_control_PEEP
-			ELECTROVALVULAS			0
+			ASIGNA_PWM_V_ex  				0,0;ELECTROVALVULAS			0
 			outi		PWM_FLUJOH,high(PWMmin)
 			outi		PWM_FLUJOL,low(PWMmin)
 			rjmp		@0
@@ -694,7 +695,7 @@ PEEP_PrSp:
 			rbreq	tst_PEEP
 			outi	primer_cruce,'0'
 			outi		B_PR_SP,'1'
-			ELECTROVALVULAS		0
+			ASIGNA_PWM_V_ex  				0,0;ELECTROVALVULAS		0
 			;delay_ms	30
 			;outi		PWM_FLUJOH,high(0)
 			;outi		PWM_FLUJOL,low(0)
@@ -805,7 +806,8 @@ PEEP_Ok_out:
 ;************************************************************
 ;************************************************************
 PEEP_Baja:
-
+			ASIGNA_PWM_V_ex  				0x01,0x00
+			rjmp	salir_control
 			call	Valv_ON
 			inr		ZL,PWM_FLUJOL
 			inr		ZH,PWM_FLUJOH
@@ -825,7 +827,8 @@ CHK_PEEP_Baja:
 ;************************************************************
 ;************************************************************
 PEEP_Alta:
-			
+			ASIGNA_PWM_V_ex  			0,0
+			rjmp	salir_control
 			;rjmp	salir_control
 			call	valv_off
 			;outi 	recarga_PWM,0x10
@@ -886,7 +889,7 @@ skip_valv_off:
 sin_modificar_flujo:	;outi		bandera_inc_compensacion,'0'
 						outi		reg_FLUJO_compensacionH,high(flujo_inicial_compensacion)
 						outi		reg_FLUJO_compensacionL,low(flujo_inicial_compensacion)
-						ELECTROVALVULAS		0
+						ASIGNA_PWM_V_ex  			0,0;ELECTROVALVULAS		0
 						;outi		PWM_FLUJOH,high(PWMmin)
 						;outi		PWM_FLUJOL,low(PWMmin)
 						rjmp		salir_control
@@ -910,14 +913,14 @@ sin_flujo:
 						outi	PWM_FLUJOL,low(PWMZERO)
 						;outi	Cont_VV,10
 						;call	Valv_ON
-						ELECTROVALVULAS		200
+						ASIGNA_PWM_V_ex  			0x01,0x00;ELECTROVALVULAS		200
 						;outi 	bandera_inc_compensacion,'0'
 						rjmp	salir_control
 ;************************************************************
 
 libera_PS:			
 			;outi		B_PR_SP,'1'
-			ELECTROVALVULAS				0
+			ASIGNA_PWM_V_ex  				0,0;ELECTROVALVULAS				0
 			;delay_ms	100
 			outi		PWM_FLUJOH,high(60)
 			outi		PWM_FLUJOL,low(60)
