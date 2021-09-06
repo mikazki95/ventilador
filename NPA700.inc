@@ -879,11 +879,20 @@ PEEP_Baja:
 			inr		XH,reg_PWM_Val_ExH
 			cpi		XL,low(500)
 			cpci	XH,high(500)
-			rbrsh	salir_control
+			rbrsh	PEEP_Baja_out
 			adiw	XL,3
 			outr	reg_PWM_Val_ExH,XH
 			outr	reg_PWM_Val_ExL,XL
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
+PEEP_Baja_out:
+			inr		ZL,PWM_FLUJOL
+			inr		ZH,PWM_FLUJOH
+			cpi		ZL,low(480)
+			cpci	ZH,high(480)
+			rbrsh	salir_control
+			adiw	ZL,1
+			outr	PWM_FLUJOH,ZH
+			outr	PWM_FLUJOL,ZL
 			rjmp	salir_control
 ;************************************************************
 ;************************************************************
@@ -894,6 +903,15 @@ PEEP_Baja:
 ;************************************************************
 ;************************************************************
 PEEP_Alta:
+			inr		ZL,PWM_FLUJOL
+			inr		ZH,PWM_FLUJOH
+			cpi		ZL,low(40)
+			cpci	ZH,high(40)
+			rbrlo	skip_PEEP_Alta
+			adiw	ZL,1
+			outr	PWM_FLUJOH,ZH
+			outr	PWM_FLUJOL,ZL
+skip_PEEP_Alta:
 			cpri	B_Dec_PEEP,'1'
 			rbreq	SRPPA
 			movr	Presion_antL,Presion_cmH2OL
