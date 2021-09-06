@@ -109,7 +109,7 @@ inicio2:
 	
 ;************************************************************
 ;salto simulacion
-;call	control_FiO2
+;call	PEEP_Ok
 
 ;jmp	inicio2
 

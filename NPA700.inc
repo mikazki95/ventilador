@@ -18,7 +18,7 @@ rd_NPA700:	pushw
 ;Si se deja de detectar el sensor de presion, se procede a liberar la presion
 ;error_liberar_presion:
 			ASIGNA_PWM_FLUJO					0,0
-			ASIGNA_PWM_V_ex  					0,0;ELECTROVALVULAS						0
+			;ASIGNA_PWM_V_ex  					0,0;ELECTROVALVULAS						0
 			outi	presion_liberada,'1'
 			jmp		fin_NPA700
 
@@ -440,7 +440,7 @@ control_P_INS_MODO_PRESION:
 sigue_control_P_inspiracion:
 
 			
-			ldiw	xh,xl,0x01F4
+			ldiw	xh,xl,0x0064
 			inr		r16,Presion_cmH2OL
 			inr		r17,Presion_cmH2OH
 			cp		r16,Xl
@@ -503,10 +503,9 @@ pip_OK_out:
 ;************************************************************
 ;************************************************************
 PIP_Baja:
-			;rjmp	salir_control
-			;call	Valv_ON
-			;ASIGNA_PWM_V_ex  	200,200
-			ASIGNA_PWM_V_ex  				0x01,0x00;electrovalvulas		200
+			outi	reg_PWM_Val_ExH,0x01
+			outi	reg_PWM_Val_ExL,0xF4
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
 			;inr		yl,CNT_P_PIP
 			;cpi		yl,0x03
 			;brsh	PIP_Baja_C
@@ -523,6 +522,15 @@ PIP_Baja:
 			outr	C_PEEP_DOWN,yl
 			outi	Cont_CF_H,high(50)
 			outi	Cont_CF_L,low(50)
+			rjmp	salir_control
+;************************************************************
+;************************************************************
+low_PWM_PIP:
+			outi	B_P_PIP,'1'
+			outi	reg_PWM2_AireH,high(2)
+			outi	reg_PWM2_AireL,low(2)
+			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
+
 			rjmp	salir_control
 ;************************************************************
 ;************************************************************
@@ -545,7 +553,7 @@ R_PWM:
 			;rjmp	salir_control
 
 ;************************************************************
-			cpri	C_PEEP_DOWN,4
+			cpri	C_PEEP_DOWN,5
 			rbrsh	R_PWM_1
 ;************************************************************
 ;************************************************************
@@ -587,6 +595,9 @@ PMW_Inc_out:
 ;************************************************************
 PIP_Alta:
 			;outi	B_PEEP_DOWN,'0'
+			;outi	reg_PWM_Val_ExH,0x00
+			;outi	reg_PWM_Val_ExL,0x00
+			;ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
 			inr		ZL,PWM_FLUJOL
 			inr		ZH,PWM_FLUJOH
 			cpi		ZL,low(60)
@@ -606,7 +617,11 @@ CHK_PIP_Alta:
 			cp		R24,XL
 			cpc		R25,XH
 			rbrlo	salir_control
-			ASIGNA_PWM_V_ex  				0,0
+			;ASIGNA_PWM_V_ex  				0,0
+			outi	reg_PWM_Val_ExH,0x00
+			outi	reg_PWM_Val_ExL,0x00
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
+			
 			rjmp	salir_control
 ;************************************************************
 ;************************************************************
@@ -638,9 +653,21 @@ CARGA_PR_OFFSET:
 ;************************************************************
 ;************************************************************
 pip_nul:				
-			outi	PWM_FLUJOH,high(160);(PWMmin)
+			outi	PWM_FLUJOH,high(160)
 			outi	PWM_FLUJOL,low(160)
-			rjmp		salir_control
+			rjmp	salir_control
+
+			inr		ZL,PWM_FLUJOL
+			inr		ZH,PWM_FLUJOH
+			cpi		ZL,low(450)
+			cpci	ZH,high(450)
+			rbrsh	salir_control;CHK_PEEP_Baja
+			adiw	Z,3
+			outr	PWM_FLUJOH,ZH
+			outr	PWM_FLUJOL,ZL
+			;rjmp	salir_control	
+
+			rjmp	salir_control
 ;************************************************************
 ;************************************************************
 
@@ -653,7 +680,7 @@ pip_nul:
 			brne	sigue_control_PEEP
 			cpri	reg_PEEPL,0x00
 			brne	sigue_control_PEEP
-			ASIGNA_PWM_V_ex  				0,0;ELECTROVALVULAS			0
+			;ASIGNA_PWM_V_ex  				0,0;ELECTROVALVULAS			0
 			outi		PWM_FLUJOH,high(PWMmin)
 			outi		PWM_FLUJOL,low(PWMmin)
 			rjmp		@0
@@ -695,7 +722,7 @@ PEEP_PrSp:
 			rbreq	tst_PEEP
 			outi	primer_cruce,'0'
 			outi		B_PR_SP,'1'
-			ASIGNA_PWM_V_ex  				0,0;ELECTROVALVULAS		0
+			;ASIGNA_PWM_V_ex  				0,0;ELECTROVALVULAS		0
 			;delay_ms	30
 			;outi		PWM_FLUJOH,high(0)
 			;outi		PWM_FLUJOL,low(0)
@@ -786,7 +813,47 @@ PEEP_control:
 ;************************************************************	
 ;			rjmp		salir_control
 PEEP_Ok:
-			call	Valv_ON
+
+			inr		r24,Presion_cmH2OL
+			inr		r25,Presion_cmH2OH
+			inr		xl,reg_PEEPL_100porciento
+			inr		xh,reg_PEEPH_100porciento
+			cp		R24,XL
+			cpc		R25,XH
+			rbrsh	check_Flujo_PEEP
+			;rjmp	salir_control
+
+;************************************************************
+			cpri	B_Dec_PEEP,'1'
+			rbreq	SRPPOk
+			movr	Presion_antL,Presion_cmH2OL
+			movr	Presion_antH,Presion_cmH2OH
+			outi	B_Dec_PEEP,'1'
+SRPPOk:;Skip_read_Pres_PEEP_OK
+			inr		ZL,Presion_cmH2OL
+			inr		ZH,Presion_cmH2OH
+			inr		XL,Presion_antL
+			inr		XH,Presion_antH
+			subi	XL,low(10)
+			sbci	XH,high(10)
+			cp		ZL,XL
+			cpc		ZH,XH
+			rbrsh	check_Flujo_PEEP
+			rbreq	check_Flujo_PEEP
+;************************************************************
+
+			inr		XL,reg_PWM_Val_ExL
+			inr		XH,reg_PWM_Val_ExH
+			cpi		XL,low(500)
+			cpci	XH,high(500)
+			rbrsh	salir_control
+			adiw	XL,1
+			outr	reg_PWM_Val_ExH,XH
+			outr	reg_PWM_Val_ExL,XL
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
+			outi	B_Dec_PEEP,'0'
+			rjmp	salir_control
+check_Flujo_PEEP:
 			inr		ZL,PWM_FLUJOL
 			inr		ZH,PWM_FLUJOH
 			inr		XL,offset_COMFLPEEPL
@@ -804,83 +871,62 @@ PEEP_Ok_out:
 			movr	PWM_FLUJOL,offset_COMFLPEEPL
 			rjmp	salir_control
 ;************************************************************
+			
+	
 ;************************************************************
 PEEP_Baja:
-			ASIGNA_PWM_V_ex  				0x01,0x00
-			rjmp	salir_control
-			call	Valv_ON
-			inr		ZL,PWM_FLUJOL
-			inr		ZH,PWM_FLUJOH
-			cpi		ZL,low(450)
-			cpci	ZH,high(450)
-			rbrsh	salir_control;CHK_PEEP_Baja
-			adiw	Z,3
-			outr	PWM_FLUJOH,ZH
-			outr	PWM_FLUJOL,ZL
-			;rjmp	salir_control	
-
+			inr		XL,reg_PWM_Val_ExL
+			inr		XH,reg_PWM_Val_ExH
+			cpi		XL,low(500)
+			cpci	XH,high(500)
+			rbrsh	salir_control
+			adiw	XL,3
+			outr	reg_PWM_Val_ExH,XH
+			outr	reg_PWM_Val_ExL,XL
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
 			rjmp	salir_control
 ;************************************************************
 ;************************************************************
-CHK_PEEP_Baja:
+			outi	reg_PWM_Val_ExH,0x00
+			outi	reg_PWM_Val_ExL,0xF4
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
 			rjmp	salir_control
 ;************************************************************
 ;************************************************************
 PEEP_Alta:
-			ASIGNA_PWM_V_ex  			0,0
-			rjmp	salir_control
-			;rjmp	salir_control
-			call	valv_off
-			;outi 	recarga_PWM,0x10
-			;rjmp	salir_control
-			inr		ZL,PWM_FLUJOL
-			inr		ZH,PWM_FLUJOH
-			cpi		ZL,low(40)
-			cpci	ZH,high(40)
-			rbrlo	CHK_PEEP_Alta
-			sbiw	Z,3
-			outr	PWM_FLUJOH,ZH
-			outr	PWM_FLUJOL,ZL
-			;rjmp	salir_control		///nuevo
-;************************************************************
-CHK_PEEP_Alta:
-			;call	CARGA_PR_OFFSET
-			inr		r24,Presion_cmH2OL
-			inr		r25,Presion_cmH2OH
-			inr		xl,reg_PEEPL_100porciento
-			inr		xh,reg_PEEPH_100porciento
-			subi	XL,low(-150)
-			sbci	XH,high(-150)
-			cp		R24,XL
-			cpc		R25,XH
+			cpri	B_Dec_PEEP,'1'
+			rbreq	SRPPA
+			movr	Presion_antL,Presion_cmH2OL
+			movr	Presion_antH,Presion_cmH2OH
+			outi	B_Dec_PEEP,'1'
+SRPPA:;Skip_read_Pres_PEEP_Alta
+			inr		ZL,Presion_cmH2OL
+			inr		ZH,Presion_cmH2OH
+			inr		XL,Presion_antL
+			inr		XH,Presion_antH
+			subi	XL,low(10)
+			sbci	XH,high(10)
+			cp		ZL,XL
+			cpc		ZH,XH
+			rbrlo	out_PEEP_Alta
+			inr		XL,reg_PWM_Val_ExL
+			inr		XH,reg_PWM_Val_ExH
+			cpi		XL,low(50)
+			cpci	XH,high(50)
 			rbrlo	salir_control
-			call	valv_off
-			;electrovalvulas	0
+			sbiw	XL,1
+			outr	reg_PWM_Val_ExH,XH
+			outr	reg_PWM_Val_ExL,XL
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
 			rjmp	salir_control
 ;************************************************************
-Valv_ON:	
-			inr		xl,recarga_PWM
-			cpi		xl,199
-			brsh	skip_valv_on
-			inc		xl
-			outr	recarga_PWM,xl
-			ret
 ;************************************************************
-skip_valv_on:
-			outi	recarga_PWM,200
-			ret
+out_PEEP_Alta:
+			outi	B_Dec_PEEP,'0'
+			rjmp	salir_control
 ;************************************************************
-valv_off:
-			inr		xl,recarga_PWM
-			cpi		xl,160
-			brlo	skip_valv_off
-			dec		xl
-			outr	recarga_PWM,xl
-			ret
 ;************************************************************
-skip_valv_off:
-			outi	recarga_PWM,150
-			ret
+
 
 
 ;************************************************************
@@ -889,7 +935,7 @@ skip_valv_off:
 sin_modificar_flujo:	;outi		bandera_inc_compensacion,'0'
 						outi		reg_FLUJO_compensacionH,high(flujo_inicial_compensacion)
 						outi		reg_FLUJO_compensacionL,low(flujo_inicial_compensacion)
-						ASIGNA_PWM_V_ex  			0,0;ELECTROVALVULAS		0
+						;ASIGNA_PWM_V_ex  			0,0;ELECTROVALVULAS		0
 						;outi		PWM_FLUJOH,high(PWMmin)
 						;outi		PWM_FLUJOL,low(PWMmin)
 						rjmp		salir_control
@@ -913,14 +959,14 @@ sin_flujo:
 						outi	PWM_FLUJOL,low(PWMZERO)
 						;outi	Cont_VV,10
 						;call	Valv_ON
-						ASIGNA_PWM_V_ex  			0x01,0x00;ELECTROVALVULAS		200
+						;ASIGNA_PWM_V_ex  			0x01,0x00;ELECTROVALVULAS		200
 						;outi 	bandera_inc_compensacion,'0'
 						rjmp	salir_control
 ;************************************************************
 
 libera_PS:			
 			;outi		B_PR_SP,'1'
-			ASIGNA_PWM_V_ex  				0,0;ELECTROVALVULAS				0
+			;ASIGNA_PWM_V_ex  				0,0;ELECTROVALVULAS				0
 			;delay_ms	100
 			outi		PWM_FLUJOH,high(60)
 			outi		PWM_FLUJOL,low(60)

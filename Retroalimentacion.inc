@@ -165,7 +165,7 @@ int_cancela_inspiracion:
 ;Si durante el test se presenta una presión excesiva y al parecer la Raspberry no dio
 ;la orden de liberar, se ejecuta el siguiente código
 libera_tst:	ASIGNA_PWM_FLUJO					0,0
-			ASIGNA_PWM_V_ex  					0,0;ELECTROVALVULAS						0b00
+			;ASIGNA_PWM_V_ex  					0,0;ELECTROVALVULAS						0b00
 			ASIGNA_PWM_O2						0,0
 			ASIGNA_PWM_AIRE						0,0
 			rjmp	salir_int0
