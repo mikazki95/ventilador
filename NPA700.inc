@@ -440,14 +440,14 @@ control_P_INS_MODO_PRESION:
 sigue_control_P_inspiracion:
 
 			
-			ldiw	xh,xl,0x0064
+/*			ldiw	xh,xl,0x0064
 			inr		r16,Presion_cmH2OL
 			inr		r17,Presion_cmH2OH
 			cp		r16,Xl
 			cpc		r17,Xh		
 			rbrlo	pip_nul
 			;cpri	inhibe_compensacion,'1'
-			;rbreq	sin_flujo;salir_control
+*/			;rbreq	sin_flujo;salir_control
 			;rjmp	PIP_control
 
 ;************************************************************
@@ -636,29 +636,7 @@ out_PIP_Baja:
 
 ;************************************************************
 ;************************************************************
-PIP_Baja:
-			outi	reg_PWM_Val_ExH,0x01
-			outi	reg_PWM_Val_ExL,0xF4
-			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
-			;inr		yl,CNT_P_PIP
-			;cpi		yl,0x03
-			;brsh	PIP_Baja_C
-			cpri	B_PEEP_DOWN,'0'
-			brne	Inc_PWM_PIP
-			;movr	PWM_FLUJOL,Ctrl_CF_L;offset_COMFLPIPL
-			;movr	PWM_FLUJOH,Ctrl_CF_H;offset_COMFLPIPH
-			;inr		yl,CNT_P_PIP
-			;inc		yl
-			;outr	CNT_P_PIP,yl
-			outi	B_PEEP_DOWN,'1'
-			inr		yl,C_PEEP_DOWN
-			inc		yl
-			outr	C_PEEP_DOWN,yl
-			outi	Cont_CF_H,high(50)
-			outi	Cont_CF_L,low(50)
-			rjmp	salir_control
-;************************************************************
-;************************************************************
+
 low_PWM_PIP:
 			outi	B_P_PIP,'1'
 			outi	reg_PWM2_AireH,high(2)
@@ -681,7 +659,6 @@ Inc_PWM_PIP:
 ;************************************************************
 ;************************************************************
 R_PWM:		
-;			sbi		led_run	
 			outi	Cont_CF_H,high(50)
 			outi	Cont_CF_L,low(50)
 			;rjmp	salir_control
@@ -930,8 +907,8 @@ PEEP_control:
 			inr		r25,Presion_cmH2OH
 			inr		xl,reg_PEEPL_100porciento
 			inr		xh,reg_PEEPH_100porciento
-			subi	XL,low(-50)
-			sbci	XH,high(-50)
+			subi	XL,low(-100)
+			sbci	XH,high(-100)
 			cp		R24,XL
 			cpc		R25,XH
 			rbrsh	PEEP_Alta
@@ -949,7 +926,7 @@ PEEP_control:
 ;************************************************************	
 ;			rjmp		salir_control
 PEEP_Ok:
-
+			outi	B_PEEP_DOWN,'0'
 			inr		r24,Presion_cmH2OL
 			inr		r25,Presion_cmH2OH
 			inr		xl,reg_PEEPL_100porciento
@@ -1003,17 +980,19 @@ check_Flujo_PEEP:
 			rjmp	salir_control
 ;************************************************************
 PEEP_Ok_out:
+			outi	B_Dec_PEEP,'0'
 			movr	PWM_FLUJOH,offset_COMFLPEEPH
 			movr	PWM_FLUJOL,offset_COMFLPEEPL
 			rjmp	salir_control
 ;************************************************************
-PEEP_Baja_P:	
-			cpri	B_Dec_PEEP,'1'
-			rbreq	skip_PEEP_baja
+PEEP_Baja_P:
+			sbi		led_run
+			cpri	B_PEEP_DOWN,'1'
+			rbreq	skip_PEEP_baja_A
 			movr	Presion_antL,Presion_cmH2OL
 			movr	Presion_antH,Presion_cmH2OH
-			outi	B_Dec_PEEP,'1'
-skip_PEEP_baja:			
+			outi	B_PEEP_DOWN,'1'
+skip_PEEP_baja_A:			
 			inr		ZL,Presion_cmH2OL
 			inr		ZH,Presion_cmH2OH
 			inr		XL,Presion_antL
@@ -1022,18 +1001,23 @@ skip_PEEP_baja:
 			sbci	XH,high(10)
 			cp		ZL,XL
 			cpc		ZH,XH
-			rbrsh	out_PEEP_baja
+			rbrsh	salir_control
 ;******************anterior PEEP baja*************************************
+			inr		XL,Presion_antL
+			inr		XH,Presion_antH
+			sbiw	XL,5
+			outr	Presion_antH,XH
+			outr	Presion_antL,XL
 			inr		XL,reg_PWM_Val_ExL
 			inr		XH,reg_PWM_Val_ExH
 			cpi		XL,low(500)
 			cpci	XH,high(500)
-			rbrsh	PEEP_Baja_out
+			rbrsh	skip_PEEP_Baja
 			adiw	XL,2
 			outr	reg_PWM_Val_ExH,XH
 			outr	reg_PWM_Val_ExL,XL
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
-PEEP_Baja_out:
+skip_PEEP_Baja:
 			inr		ZL,PWM_FLUJOL
 			inr		ZH,PWM_FLUJOH
 			cpi		ZL,low(480)
@@ -1044,17 +1028,10 @@ PEEP_Baja_out:
 			outr	PWM_FLUJOL,ZL
 			rjmp	salir_control
 ;*********************aca termina PEEP baja anterior**************************************
-out_PEEP_baja:
-			outi	B_Dec_PEEP,'0'
-			rjmp	salir_control
 ;************************************************************		
 ;************************************************************
-
-PEEP_Baja:
-			
-;************************************************************
-;************************************************************
 PEEP_Alta:
+			outi	B_PEEP_DOWN,'0'
 			inr		ZL,PWM_FLUJOL
 			inr		ZH,PWM_FLUJOH
 			cpi		ZL,low(40)

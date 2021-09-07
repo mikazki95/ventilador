@@ -475,7 +475,7 @@ fin_macro_tiempo_pausa:
 					ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
 					outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
 					outi	PWM_FLUJOL,low(PWMZERO)
-			
+					outi	B_PEEP_DOWN,'0'
 ;************************************************************
 ;************************************************************
 			
