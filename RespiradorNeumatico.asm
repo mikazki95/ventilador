@@ -16,7 +16,7 @@
 #define	version_firmwareP	'.'
 #define	version_firmwareM	'2'
 ;#define	version_firmwareLP	'.'
-#define	version_firmwareL	'2'
+#define	version_firmwareL	'3'
 
 .equ	fxtal		=	11059200		;Frecuencia del cristal
 
@@ -109,7 +109,7 @@ inicio2:
 	
 ;************************************************************
 ;salto simulacion
-;call	PEEP_Baja_P
+;call	PIP_Baja_P
 
 ;jmp	inicio2
 

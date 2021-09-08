@@ -349,37 +349,6 @@ fin_macro_presion_soporte:
 			;delay_ms	30
 			;outi		PWM_FLUJOH,high(0)
 			;outi		PWM_FLUJOL,low(0)
-			ldiw	zh,zl,tabla_PIP*2;tabla_inc_rangoPEEP_PARKER*2
-			inr		xh,Presion_cmH2OH
-			inr		xl,Presion_cmH2OL;low(500);reg_PEEPL
-			;low(500);reg_PEEPH
-			;outr		xl,low(500)
-			;outr		xl,low(500)
-			lsl		xl
-			rol		xh
-			add		zl,xl
-			adc		zh,xh
-			outi	rampz,0x00
-			lpm		xl,z+
-			lpm		xh,z
-			;ldiw	zh,zl,1
-			;low(500);reg_PEEPL
-			inr		zh,offset_PEEPH;low(500);reg_PEEPH
-			inr		zL,offset_PEEPL
-			add		xl,zl
-			adc		xh,zh
-			;subi	xl,low(-50);zl
-			;sbci	xh,high(-50)
-			outr		Ctrl_CF_H,xh
-			outr		Ctrl_CF_L,xl
-			outi		CCF_H,high(60)
-			outi		CCF_L,low(60)
-			;outi		Ctrl_CF_H,high(114)
-			;outi		Ctrl_CF_L,low(114)
-			outi		Cont_CF_H,high(300)
-			outi		Cont_CF_L,low(300)
-			outi		reg_FLUJO_compensacionH,high(flujo_inicial_compensacion)
-			outi		reg_FLUJO_compensacionL,low(flujo_inicial_compensacion)
 			outi		bandera_inc_compensacion,'0'
 			outi		B_Dec,'0'
 			outi		B_PEEP_AC,'0'
@@ -1628,20 +1597,20 @@ init_io:	outi	ddra, 0b11111111
 ;			outi	tmr_de_presion,0
 
 //*******************valores a calibrar por equipo 
-			outi 	offset_PEEPH,high(100)
-			outi 	offset_PEEPL,low(100)
+			outi 	offset_PEEPH,high(60)
+			outi 	offset_PEEPL,low(60)
 			
-			outi 	offset_PIPH,high(115)
-			outi 	offset_PIPL,low(115)
+			outi 	offset_PIPH,high(110)
+			outi 	offset_PIPL,low(110)
 
-			outi 	offset_COMFLPEEPH,high(100)
-			outi 	offset_COMFLPEEPL,low(100)
+			outi 	offset_COMFLPEEPH,high(110)
+			outi 	offset_COMFLPEEPL,low(110)
 			
 			outi 	offset_COMFLPIPH,high(120)
 			outi 	offset_COMFLPIPL,low(120)
 
-			outi 	offset_PreH,high(150)
-			outi 	offset_PreL,low(150)
+			outi 	offset_PreH,high(300)
+			outi 	offset_PreL,low(300)
 			
 			outi 	offset_batH,high(585)
 			outi 	offset_batL,low(585)
@@ -1652,7 +1621,7 @@ init_io:	outi	ddra, 0b11111111
 			outi	rx_Ctrl_Vol,'0'
 			outi	rx_Ctrl_FiO2,'0'
 
-			outi	VV_OFF,60
+			outi	VV_OFF,2
 			
 			outi	CPAP_alarma_APNEA,'0'
 			OUTI	FASE,						STANDBY
