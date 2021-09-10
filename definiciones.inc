@@ -427,8 +427,8 @@ fin_macro_tiempo_pausa:
 ;*********************************************************************
 
 .macro		FASE_EXHALACION
-			outi	reg_PWM_Val_ExH,0x00
-			outi	reg_PWM_Val_ExL,0xF4
+			outi	reg_PWM_Val_ExH,0x01
+			outi	reg_PWM_Val_ExL,0x50
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
 			
 			outi	tmr_inhibe_on_off_pwm,		3
@@ -1599,8 +1599,8 @@ init_io:	outi	ddra, 0b11111111
 ;			outi	tmr_de_presion,0
 
 //*******************valores a calibrar por equipo 
-			outi 	offset_PEEPH,high(60)
-			outi 	offset_PEEPL,low(60)
+			outi 	offset_PEEPH,high(300)
+			outi 	offset_PEEPL,low(300)
 			
 			outi 	offset_PIPH,high(300)
 			outi 	offset_PIPL,low(300)

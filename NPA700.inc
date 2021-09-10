@@ -826,29 +826,7 @@ PEEP_PrSp:
 			;delay_ms	30
 			;outi		PWM_FLUJOH,high(0)
 			;outi		PWM_FLUJOL,low(0)
-			ldiw	zh,zl,tabla_PIP*2;tabla_inc_rangoPEEP_PARKER*2
-			inr		xh,Presion_cmH2OH
-			inr		xl,Presion_cmH2OL;low(500);reg_PEEPL
-			;low(500);reg_PEEPH
-			;outr		xl,low(500)
-			;outr		xl,low(500)
-			lsl		xl
-			rol		xh
-			add		zl,xl
-			adc		zh,xh
-			outi	rampz,0x00
-			lpm		xl,z+
-			lpm		xh,z
-			;ldiw	zh,zl,1
-			;low(500);reg_PEEPL
-			inr		zh,offset_PEEPH;low(500);reg_PEEPH
-			inr		zL,offset_PEEPL
-			add		xl,zl
-			adc		xh,zh
-			;subi	xl,low(-50);zl
-			;sbci	xh,high(-50)
-			outr		Ctrl_CF_H,xh
-			outr		Ctrl_CF_L,xl
+			
 			outi		CCF_H,high(60)
 			outi		CCF_L,low(60)
 			;outi		Ctrl_CF_H,high(114)
@@ -890,8 +868,9 @@ peep_CPAP:
 		
 ;************************************************************
 PEEP_control:
-			inr		r24,Presion_cmH2OL
-			inr		r25,Presion_cmH2OH
+			;inr		r24,Presion_cmH2OL
+			;inr		r25,Presion_cmH2OH
+			call	Carga_offset_PEEP
 			inr		xl,reg_PEEPL_100porciento
 			inr		xh,reg_PEEPH_100porciento
 			subi	XL,low(-100)
@@ -901,8 +880,9 @@ PEEP_control:
 			rbrsh	PEEP_Alta
 ;************************************************************
 			;call	CARGA_PR_OFFSET
-			inr		r24,Presion_cmH2OL
-			inr		r25,Presion_cmH2OH
+			;inr		r24,Presion_cmH2OL
+			;inr		r25,Presion_cmH2OH
+			call	Carga_offset_PEEP
 			inr		xl,reg_PEEPL_100porciento
 			inr		xh,reg_PEEPH_100porciento
 			subi	XL,low(100)
@@ -911,27 +891,11 @@ PEEP_control:
 			cpc		R25,XH
 			rbrlo	PEEP_Baja_P
 ;***********************peep ok*************************************	
-/*			inr		ZL,Presion_cmH2OL
-			inr		ZH,Presion_cmH2OH
-			inr		XL,Presion_antL
-			inr		XH,Presion_antH
-			subi	XL,low(10)
-			sbci	XH,high(10)
-			cp		ZL,XL
-			cpc		ZH,XH
-			rbrsh	salir_control
-;******************anterior PEEP baja*************************************
-			inr		XL,Presion_antL
-			inr		XH,Presion_antH
-			sbiw	XL,5
-			outr	Presion_antH,XH
-			outr	Presion_antL,XL
-*/
-;			rjmp		salir_control
 PEEP_Ok:
 			outi	B_PEEP_DOWN,'0'
-			inr		r24,Presion_cmH2OL
-			inr		r25,Presion_cmH2OH
+			;inr		r24,Presion_cmH2OL
+			;inr		r25,Presion_cmH2OH
+			call	Carga_offset_PEEP
 			inr		xl,reg_PEEPL_100porciento
 			inr		xh,reg_PEEPH_100porciento
 			cp		R24,XL
@@ -946,14 +910,17 @@ PEEP_Ok:
 			movr	Presion_antH,Presion_cmH2OH
 			outi	B_Dec_PEEP,'1'
 SRPPOk:;Skip_read_Pres_PEEP_OK
-			inr		ZL,Presion_cmH2OL
-			inr		ZH,Presion_cmH2OH
+			;inr		ZL,Presion_cmH2OL
+			;inr		ZH,Presion_cmH2OH
+			;inr		r24,Presion_cmH2OL
+			;inr		r25,Presion_cmH2OH
+			call	Carga_offset_PEEP
 			inr		XL,Presion_antL
 			inr		XH,Presion_antH
 			subi	XL,low(-10)
 			sbci	XH,high(-10)
-			cp		ZL,XL
-			cpc		ZH,XH
+			cp		R24,XL
+			cpc		R25,XH
 			rbrsh	check_Flujo_PEEP
 			rbreq	check_Flujo_PEEP
 ;************************************************************
@@ -996,14 +963,15 @@ PEEP_Baja_P:
 			movr	Presion_antH,Presion_cmH2OH
 			outi	B_PEEP_DOWN,'1'
 skip_PEEP_baja_A:			
-			inr		ZL,Presion_cmH2OL
-			inr		ZH,Presion_cmH2OH
+			;inr		r24,Presion_cmH2OL
+			;inr		r25,Presion_cmH2OH
+			call	Carga_offset_PEEP
 			inr		XL,Presion_antL
 			inr		XH,Presion_antH
 			subi	XL,low(-10)
 			sbci	XH,high(-10)
-			cp		ZL,XL
-			cpc		ZH,XH
+			cp		R24,XL
+			cpc		R25,XH
 			rbrsh	salir_control
 ;******************anterior PEEP baja*************************************
 			;inr		XL,Presion_antL
@@ -1046,18 +1014,26 @@ PEEP_Alta:
 skip_PEEP_Alta:
 			cpri	B_Dec_PEEP,'1'
 			rbreq	SRPPEA
-			movr	Presion_antL,Presion_cmH2OL
-			movr	Presion_antH,Presion_cmH2OH
+			;movr	Presion_antL,Presion_cmH2OL
+			;movr	Presion_antH,Presion_cmH2OH
+			;inr		r24,Presion_cmH2OL
+			;inr		r25,Presion_cmH2OH
+			call	Carga_offset_PEEP
+			outr	Presion_antL,R24
+			outr	Presion_antH,R25
 			outi	B_Dec_PEEP,'1'
 SRPPEA:;Skip_read_Pres_PEEP_Alta
-			inr		ZL,Presion_cmH2OL
-			inr		ZH,Presion_cmH2OH
+			;inr		ZL,Presion_cmH2OL
+			;inr		ZH,Presion_cmH2OH
+			;inr		r24,Presion_cmH2OL
+			;inr		r25,Presion_cmH2OH
+			call	Carga_offset_PEEP
 			inr		XL,Presion_antL
 			inr		XH,Presion_antH
 			subi	XL,low(10)
 			sbci	XH,high(10)
-			cp		ZL,XL
-			cpc		ZH,XH
+			cp		R24,XL
+			cpc		R25,XH
 			rbrlo	out_PEEP_Alta
 			inr		XL,reg_PWM_Val_ExL
 			inr		XH,reg_PWM_Val_ExH
@@ -1104,8 +1080,8 @@ sin_flujo:
 Carga_offset_PEEP:
 			inr		r24,Presion_cmH2OL
 			inr		r25,Presion_cmH2OH
-			inr		ZL,offset_PreL
-			inr		ZH,offset_PreH
+			inr		ZL,offset_PEEPL
+			inr		ZH,offset_PEEPH
 			cp		R24,ZL
 			cpc		R25,ZH
 			rbrlo	out_carga_offset
