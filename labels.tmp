@@ -297,26 +297,30 @@
   <libera_tst><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>168</LINE></libera_tst>
   <alarma_sobrepresion><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>174</LINE></alarma_sobrepresion>
   <salir_int0><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>180</LINE></salir_int0>
-  <si_es_trigger><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>48</LINE></si_es_trigger>
-  <rx_ping_sv><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>152</LINE></rx_ping_sv>
-  <tst_modo_CPAP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>26</LINE></tst_modo_CPAP>
-  <borra_bandera_datos><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>20</LINE></borra_bandera_datos>
-  <tst_rx_2_3><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>33</LINE></tst_rx_2_3>
-  <tst_alarma_sv><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>38</LINE></tst_alarma_sv>
-  <entra_CPAP_asistido><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>136</LINE></entra_CPAP_asistido>
-  <salir_CPAP_asistido><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>144</LINE></salir_CPAP_asistido>
-  <salir_int_rx1><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>180</LINE></salir_int_rx1>
-  <tst_P_CPAP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>124</LINE></tst_P_CPAP>
-  <tst_tiempo_pausa_ps><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>68</LINE></tst_tiempo_pausa_ps>
-  <tst_SIMV><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>97</LINE></tst_SIMV>
-  <tst_CMV><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>83</LINE></tst_CMV>
-  <asigna_inspiracion><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>91</LINE></asigna_inspiracion>
-  <tst_ventana><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>102</LINE></tst_ventana>
-  <asigna_inspiracion_asistida><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>109</LINE></asigna_inspiracion_asistida>
-  <asigna_PS_CPAP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>131</LINE></asigna_PS_CPAP>
-  <pres_ok><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>165</LINE></pres_ok>
-  <pres_ok_2><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>177</LINE></pres_ok_2>
-  <alarma_nivel1><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>185</LINE></alarma_nivel1>
+  <inc_Nivel_PIP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>132</LINE></inc_Nivel_PIP>
+  <dec_Nivel_PIP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>142</LINE></dec_Nivel_PIP>
+  <inc_Nivel_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>152</LINE></inc_Nivel_PEEP>
+  <dec_Nivel_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>162</LINE></dec_Nivel_PEEP>
+  <si_es_trigger><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>56</LINE></si_es_trigger>
+  <rx_ping_sv><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>203</LINE></rx_ping_sv>
+  <tst_modo_CPAP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>34</LINE></tst_modo_CPAP>
+  <borra_bandera_datos><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>28</LINE></borra_bandera_datos>
+  <tst_rx_2_3><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>41</LINE></tst_rx_2_3>
+  <tst_alarma_sv><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>46</LINE></tst_alarma_sv>
+  <entra_CPAP_asistido><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>187</LINE></entra_CPAP_asistido>
+  <salir_CPAP_asistido><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>195</LINE></salir_CPAP_asistido>
+  <salir_int_rx1><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>231</LINE></salir_int_rx1>
+  <tst_P_CPAP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>175</LINE></tst_P_CPAP>
+  <tst_tiempo_pausa_ps><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>76</LINE></tst_tiempo_pausa_ps>
+  <tst_SIMV><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>105</LINE></tst_SIMV>
+  <tst_CMV><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>91</LINE></tst_CMV>
+  <asigna_inspiracion><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>99</LINE></asigna_inspiracion>
+  <tst_ventana><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>110</LINE></tst_ventana>
+  <asigna_inspiracion_asistida><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>117</LINE></asigna_inspiracion_asistida>
+  <asigna_PS_CPAP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>182</LINE></asigna_PS_CPAP>
+  <pres_ok><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>216</LINE></pres_ok>
+  <pres_ok_2><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>228</LINE></pres_ok_2>
+  <alarma_nivel1><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>237</LINE></alarma_nivel1>
   <desactiva_alarma_ping_int_rx><FILE>C:\Ventilador\control\Control_R\ventilador\Comandos.inc</FILE><LINE>523</LINE></desactiva_alarma_ping_int_rx>
   <compara_cont_1><FILE>C:\Ventilador\control\Control_R\ventilador\Comandos.inc</FILE><LINE>126</LINE></compara_cont_1>
   <comando_ok><FILE>C:\Ventilador\control\Control_R\ventilador\Comandos.inc</FILE><LINE>118</LINE></comando_ok>

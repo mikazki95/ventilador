@@ -431,8 +431,8 @@ control_P_INS_MODO_PRESION:
 			cpri	B_Vol,'1'
 			rbreq	sin_Flujo
 
-			ASIGNA_PWM_FLUJO		offset_PreH,offset_PreL
-			;ASIGNA_PWM_FLUJO					reg_PWM0H,reg_PWM0L
+			;ASIGNA_PWM_FLUJO		offset_PreH,offset_PreL
+			ASIGNA_PWM_FLUJO					reg_PWM0H,reg_PWM0L
 			rjmp	salir_control
 
 

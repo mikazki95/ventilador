@@ -4,9 +4,17 @@
 rx_trigger:
 			pushw
 			pushr	sreg
+			pushx
 			inr		r25,udr1
 			outr	tmp_udr1,r25
-
+			cpi		r25,'Q'
+			rbreq	inc_Nivel_PIP
+			cpi		r25,'W'
+			rbreq	dec_Nivel_PIP
+			cpi		r25,'E'
+			rbreq	inc_Nivel_PEEP
+			cpi		r25,'R'
+			rbreq	dec_Nivel_PEEP
 			cpi		r25,'1'
 			rbreq	si_es_trigger
 			cpi		r25,'0'
@@ -119,6 +127,49 @@ asigna_inspiracion_asistida:
 ;			jmp			asigna_inspiracion
 
 ;*************************************************************
+;AUTO AJUSTE DE NIVELES DE PRESION
+;*************************************************************
+inc_Nivel_PIP:
+			inr		XL,offset_PIPL
+			inr		XH,offset_PIPH
+			adiw	X,0x0A
+			cpi		XL,low(600)
+			cpci	XH,high(600)
+			rbrsh	salir_int_rx1
+			outr	offset_PIPH,XH
+			outr	offset_PIPL,XL
+			jmp		salir_int_rx1
+dec_Nivel_PIP:
+			inr		XL,offset_PIPL
+			inr		XH,offset_PIPH
+			sbiw	X,0x0A
+			cpi		XL,0x00
+			cpci	XH,0x00
+			rbrlo	salir_int_rx1
+			outr	offset_PIPH,XH
+			outr	offset_PIPL,XL
+			jmp		salir_int_rx1
+inc_Nivel_PEEP:
+			inr		XL,offset_PEEPL
+			inr		XH,offset_PEEPH
+			adiw	X,0x0A
+			cpi		XL,low(600)
+			cpci	XH,high(600)
+			rbrsh	salir_int_rx1
+			outr	offset_PEEPH,XH
+			outr	offset_PEEPL,XL
+			jmp		salir_int_rx1
+dec_Nivel_PEEP:
+			inr		XL,offset_PIPL
+			inr		XH,offset_PIPH
+			sbiw	X,0x0A
+			cpi		XL,0x00
+			cpci	XH,0x00
+			rbrlo	salir_int_rx1
+			outr	offset_PEEPH,XH
+			outr	offset_PEEPL,XL
+			jmp		salir_int_rx1
+;*************************************************************
 ;FUNCIONALIDAD DEL TRIGGER EN LOS MODOS CPAP (SIN APNEA)
 ;*************************************************************
 tst_P_CPAP:
@@ -178,7 +229,8 @@ pres_ok_2:
 			inr		r25,tmp_udr1
 			outr	udr1,r25
 salir_int_rx1:
-			popr	sreg
+			popx
+			popr		sreg
 			popw
 			reti
 
