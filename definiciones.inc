@@ -279,10 +279,10 @@ fin_macro_standby:
 			rjmp	skip_asigna_0
 asigna_inspiracion_0:
 
-			;outi		PWM_FLUJOH,high(120)
-			;outi		PWM_FLUJOL,low(120)
-			movr	PWM_FLUJOH,offset_PiPH
-			movr	PWM_FLUJOL,offset_PiPL
+			outi		PWM_FLUJOH,high(100)
+			outi		PWM_FLUJOL,low(100)
+			;movr	PWM_FLUJOH,offset_PiPH
+			;movr	PWM_FLUJOL,offset_PiPL
 			;ASIGNA_PWM_FLUJO					0,0
 skip_asigna_0:
 			;ELECTROVALVULAS						PWM_VV_Max
@@ -301,8 +301,10 @@ fin_macro_inspiracion:
 			
 			outi	B_PR_SP,'0'
 			outi	B_PS_Ok,'0'
-			movr	PWM_FLUJOH,offset_PiPH
-			movr	PWM_FLUJOL,offset_PiPL
+			outi		PWM_FLUJOH,high(100)
+			outi		PWM_FLUJOL,low(100)
+			;movr	PWM_FLUJOH,offset_PiPH
+			;movr	PWM_FLUJOL,offset_PiPL
 			outi	Cont_CF_H,high(10)
 			outi	Cont_CF_L,low(10)
 
@@ -1600,8 +1602,8 @@ init_io:	outi	ddra, 0b11111111
 			outi 	offset_PEEPH,high(60)
 			outi 	offset_PEEPL,low(60)
 			
-			outi 	offset_PIPH,high(110)
-			outi 	offset_PIPL,low(110)
+			outi 	offset_PIPH,high(300)
+			outi 	offset_PIPL,low(300)
 
 			outi 	offset_COMFLPEEPH,high(110)
 			outi 	offset_COMFLPEEPL,low(110)

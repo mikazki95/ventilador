@@ -738,8 +738,8 @@ R_PWM_1:
 CARGA_PR_OFFSET:
 			inr		r24,Presion_cmH2OL
 			inr		r25,Presion_cmH2OH
-			inr		ZL,offset_PreL
-			inr		ZH,offset_PreH
+			inr		ZL,offset_PIPL
+			inr		ZH,offset_PIPH
 			cp		R24,ZL
 			cpc		R25,ZH
 			rbrlo	out_carga_offset
