@@ -282,21 +282,21 @@
   <set_pin><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>507</LINE></set_pin>
   <desactiva_mute><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>499</LINE></desactiva_mute>
   <solo_carga><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>511</LINE></solo_carga>
-  <tst_retro><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>18</LINE></tst_retro>
-  <int_cancela_inspiracion><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>154</LINE></int_cancela_inspiracion>
-  <salir_int_PCINT><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>13</LINE></salir_int_PCINT>
-  <int_INC_PWM0><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>68</LINE></int_INC_PWM0>
-  <int_DEC_PWM0><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>117</LINE></int_DEC_PWM0>
-  <int_CORTA_PWM0_MODO_VOLUMEN><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>32</LINE></int_CORTA_PWM0_MODO_VOLUMEN>
-  <salir_int_CORTA_PWM0_MODO_VOLUMEN><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>61</LINE></salir_int_CORTA_PWM0_MODO_VOLUMEN>
-  <corta_PWM0_volumen><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>57</LINE></corta_PWM0_volumen>
-  <salir_int_inc><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>110</LINE></salir_int_inc>
-  <Incrementa_volumen><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>107</LINE></Incrementa_volumen>
-  <salir_int_dec><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>147</LINE></salir_int_dec>
-  <Decrementa_volumen><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>145</LINE></Decrementa_volumen>
-  <libera_tst><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>167</LINE></libera_tst>
-  <alarma_sobrepresion><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>173</LINE></alarma_sobrepresion>
-  <salir_int0><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>179</LINE></salir_int0>
+  <tst_retro><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>19</LINE></tst_retro>
+  <int_cancela_inspiracion><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>155</LINE></int_cancela_inspiracion>
+  <salir_int_PCINT><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>14</LINE></salir_int_PCINT>
+  <int_INC_PWM0><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>69</LINE></int_INC_PWM0>
+  <int_DEC_PWM0><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>118</LINE></int_DEC_PWM0>
+  <int_CORTA_PWM0_MODO_VOLUMEN><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>33</LINE></int_CORTA_PWM0_MODO_VOLUMEN>
+  <salir_int_CORTA_PWM0_MODO_VOLUMEN><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>62</LINE></salir_int_CORTA_PWM0_MODO_VOLUMEN>
+  <corta_PWM0_volumen><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>58</LINE></corta_PWM0_volumen>
+  <salir_int_inc><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>111</LINE></salir_int_inc>
+  <Incrementa_volumen><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>108</LINE></Incrementa_volumen>
+  <salir_int_dec><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>148</LINE></salir_int_dec>
+  <Decrementa_volumen><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>146</LINE></Decrementa_volumen>
+  <libera_tst><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>168</LINE></libera_tst>
+  <alarma_sobrepresion><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>174</LINE></alarma_sobrepresion>
+  <salir_int0><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>180</LINE></salir_int0>
   <si_es_trigger><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>48</LINE></si_es_trigger>
   <rx_ping_sv><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>152</LINE></rx_ping_sv>
   <tst_modo_CPAP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>26</LINE></tst_modo_CPAP>

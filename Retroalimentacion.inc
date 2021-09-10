@@ -4,6 +4,7 @@
 int_PCINT4y5:
 			pushw
 			pushr	sreg
+			;jmp		salir_int0
 			sbic	PCINT_4
 			rjmp	tst_retro
 			sbic	PCINT_5
