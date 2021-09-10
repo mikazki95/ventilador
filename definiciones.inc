@@ -427,8 +427,8 @@ fin_macro_tiempo_pausa:
 ;*********************************************************************
 
 .macro		FASE_EXHALACION
-			outi	reg_PWM_Val_ExH,0x01
-			outi	reg_PWM_Val_ExL,0x50
+			outi	reg_PWM_Val_ExH,0x00
+			outi	reg_PWM_Val_ExL,0xF0
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
 			
 			outi	tmr_inhibe_on_off_pwm,		3
@@ -1376,9 +1376,9 @@ init_io:	outi	ddra, 0b11111111
 ;			outi		eicra,0b00001111	;INTF0 e INTF1 activas por flanco asc
 ;			outi		eifr, 0b00000011	;Borra bandera INTF0
 ;			outi		eimsk,0b00000011	;Habilita la interrupción
-					outi		pcmsk0,	0b01100000	;Habilita las interrupciones de los
-					outi		pcicr,	0b00000001	;pines PCINT5 y PCINT6 (PB5 y PB6)
-					outi		pcifr,	0b00000001
+					outi		pcmsk0,	0b00110000	;Habilita las interrupciones de los
+					outi		pcicr,	0b00000011	;pines PCINT5 y PCINT4 (PB5 y PB4)
+					outi		pcifr,	0b00000011
 ;***************************************
 
 ;***************************************
