@@ -1611,8 +1611,8 @@ init_io:	outi	ddra, 0b11111111
 			outi 	offset_COMFLPIPH,high(120)
 			outi 	offset_COMFLPIPL,low(120)
 
-			outi 	offset_PreH,high(300)
-			outi 	offset_PreL,low(300)
+			outi 	offset_PreH,high(100)
+			outi 	offset_PreL,low(100)
 			
 			outi 	offset_batH,high(585)
 			outi 	offset_batL,low(585)
