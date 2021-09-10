@@ -8,12 +8,20 @@ rx_trigger:
 			inr		r25,udr1
 			outr	tmp_udr1,r25
 			cpi		r25,'Q'
-			rbreq	inc_Nivel_PIP
+			rbreq	incP_Nivel_PIP
 			cpi		r25,'W'
-			rbreq	dec_Nivel_PIP
+			rbreq	decP_Nivel_PIP
 			cpi		r25,'E'
-			rbreq	inc_Nivel_PEEP
+			rbreq	incP_Nivel_PEEP
 			cpi		r25,'R'
+			rbreq	decP_Nivel_PEEP
+			cpi		r25,'q'
+			rbreq	inc_Nivel_PIP
+			cpi		r25,'w'
+			rbreq	dec_Nivel_PIP
+			cpi		r25,'e'
+			rbreq	inc_Nivel_PEEP
+			cpi		r25,'r'
 			rbreq	dec_Nivel_PEEP
 			cpi		r25,'1'
 			rbreq	si_es_trigger
@@ -170,6 +178,48 @@ dec_Nivel_PEEP:
 			outr	offset_PEEPL,XL
 			jmp		salir_int_rx1
 ;*************************************************************
+incP_Nivel_PIP:
+			inr		XL,offset_PIPL
+			inr		XH,offset_PIPH
+			adiw	X,0x32
+			cpi		XL,low(600)
+			cpci	XH,high(600)
+			rbrsh	salir_int_rx1
+			outr	offset_PIPH,XH
+			outr	offset_PIPL,XL
+			jmp		salir_int_rx1
+decP_Nivel_PIP:
+			inr		XL,offset_PIPL
+			inr		XH,offset_PIPH
+			sbiw	X,0x32
+			cpi		XL,0x00
+			cpci	XH,0x00
+			rbrlo	salir_int_rx1
+			outr	offset_PIPH,XH
+			outr	offset_PIPL,XL
+			jmp		salir_int_rx1
+incP_Nivel_PEEP:
+			inr		XL,offset_PEEPL
+			inr		XH,offset_PEEPH
+			adiw	X,0x32
+			cpi		XL,low(600)
+			cpci	XH,high(600)
+			rbrsh	salir_int_rx1
+			outr	offset_PEEPH,XH
+			outr	offset_PEEPL,XL
+			jmp		salir_int_rx1
+decP_Nivel_PEEP:
+			inr		XL,offset_PIPL
+			inr		XH,offset_PIPH
+			sbiw	X,0x32
+			cpi		XL,0x00
+			cpci	XH,0x00
+			rbrlo	salir_int_rx1
+			outr	offset_PEEPH,XH
+			outr	offset_PEEPL,XL
+			jmp		salir_int_rx1
+;*************************************************************
+
 ;FUNCIONALIDAD DEL TRIGGER EN LOS MODOS CPAP (SIN APNEA)
 ;*************************************************************
 tst_P_CPAP:
