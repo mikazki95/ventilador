@@ -1014,19 +1014,11 @@ PEEP_Alta:
 skip_PEEP_Alta:
 			cpri	B_Dec_PEEP,'1'
 			rbreq	SRPPEA
-			;movr	Presion_antL,Presion_cmH2OL
-			;movr	Presion_antH,Presion_cmH2OH
-			;inr		r24,Presion_cmH2OL
-			;inr		r25,Presion_cmH2OH
 			call	Carga_offset_PEEP
 			outr	Presion_antL,R24
 			outr	Presion_antH,R25
 			outi	B_Dec_PEEP,'1'
-SRPPEA:;Skip_read_Pres_PEEP_Alta
-			;inr		ZL,Presion_cmH2OL
-			;inr		ZH,Presion_cmH2OH
-			;inr		r24,Presion_cmH2OL
-			;inr		r25,Presion_cmH2OH
+SRPPEA:
 			call	Carga_offset_PEEP
 			inr		XL,Presion_antL
 			inr		XH,Presion_antH
@@ -1052,12 +1044,21 @@ out_PEEP_Alta:
 			rjmp	salir_control
 ;************************************************************
 ;************************************************************
-
-
-;Presion es igual al umbral superior                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-
+Carga_offset_PEEP:
+			inr		r24,Presion_cmH2OL
+			inr		r25,Presion_cmH2OH
+			inr		ZL,offset_PEEPL
+			inr		ZH,offset_PEEPH
+			cp		R24,ZL
+			cpc		R25,ZH
+			rbrlo	out_carga_offset
+			sub		r24,zl
+			sbc		r25,zh
+			subi	r24,low(-300)
+			sbci	r25,high(-300)
+			ret
 ;************************************************************
-;************************************************************
+;**********************fin peep control**********************
 
 
 
@@ -1075,21 +1076,6 @@ sin_flujo:
 			outi	reg_PWM_Val_ExL,0xF4
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
 			rjmp	salir_control
-;************************************************************
-;************************************************************
-Carga_offset_PEEP:
-			inr		r24,Presion_cmH2OL
-			inr		r25,Presion_cmH2OH
-			inr		ZL,offset_PEEPL
-			inr		ZH,offset_PEEPH
-			cp		R24,ZL
-			cpc		R25,ZH
-			rbrlo	out_carga_offset
-			sub		r24,zl
-			sbc		r25,zh
-			subi	r24,low(-300)
-			sbci	r25,high(-300)
-			ret
 ;************************************************************
 ;************************************************************
 ;********************sobre presion***************************
