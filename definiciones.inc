@@ -241,6 +241,7 @@ fin_macro_standby:
 			outi	reg_PWM_Val_ExH,0x01
 			outi	reg_PWM_Val_ExL,0xF4
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
+		
 			
 			outi		B_P_PIP,'0'
 			outi		B_Vol,'0'
@@ -255,7 +256,9 @@ fin_macro_standby:
 			INSP_EXHA			1
 			PIN_PS0
 			////nuevo
-
+			
+			movr		Pres_objL,reg_Pinspiracionx100L
+			movr		Pres_objH,reg_Pinspiracionx100H
 			
 
 
@@ -307,12 +310,15 @@ fin_macro_inspiracion:
 			OUTI	FASE,						PRESION_SOPORTE
 			////nuevo
 
-		
+			movr		Pres_objL,reg_PSx100L
+			movr		Pres_objH,reg_PSx100H
+
 			CBI		T_PAUSA
 			outi	presion_maxima,				'0'
 			outi		bandera_Tinsp_50p,'0'
 			outi	bandera_inc_PWM_inspiracion,'0'
 			outi	inhibe_compensacion,'0'
+			;outiw		cont_10msH,cont_10msL,0x0196
 			ASIGNA_TIEMPO						tmr_TIEMPO_INSH,tmr_TIEMPO_INSL
 
 			outi	B_PR_SP,'0'
@@ -1200,8 +1206,9 @@ fin_macro_dec_volumen:
 
 .equ		Presion_antL			=	reg_NPA700+36
 .equ		Presion_antH			=	reg_NPA700+37
-;.equ		reg_PEEPMHFPx100		=	reg_NPA700+38
-;.equ		reg_PEEPHFPx100			=	reg_NPA700+39
+
+.equ		Pres_objL				=	reg_NPA700+38
+.equ		Pres_objH				=	reg_NPA700+39
 
 .equ		reg_PSLFPx100			=	reg_NPA700+40
 .equ		reg_PSMLFPx100			=	reg_NPA700+41
