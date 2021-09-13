@@ -440,7 +440,7 @@ control_P_INS_MODO_PRESION:
 
 
 sigue_control_P_inspiracion:
-
+			sbi		led_run
 			call	CARGA_PR_OFFSET
 			cpi		R24,low(45)
 			cpci	R25,high(45)
@@ -448,6 +448,8 @@ sigue_control_P_inspiracion:
 ;************************************************************
 ;************************************************************
 PIP_control:
+			
+			
 			;outi	inhibe_compensacion,'1'
 			call	CARGA_PR_OFFSET
 			inr		xl,reg_Pinspiracionx100L
@@ -467,7 +469,7 @@ PIP_control:
 			cpc		R25,XH
 			rbrlo	PIP_Baja_P
 ;************************************************************	
-;			rjmp		salir_control
+			rjmp	PIP_Ok_P;	salir_control
 			call	CARGA_PR_OFFSET
 			inr		xl,reg_Pinspiracionx100L
 			inr		xh,reg_Pinspiracionx100H
@@ -483,14 +485,14 @@ PIP_control:
 			outi	B_Dec_PEEP,'1'
 SRPPIOK_A:;Skip_read_Pres_PIP_OK
 			call	CARGA_PR_OFFSET
-			outr	Presion_antL,R24
-			outr	Presion_antH,R25 
+			;outr	Presion_antL,R24
+			;outr	Presion_antH,R25 
 			inr		XL,Presion_antL
 			inr		XH,Presion_antH
 			subi	XL,low(-10)
 			sbci	XH,high(-10)
-			cp		ZL,XL
-			cpc		ZH,XH
+			cp		R24,XL
+			cpc		R25,XH
 			rbrlo	salir_control;;;apagado de basndera de actualizacion 
 			inr		XL,reg_PWM_Val_ExL
 			inr		XH,reg_PWM_Val_ExH
@@ -498,13 +500,13 @@ SRPPIOK_A:;Skip_read_Pres_PIP_OK
 			cpci	XH,high(50)
 			rbrsh	Skip_PIP_V_OK_B
 			sbiw	XL,1
-			outr	reg_PWM_Val_ExH,XH
-			outr	reg_PWM_Val_ExL,XL
+			;outr	reg_PWM_Val_ExH,XH
+			;outr	reg_PWM_Val_ExL,XL
 Skip_PIP_V_OK_B:
 			inr		XL,PWM_FLUJOL
 			inr		XH,PWM_FLUJOH
-			cpi		XL,low(40)
-			cpci	XH,high(40)
+			cpi		XL,low(110)
+			cpci	XH,high(110)
 			rbrlo	salir_control
 			sbiw	XL,1
 			outr	PWM_FLUJOH,XH
@@ -530,14 +532,14 @@ Skip_PIP_V_OK:
 			outi	B_Dec_PEEP,'1'
 SRPPIOK:;Skip_read_Pres_PIP_OK
 			call	CARGA_PR_OFFSET
-			outr	Presion_antH,R25 
-			outr	Presion_antL,R24
+			;outr	Presion_antH,R25 
+			;outr	Presion_antL,R24
 			inr		XL,Presion_antL
 			inr		XH,Presion_antH
 			subi	XL,low(-10)
 			sbci	XH,high(-10)
-			cp		ZL,XL
-			cpc		ZH,XH
+			cp		R24,XL
+			cpc		R25,XH
 			rbrsh	salir_control
 			inr		ZL,Presion_antL
 			inr		ZH,Presion_antH
@@ -621,75 +623,6 @@ out_PIP_Baja:
 
 
 ;************************************************************
-;************************************************************
-
-low_PWM_PIP:
-			outi	B_P_PIP,'1'
-			outi	reg_PWM2_AireH,high(2)
-			outi	reg_PWM2_AireL,low(2)
-			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
-
-			rjmp	salir_control
-;************************************************************
-;************************************************************
-Inc_PWM_PIP:
-			inr		ZL,Cont_CF_L
-			inr		ZH,Cont_CF_H
-			cpi		ZL,low(2)
-			cpci	ZH,high(2)
-			brlo	R_PWM
-			sbiw	Z,1
-			outr	Cont_CF_L,ZL
-			outr	Cont_CF_H,ZH
-			rjmp	salir_control
-;************************************************************
-;************************************************************
-R_PWM:		
-			outi	Cont_CF_H,high(50)
-			outi	Cont_CF_L,low(50)
-			;rjmp	salir_control
-
-;************************************************************
-			cpri	C_PEEP_DOWN,5
-			rbrsh	R_PWM_1
-;************************************************************
-;************************************************************
-			call	CARGA_PR_OFFSET
-			inr		xl,reg_Pinspiracionx100L
-			inr		xh,reg_Pinspiracionx100H
-			sub		XL,r24
-			sbc		XH,r25	
-			ldiw	zh,zl,tabla_PIP*2
-			;outr		xl,low(500)
-			;outr		xl,low(500)
-			lsl		xl
-			rol		xh
-			add		zl,xl
-			adc		zh,xh
-			outi	rampz,0x00
-			lpm		xl,z+
-			lpm		xh,z
-;************************************************************
-			
-			inr		ZL,PWM_FLUJOL
-			inr		ZH,PWM_FLUJOH
-			;adiw	XL,3			;subi	XL,low(-10)
-			;sbci	XH,high(-10)
-			add		zl,XL
-			adc		zh,XH
-			cpi		ZL,low(480)
-			cpci	ZH,high(480)
-			rbrsh	PMW_Inc_out
-			outr	PWM_FLUJOH,ZH
-			outr	PWM_FLUJOL,ZL
-			rjmp	salir_control
-			
-;************************************************************
-PMW_Inc_out:
-			outi	PWM_FLUJOH,high(480)
-			outi	PWM_FLUJOL,low(480)
-			rjmp	salir_control
-;************************************************************
 PIP_Alta:
 			;outi	B_PEEP_DOWN,'0'
 			;outi	reg_PWM_Val_ExH,0x00
@@ -715,26 +648,15 @@ CHK_PIP_Alta:
 			cpc		R25,XH
 			rbrlo	salir_control
 			;ASIGNA_PWM_V_ex  				0,0
+			outi	PWM_FLUJOL,low(0)
+			outi	PWM_FLUJOH,high(0)
 			outi	reg_PWM_Val_ExH,0x00
 			outi	reg_PWM_Val_ExL,0x00
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
 			
 			rjmp	salir_control
 ;************************************************************
-;************************************************************
-;************************************************************
-R_PWM_1:
-			inr		ZL,PWM_FLUJOL
-			inr		ZH,PWM_FLUJOH
-			adiw	ZL,5			
-			cpi		ZL,low(480)
-			cpci	ZH,high(480)
-			rbrsh	PMW_Inc_out
-			outr	PWM_FLUJOH,ZH
-			outr	PWM_FLUJOL,ZL
-			;outi	PWM_FLUJOH,high(140)
-			;outi	PWM_FLUJOL,low(140)
-			rjmp	salir_control
+
 ;************************************************************
 ;************************************************************
 CARGA_PR_OFFSET:
@@ -747,8 +669,8 @@ CARGA_PR_OFFSET:
 			rbrlo	out_carga_offset
 			sub		r24,zl
 			sbc		r25,zh
-			subi	r24,low(-300)
-			sbci	r25,high(-300)
+			subi	r24,low(-200)
+			sbci	r25,high(-200)
 			ret
 
 ;************************************************************
@@ -1119,143 +1041,25 @@ ini_Pr_Sp:
 			inr		r16,cont_10msL	;Si el tiempo de la fase es menor a 20ms
 			inr		r17,cont_10msH	;ya no se ejecuta el control
 			sei
-			cpi		r16,low(2)
-			cpci	r17,high(2)
-			rbrlo	sin_flujo
-;************************************************************
-;************************************************************
-			cpri	B_PS_Ok,'1'
-			rbreq	Pr_Sp_Ok
-;************************************************************
-;************************************************************
-			inr		r16,reg_PSx100L
-			inr		r17,reg_PSx100H
-			inr		R24,Presion_cmH2OL
-			inr		R25,Presion_cmH2OH
-			;call	CARGA_PR_OFFSET
-			subi	R24,low(-700)
-			sbci	R25,high(-700)
-			cp		R24,r16
-			cpc		R25,r17
-			;cpi		XL,low(2800)
-			;cpci	XH,high(2800)
-			rbrsh	Pr_Sp_Ok
-;************************************************************
-			movr	Reg_PS_TempL,Presion_cmH2OL
-			movr	Reg_PS_TempH,Presion_cmH2OH
-;************************************************************
-;************************************************************
-			inr		ZL,Cont_CF_L
-			inr		ZH,Cont_CF_H
-			cpi		ZL,low(2)
-			cpci	ZH,high(2)
-			brlo	sum_PS_PWM
-			sbiw	Z,1
-			outr	Cont_CF_L,ZL
-			outr	Cont_CF_H,ZH
-			rjmp	salir_control
-;+++++++++++++++++++++++++++++++++++++++++
-;+++++++++++++++++++++++++++++++++++++++++
-sum_PS_PWM:
-			outi	Cont_CF_H,high(20)
-			outi	Cont_CF_L,low(20)
-			;inr		r24,Presion_cmH2OL
-			;inr		r25,Presion_cmH2OH
-			call	CARGA_PR_OFFSET
-			inr		XL,reg_PSx100L
-			inr		XH,reg_PSx100H
-			sub		XL,r24
-			sbc		XH,r25	
-			ldiw	zh,zl,tabla_PIP*2
-			;outr		xl,low(500)
-			;outr		xl,low(500)
-			lsl		xl
-			rol		xh
-			add		zl,xl
-			adc		zh,xh
-			outi	rampz,0x00
-			lpm		xl,z+
-			lpm		xh,z
-;************************************************************
-			
-			inr		ZL,PWM_FLUJOL
-			inr		ZH,PWM_FLUJOH
-			;adiw	XL,3			;subi	XL,low(-10)
-			;sbci	XH,high(-10)
-			add		zl,XL
-			adc		zh,XH
-			cpi		ZL,low(480)
-			cpci	ZH,high(480)
-			rbrsh	PMW_Inc_out
-			outr	PWM_FLUJOH,ZH
-			outr	PWM_FLUJOL,ZL
-			rjmp	salir_control
-
-;************************************************************
-Pr_Sp_Ok:
-			outi	B_PS_Ok,'1'
-			inr		r16,reg_PSx100L
-			inr		r17,reg_PSx100H
-/*			inr		R24,Presion_cmH2OL
-			inr		R25,Presion_cmH2OH
-			subi	R24,low(-150)
-			sbci	R25,high(-150)*/
-			call	CARGA_PR_OFFSET
-			cp		R24,r16
-			cpc		R25,r17
-			rbrsh	libera_PS
-;************************************************************
-			inr		ZL,Cont_CF_L
-			inr		ZH,Cont_CF_H
-			cpi		ZL,low(2)
-			cpci	ZH,high(2)
-			brlo	Dec_PS_PWM
-			sbiw	Z,1
-			outr	Cont_CF_L,ZL
-			outr	Cont_CF_H,ZH
-			rjmp	salir_control
-;************************************************************
-Dec_PS_PWM:
-			inr		r16,Reg_PS_TempL
-			inr		r17,Reg_PS_TempH
-			inr		R24,Presion_cmH2OL
-			inr		R25,Presion_cmH2OH
-			;call	CARGA_PR_OFFSET
-			subi	R24,low(10)
-			sbci	R25,high(10)
-			cp		R24,r16
-			cpc		R25,r17
+			cpi		r16,low(4)
+			cpci	r17,high(4)
 			rbrlo	salir_control
-;************************************************************
-;************************************************************
-			movr	Reg_PS_TempL,Presion_cmH2OL
-			movr	Reg_PS_TempH,Presion_cmH2OH
-			inr		ZL,PWM_FLUJOL
-			inr		ZH,PWM_FLUJOH
-			inr		XL,offset_COMFLPIPL
-			inr		XH,offset_COMFLPIPH
-			cp		ZL,XL
-			cpc		ZH,XH
-			rbrlo	pip_OK_out
-			sbiw	ZL,3
-			outr	PWM_FLUJOH,ZH
-			outr	PWM_FLUJOL,ZL
+
+
+			cpri	B_PS_Ok,'0'
+			breq	Pr_Sp_control
+			cpri	B_PS_Ok,'2'
+			breq	Pr_Sp_control
+			;jmp		Pr_Sp_control
+			outiw	cont_10msH,cont_10msL,0x0010
+			outi	B_PS_Ok,'2'
+Pr_Sp_control:
+			outi		PWM_FLUJOH,high(170)
+			outi		PWM_FLUJOL,low(170)
 			rjmp	salir_control
-;************************************************************
-;************************************************************
-			
-			outi	Cont_CF_H,high(15)
-			outi	Cont_CF_L,low(15)
-			inr		ZL,PWM_FLUJOL
-			inr		ZH,PWM_FLUJOH
-			inr		XL,offset_COMFLPIPL
-			inr		XH,offset_COMFLPIPH
-			cp		ZL,XL
-			cpc		ZH,XH
-			rbrlo	pip_OK_out
-			sbiw	ZL,5
-			outr	PWM_FLUJOH,ZH
-			outr	PWM_FLUJOL,ZL
-			rjmp	salir_control
+;+++++++++++++++++++++++++++++++++++++++++
+;+++++++++++++++++++++++++++++++++++++++++
+
+
 ;************************************************************
 ;************************************************************

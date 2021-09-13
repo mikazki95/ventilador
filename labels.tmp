@@ -46,7 +46,7 @@
   <TABLA_CONVERSION_O2_BCD><FILE>C:\Ventilador\control\Control_R\ventilador\TablaO2.inc</FILE><LINE>4</LINE></TABLA_CONVERSION_O2_BCD>
   <TABLA_CONVERSION_PRESION><FILE>C:\Ventilador\control\Control_R\ventilador\TablaPresion.inc</FILE><LINE>4</LINE></TABLA_CONVERSION_PRESION>
   <TABLA_CONVERSION_PRESION_NPA700><FILE>C:\Ventilador\control\Control_R\ventilador\TablaPresionNPA700.inc</FILE><LINE>4</LINE></TABLA_CONVERSION_PRESION_NPA700>
-  <init_io><FILE>C:\Ventilador\control\Control_R\ventilador\definiciones.inc</FILE><LINE>1313</LINE></init_io>
+  <init_io><FILE>C:\Ventilador\control\Control_R\ventilador\definiciones.inc</FILE><LINE>1308</LINE></init_io>
   <NORM_HEX><FILE>C:\Ventilador\control\Control_R\ventilador\fp_lib.inc</FILE><LINE>591</LINE></NORM_HEX>
   <NORM_HEX1><FILE>C:\Ventilador\control\Control_R\ventilador\fp_lib.inc</FILE><LINE>608</LINE></NORM_HEX1>
   <NORM_HEX2><FILE>C:\Ventilador\control\Control_R\ventilador\fp_lib.inc</FILE><LINE>613</LINE></NORM_HEX2>
@@ -297,34 +297,34 @@
   <libera_tst><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>168</LINE></libera_tst>
   <alarma_sobrepresion><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>174</LINE></alarma_sobrepresion>
   <salir_int0><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>180</LINE></salir_int0>
-  <incP_Nivel_PIP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>181</LINE></incP_Nivel_PIP>
-  <decP_Nivel_PIP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>191</LINE></decP_Nivel_PIP>
-  <incP_Nivel_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>201</LINE></incP_Nivel_PEEP>
-  <decP_Nivel_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>211</LINE></decP_Nivel_PEEP>
-  <inc_Nivel_PIP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>140</LINE></inc_Nivel_PIP>
-  <dec_Nivel_PIP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>150</LINE></dec_Nivel_PIP>
-  <inc_Nivel_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>160</LINE></inc_Nivel_PEEP>
-  <dec_Nivel_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>170</LINE></dec_Nivel_PEEP>
-  <si_es_trigger><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>64</LINE></si_es_trigger>
-  <rx_ping_sv><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>253</LINE></rx_ping_sv>
-  <tst_modo_CPAP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>42</LINE></tst_modo_CPAP>
-  <borra_bandera_datos><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>36</LINE></borra_bandera_datos>
-  <tst_rx_2_3><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>49</LINE></tst_rx_2_3>
-  <tst_alarma_sv><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>54</LINE></tst_alarma_sv>
-  <entra_CPAP_asistido><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>237</LINE></entra_CPAP_asistido>
-  <salir_CPAP_asistido><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>245</LINE></salir_CPAP_asistido>
-  <salir_int_rx1><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>281</LINE></salir_int_rx1>
-  <tst_P_CPAP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>225</LINE></tst_P_CPAP>
-  <tst_tiempo_pausa_ps><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>84</LINE></tst_tiempo_pausa_ps>
-  <tst_SIMV><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>113</LINE></tst_SIMV>
-  <tst_CMV><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>99</LINE></tst_CMV>
-  <asigna_inspiracion><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>107</LINE></asigna_inspiracion>
-  <tst_ventana><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>118</LINE></tst_ventana>
-  <asigna_inspiracion_asistida><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>125</LINE></asigna_inspiracion_asistida>
-  <asigna_PS_CPAP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>232</LINE></asigna_PS_CPAP>
-  <pres_ok><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>266</LINE></pres_ok>
-  <pres_ok_2><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>278</LINE></pres_ok_2>
-  <alarma_nivel1><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>287</LINE></alarma_nivel1>
+  <incP_Nivel_PIP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>184</LINE></incP_Nivel_PIP>
+  <decP_Nivel_PIP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>194</LINE></decP_Nivel_PIP>
+  <inc_Nivel_PIP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>143</LINE></inc_Nivel_PIP>
+  <dec_Nivel_PIP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>153</LINE></dec_Nivel_PIP>
+  <incP_Nivel_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>204</LINE></incP_Nivel_PEEP>
+  <decP_Nivel_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>214</LINE></decP_Nivel_PEEP>
+  <inc_Nivel_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>163</LINE></inc_Nivel_PEEP>
+  <dec_Nivel_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>173</LINE></dec_Nivel_PEEP>
+  <si_es_trigger><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>67</LINE></si_es_trigger>
+  <rx_ping_sv><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>256</LINE></rx_ping_sv>
+  <tst_modo_CPAP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>45</LINE></tst_modo_CPAP>
+  <borra_bandera_datos><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>39</LINE></borra_bandera_datos>
+  <tst_rx_2_3><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>52</LINE></tst_rx_2_3>
+  <tst_alarma_sv><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>57</LINE></tst_alarma_sv>
+  <entra_CPAP_asistido><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>240</LINE></entra_CPAP_asistido>
+  <salir_CPAP_asistido><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>248</LINE></salir_CPAP_asistido>
+  <salir_int_rx1><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>284</LINE></salir_int_rx1>
+  <tst_P_CPAP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>228</LINE></tst_P_CPAP>
+  <tst_tiempo_pausa_ps><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>87</LINE></tst_tiempo_pausa_ps>
+  <tst_SIMV><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>116</LINE></tst_SIMV>
+  <tst_CMV><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>102</LINE></tst_CMV>
+  <asigna_inspiracion><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>110</LINE></asigna_inspiracion>
+  <tst_ventana><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>121</LINE></tst_ventana>
+  <asigna_inspiracion_asistida><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>128</LINE></asigna_inspiracion_asistida>
+  <asigna_PS_CPAP><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>235</LINE></asigna_PS_CPAP>
+  <pres_ok><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>269</LINE></pres_ok>
+  <pres_ok_2><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>281</LINE></pres_ok_2>
+  <alarma_nivel1><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>290</LINE></alarma_nivel1>
   <desactiva_alarma_ping_int_rx><FILE>C:\Ventilador\control\Control_R\ventilador\Comandos.inc</FILE><LINE>523</LINE></desactiva_alarma_ping_int_rx>
   <compara_cont_1><FILE>C:\Ventilador\control\Control_R\ventilador\Comandos.inc</FILE><LINE>126</LINE></compara_cont_1>
   <comando_ok><FILE>C:\Ventilador\control\Control_R\ventilador\Comandos.inc</FILE><LINE>118</LINE></comando_ok>
@@ -371,57 +371,50 @@
   <pulso><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>270</LINE></pulso>
   <next_bit_rd><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>287</LINE></next_bit_rd>
   <salir_control><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>378</LINE></salir_control>
-  <tst_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>860</LINE></tst_PEEP>
+  <tst_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>782</LINE></tst_PEEP>
   <tst_P_PRUEBA><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>386</LINE></tst_P_PRUEBA>
   <tst_P_INSPIRACION><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>409</LINE></tst_P_INSPIRACION>
-  <sin_flujo><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1086</LINE></sin_flujo>
-  <ini_Pr_Sp><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1117</LINE></ini_Pr_Sp>
-  <peep_CPAP><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>864</LINE></peep_CPAP>
+  <sin_flujo><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1008</LINE></sin_flujo>
+  <ini_Pr_Sp><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1039</LINE></ini_Pr_Sp>
+  <peep_CPAP><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>786</LINE></peep_CPAP>
   <SDS><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>401</LINE></SDS>
   <control_P_INS_MODO_PRESION><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>410</LINE></control_P_INS_MODO_PRESION>
   <sigue_control_P_inspiracion><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>442</LINE></sigue_control_P_inspiracion>
-  <CARGA_PR_OFFSET><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>740</LINE></CARGA_PR_OFFSET>
-  <pip_nul><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>761</LINE></pip_nul>
+  <CARGA_PR_OFFSET><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>662</LINE></CARGA_PR_OFFSET>
+  <pip_nul><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>683</LINE></pip_nul>
   <PIP_control><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>450</LINE></PIP_control>
-  <PIP_Alta><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>693</LINE></PIP_Alta>
-  <PIP_Baja_P><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>586</LINE></PIP_Baja_P>
-  <PIP_Ok_P><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>515</LINE></PIP_Ok_P>
-  <SRPPIOK_A><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>484</LINE></SRPPIOK_A>
-  <Skip_PIP_V_OK_B><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>503</LINE></Skip_PIP_V_OK_B>
-  <Skip_PIP_V_OK><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>524</LINE></Skip_PIP_V_OK>
-  <SRPPIOK><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>531</LINE></SRPPIOK>
-  <PIP_Ok><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>565</LINE></PIP_Ok>
-  <pip_OK_out><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>580</LINE></pip_OK_out>
-  <SRPPIA><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>596</LINE></SRPPIA>
-  <out_PIP_Baja><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>616</LINE></out_PIP_Baja>
-  <low_PWM_PIP><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>626</LINE></low_PWM_PIP>
-  <Inc_PWM_PIP><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>635</LINE></Inc_PWM_PIP>
-  <R_PWM><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>647</LINE></R_PWM>
-  <R_PWM_1><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>726</LINE></R_PWM_1>
-  <PMW_Inc_out><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>688</LINE></PMW_Inc_out>
-  <CHK_PIP_Alta><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>708</LINE></CHK_PIP_Alta>
-  <out_carga_offset><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>755</LINE></out_carga_offset>
-  <PEEP_PrSp><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>822</LINE></PEEP_PrSp>
-  <tst_PEEP2><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>859</LINE></tst_PEEP2>
-  <PEEP_control><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>871</LINE></PEEP_control>
-  <Carga_offset_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1062</LINE></Carga_offset_PEEP>
-  <PEEP_Alta><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1004</LINE></PEEP_Alta>
-  <PEEP_Baja_P><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>958</LINE></PEEP_Baja_P>
-  <PEEP_Ok><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>895</LINE></PEEP_Ok>
-  <check_Flujo_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>939</LINE></check_Flujo_PEEP>
-  <SRPPOk><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>914</LINE></SRPPOk>
-  <PEEP_Ok_out><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>952</LINE></PEEP_Ok_out>
-  <skip_PEEP_baja_A><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>965</LINE></skip_PEEP_baja_A>
-  <skip_PEEP_Baja><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>991</LINE></skip_PEEP_Baja>
-  <skip_PEEP_Alta><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1015</LINE></skip_PEEP_Alta>
-  <SRPPEA><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1022</LINE></SRPPEA>
-  <out_PEEP_Alta><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1056</LINE></out_PEEP_Alta>
-  <skip_cont_VV><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1039</LINE></skip_cont_VV>
-  <sobre_presion><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1080</LINE></sobre_presion>
-  <libera_PS><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1099</LINE></libera_PS>
-  <Pr_Sp_Ok><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1195</LINE></Pr_Sp_Ok>
-  <sum_PS_PWM><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1159</LINE></sum_PS_PWM>
-  <Dec_PS_PWM><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1218</LINE></Dec_PS_PWM>
+  <PIP_Alta><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>626</LINE></PIP_Alta>
+  <PIP_Baja_P><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>588</LINE></PIP_Baja_P>
+  <PIP_Ok_P><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>517</LINE></PIP_Ok_P>
+  <SRPPIOK_A><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>486</LINE></SRPPIOK_A>
+  <Skip_PIP_V_OK_B><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>505</LINE></Skip_PIP_V_OK_B>
+  <Skip_PIP_V_OK><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>526</LINE></Skip_PIP_V_OK>
+  <SRPPIOK><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>533</LINE></SRPPIOK>
+  <PIP_Ok><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>567</LINE></PIP_Ok>
+  <pip_OK_out><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>582</LINE></pip_OK_out>
+  <SRPPIA><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>598</LINE></SRPPIA>
+  <out_PIP_Baja><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>618</LINE></out_PIP_Baja>
+  <CHK_PIP_Alta><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>641</LINE></CHK_PIP_Alta>
+  <out_carga_offset><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>677</LINE></out_carga_offset>
+  <PEEP_PrSp><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>744</LINE></PEEP_PrSp>
+  <tst_PEEP2><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>781</LINE></tst_PEEP2>
+  <PEEP_control><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>793</LINE></PEEP_control>
+  <Carga_offset_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>984</LINE></Carga_offset_PEEP>
+  <PEEP_Alta><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>926</LINE></PEEP_Alta>
+  <PEEP_Baja_P><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>880</LINE></PEEP_Baja_P>
+  <PEEP_Ok><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>817</LINE></PEEP_Ok>
+  <check_Flujo_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>861</LINE></check_Flujo_PEEP>
+  <SRPPOk><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>836</LINE></SRPPOk>
+  <PEEP_Ok_out><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>874</LINE></PEEP_Ok_out>
+  <skip_PEEP_baja_A><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>887</LINE></skip_PEEP_baja_A>
+  <skip_PEEP_Baja><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>913</LINE></skip_PEEP_Baja>
+  <skip_PEEP_Alta><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>937</LINE></skip_PEEP_Alta>
+  <SRPPEA><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>944</LINE></SRPPEA>
+  <out_PEEP_Alta><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>978</LINE></out_PEEP_Alta>
+  <skip_cont_VV><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>961</LINE></skip_cont_VV>
+  <sobre_presion><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1002</LINE></sobre_presion>
+  <libera_PS><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1021</LINE></libera_PS>
+  <Pr_Sp_control><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1056</LINE></Pr_Sp_control>
   <inicio2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>108</LINE></inicio2>
   <tx_listo><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1109</LINE></tx_listo>
   <wait_rx><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>122</LINE></wait_rx>

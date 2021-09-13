@@ -11,14 +11,17 @@ rx_trigger:
 			rbreq	incP_Nivel_PIP
 			cpi		r25,'W'
 			rbreq	decP_Nivel_PIP
-			cpi		r25,'E'
-			rbreq	incP_Nivel_PEEP
-			cpi		r25,'R'
-			rbreq	decP_Nivel_PEEP
+			
 			cpi		r25,'q'
 			rbreq	inc_Nivel_PIP
 			cpi		r25,'w'
 			rbreq	dec_Nivel_PIP
+
+			cpi		r25,'E'
+			rbreq	incP_Nivel_PEEP
+			cpi		r25,'R'
+			rbreq	decP_Nivel_PEEP
+
 			cpi		r25,'e'
 			rbreq	inc_Nivel_PEEP
 			cpi		r25,'r'
@@ -140,7 +143,7 @@ asigna_inspiracion_asistida:
 inc_Nivel_PIP:
 			inr		XL,offset_PIPL
 			inr		XH,offset_PIPH
-			adiw	X,0x0A
+			adiw	XL,0x0A
 			cpi		XL,low(600)
 			cpci	XH,high(600)
 			rbrsh	salir_int_rx1
@@ -150,17 +153,17 @@ inc_Nivel_PIP:
 dec_Nivel_PIP:
 			inr		XL,offset_PIPL
 			inr		XH,offset_PIPH
-			sbiw	X,0x0A
+			sbiw	XL,0x0A
 			cpi		XL,0x00
 			cpci	XH,0x00
-			rbrlo	salir_int_rx1
+			rbrlt	salir_int_rx1
 			outr	offset_PIPH,XH
 			outr	offset_PIPL,XL
 			jmp		salir_int_rx1
 inc_Nivel_PEEP:
 			inr		XL,offset_PEEPL
 			inr		XH,offset_PEEPH
-			adiw	X,0x0A
+			adiw	XL,0x0A
 			cpi		XL,low(600)
 			cpci	XH,high(600)
 			rbrsh	salir_int_rx1
@@ -168,12 +171,12 @@ inc_Nivel_PEEP:
 			outr	offset_PEEPL,XL
 			jmp		salir_int_rx1
 dec_Nivel_PEEP:
-			inr		XL,offset_PIPL
-			inr		XH,offset_PIPH
-			sbiw	X,0x0A
+			inr		XL,offset_PEEPL
+			inr		XH,offset_PEEPH
+			sbiw	XL,0x0A
 			cpi		XL,0x00
 			cpci	XH,0x00
-			rbrlo	salir_int_rx1
+			rbrlt	salir_int_rx1
 			outr	offset_PEEPH,XH
 			outr	offset_PEEPL,XL
 			jmp		salir_int_rx1
@@ -181,7 +184,7 @@ dec_Nivel_PEEP:
 incP_Nivel_PIP:
 			inr		XL,offset_PIPL
 			inr		XH,offset_PIPH
-			adiw	X,0x32
+			adiw	XL,0x32
 			cpi		XL,low(600)
 			cpci	XH,high(600)
 			rbrsh	salir_int_rx1
@@ -191,17 +194,17 @@ incP_Nivel_PIP:
 decP_Nivel_PIP:
 			inr		XL,offset_PIPL
 			inr		XH,offset_PIPH
-			sbiw	X,0x32
+			sbiw	XL,0x32
 			cpi		XL,0x00
 			cpci	XH,0x00
-			rbrlo	salir_int_rx1
+			rbrlt	salir_int_rx1
 			outr	offset_PIPH,XH
 			outr	offset_PIPL,XL
 			jmp		salir_int_rx1
 incP_Nivel_PEEP:
 			inr		XL,offset_PEEPL
 			inr		XH,offset_PEEPH
-			adiw	X,0x32
+			adiw	XL,0x32
 			cpi		XL,low(600)
 			cpci	XH,high(600)
 			rbrsh	salir_int_rx1
@@ -209,12 +212,12 @@ incP_Nivel_PEEP:
 			outr	offset_PEEPL,XL
 			jmp		salir_int_rx1
 decP_Nivel_PEEP:
-			inr		XL,offset_PIPL
-			inr		XH,offset_PIPH
-			sbiw	X,0x32
+			inr		XL,offset_PEEPL
+			inr		XH,offset_PEEPH
+			sbiw	XL,0x32
 			cpi		XL,0x00
 			cpci	XH,0x00
-			rbrlo	salir_int_rx1
+			rbrlt	salir_int_rx1
 			outr	offset_PEEPH,XH
 			outr	offset_PEEPL,XL
 			jmp		salir_int_rx1

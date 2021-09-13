@@ -267,6 +267,13 @@ salto:
 salto:
 			.endm
 
+.macro		rbrlt
+			brge	salto
+			jmp	@0
+salto:
+			.endm
+
+
 .macro		rbrts
 			brtc	salto
 			jmp	@0

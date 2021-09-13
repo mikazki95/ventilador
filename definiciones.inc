@@ -255,8 +255,7 @@ fin_macro_standby:
 			INSP_EXHA			1
 			PIN_PS0
 			////nuevo
-			outi		Cont_CF_H,high(50)
-			outi		Cont_CF_L,low(50)
+
 			
 
 
@@ -281,12 +280,7 @@ asigna_inspiracion_0:
 
 			outi		PWM_FLUJOH,high(100)
 			outi		PWM_FLUJOL,low(100)
-			;movr	PWM_FLUJOH,offset_PiPH
-			;movr	PWM_FLUJOL,offset_PiPL
-			;ASIGNA_PWM_FLUJO					0,0
 skip_asigna_0:
-			;ELECTROVALVULAS						PWM_VV_Max
-			;ASIGNA_PWM_V_ex  					0x01,0x00
 			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
 			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
 
@@ -299,32 +293,33 @@ fin_macro_inspiracion:
 			outi	reg_PWM_Val_ExL,0xF4
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
 			
+			outi		B_P_PIP,'0'
+			outi		B_Vol,'0'
+			outi		b_sp,'0'
+			outi		ventana,'1'
+			outi		B_PIP_OK,'0'
+			outi		B_PEEP_DOWN,'1'
+			outi		B_PEEP_UP,'0'
+			outi		tmr_inhibe_on_off_pwm,		3			; -> 3 int de 10ms
+			outi		inhibe_on_off_pwm,			'1'
+			INSP_EXHA			1
+			;PIN_PS0
+			OUTI	FASE,						PRESION_SOPORTE
+			////nuevo
+
+		
+			CBI		T_PAUSA
+			outi	presion_maxima,				'0'
+			outi		bandera_Tinsp_50p,'0'
+			outi	bandera_inc_PWM_inspiracion,'0'
+			outi	inhibe_compensacion,'0'
+			ASIGNA_TIEMPO						tmr_TIEMPO_INSH,tmr_TIEMPO_INSL
+
 			outi	B_PR_SP,'0'
 			outi	B_PS_Ok,'0'
-			outi		PWM_FLUJOH,high(100)
-			outi		PWM_FLUJOL,low(100)
-			;movr	PWM_FLUJOH,offset_PiPH
-			;movr	PWM_FLUJOL,offset_PiPL
-			outi	Cont_CF_H,high(10)
-			outi	Cont_CF_L,low(10)
-
-			;outi		reg_PSx100H,high(3000)
-			;outi		reg_PSx100L,low(3000)
-
-
-
-c_PS:		outi	tmr_inhibe_on_off_pwm,		3
-			outi	inhibe_on_off_pwm,			'1'
-			OUTI	FASE,						PRESION_SOPORTE
-			INSP_EXHA							1
 			PIN_PS1
-			CBI		T_PAUSA
-			
-			;outiw		cont_10msH,cont_10msL,0x0196
-			ASIGNA_TIEMPO						tmr_TIEMPO_INSH,tmr_TIEMPO_INSL;0x01,0x90;0x17,0x2F;
-			;ASIGNA_PWM_V_ex  					0,0;ELECTROVALVULAS						PWM_VV_Max
-			ASIGNA_PWM_O2					  	reg_PWM1_O2H,reg_PWM1_O2L
-			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
+
+
 fin_macro_presion_soporte:
 			.endm
 
