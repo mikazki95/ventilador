@@ -16,7 +16,7 @@
 #define	version_firmwareP	'.'
 #define	version_firmwareM	'2'
 ;#define	version_firmwareLP	'.'
-#define	version_firmwareL	'6'
+#define	version_firmwareL	'T'
 
 .equ	fxtal		=	11059200		;Frecuencia del cristal
 
@@ -596,14 +596,14 @@ skip_cp_1:	outr		tst_electro_exp,r16
 
 					cli
 
-					;outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
-					;outi	PWM_FLUJOL,low(PWMZERO);;
-					
+					outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
+					outi	PWM_FLUJOL,low(PWMZERO);;
+					/*
 					inr			r16,tmp_reg_PWM0L
 					outr		reg_PWM0L,r16
 					inr			r16,tmp_reg_PWM0H
 					outr		reg_PWM0H,r16
-
+*/
 					inr			r16,tmp_reg_PWM1_O2L
 					outr		reg_PWM1_O2L,r16
 					inr			r16,tmp_reg_PWM1_O2H

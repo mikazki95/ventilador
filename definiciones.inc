@@ -540,7 +540,16 @@ fin_macro_o2_100:
 			outi	presion_maxima,'0'
 			ASIGNA_PWM_O2					reg_PWM1_O2H,reg_PWM1_O2L
 			ASIGNA_PWM_AIRE					reg_PWM2_AireH,reg_PWM2_AireL
-			ASIGNA_PWM_FLUJO				reg_PWM0H,reg_PWM0L
+			;ASIGNA_PWM_FLUJO				reg_PWM0H,reg_PWM0L
+;***********************************************************************
+;***********************************************************************
+			outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
+			outi	PWM_FLUJOL,low(PWMZERO);;
+			outiw		cont_10msH,cont_10msL,0x0064
+			outi		Pres_objL,0xB8
+			outi		Pres_objH,0x0B
+;***********************************************************************
+;***********************************************************************
 			outi		FASE,				TST_ELECTROVALVULAS
 			outi	B_PR_TST,'1'
 			cpri	tst_electro_exp,'1'

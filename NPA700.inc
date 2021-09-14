@@ -384,6 +384,20 @@ libera_presion:
 			rjmp	salir_control
 */
 tst_P_PRUEBA:
+			cli
+			inr		r16,cont_10msL	;Si el tiempo de la fase es menor a 20ms
+			inr		r17,cont_10msH	;ya no se ejecuta el control
+			sei
+			cpi		r16,low(50)
+			cpci	r17,high(50)
+			rbrlo	verf_pres
+
+			jmp		sigue_control_P_inspiracion
+
+verf_pres:
+			outiw	cont_10msH,cont_10msL,0x000A
+			sbi		led_run
+			jmp		sin_flujo
 
 			cpri	B_PR_TST,'0'
 			rbreq	salir_control
@@ -440,7 +454,7 @@ control_P_INS_MODO_PRESION:
 
 
 sigue_control_P_inspiracion:
-			sbi		led_run
+			
 			call	CARGA_PR_OFFSET
 			cpi		R24,low(45)
 			cpci	R25,high(45)
@@ -736,42 +750,6 @@ sigue_control_PEEP:
 .endm
 ;************************************************************
 
-;************************************************************
-PEEP_PrSp:
-			cpri	B_PEEP_D,'1'
-			rbreq	tst_PEEP
-			outi	primer_cruce,'0'
-			outi		B_PR_SP,'1'
-			;ASIGNA_PWM_V_ex  				0,0;ELECTROVALVULAS		0
-			;delay_ms	30
-			;outi		PWM_FLUJOH,high(0)
-			;outi		PWM_FLUJOL,low(0)
-			
-			outi		CCF_H,high(60)
-			outi		CCF_L,low(60)
-			;outi		Ctrl_CF_H,high(114)
-			;outi		Ctrl_CF_L,low(114)
-			outi		Cont_CF_H,high(300)
-			outi		Cont_CF_L,low(300)
-			outi		reg_FLUJO_compensacionH,high(flujo_inicial_compensacion)
-			outi		reg_FLUJO_compensacionL,low(flujo_inicial_compensacion)
-			outi		bandera_inc_compensacion,'0'
-			outi		B_Dec,'0'
-			outi		B_PEEP_AC,'0'
-			outi		B_PEEP_D,'0'
-			outi		B_PEEP_DOWN,'0'
-			outi		B_PEEP_UP,'0'
-			outi		B_PEEP_DC,'0'	
-			outi		B_Cont,'0'
-			movr		VV_X,VV_OFF
-			outi		Cont_VV,50
-								
-			
-			
-			ASIGNA_PWM_O2						  reg_PWM1_O2H,reg_PWM1_O2L
-			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
-			outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
-			outi	PWM_FLUJOL,low(PWMZERO)
 
 ;************************************************************
 tst_PEEP2:			;PEEP_Control
