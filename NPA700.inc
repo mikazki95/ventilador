@@ -811,7 +811,6 @@ PEEP_control:
 			rbrlo	PEEP_Baja_P
 ;***********************peep ok*************************************	
 PEEP_Ok:
-			outi	primer_cruce,'1'
 			outi	B_PEEP_DOWN,'0'
 			;inr		r24,Presion_cmH2OL
 			;inr		r25,Presion_cmH2OH
@@ -875,7 +874,6 @@ PEEP_Ok_out:
 			rjmp	salir_control
 ;************************************************************
 PEEP_Baja_P:
-			outi	primer_cruce,'1'
 			cpri	B_PEEP_DOWN,'1'
 			rbreq	skip_PEEP_baja_A
 			call	Carga_offset_PEEP
@@ -922,8 +920,6 @@ skip_PEEP_Baja:
 ;************************************************************		
 ;************************************************************
 PEEP_Alta:
-			;cpri	primer_cruce,'1'
-			;rbreq	CHK_PEEP_Alta
 			outi	B_PEEP_DOWN,'0'
 			inr		ZL,PWM_FLUJOL
 			inr		ZH,PWM_FLUJOH
@@ -941,7 +937,9 @@ skip_PEEP_Alta:
 			outr	Presion_antL,R24;Presion_cmH2OL
 			outr	Presion_antH,R25;Presion_cmH2OH
 			outi	B_Dec_PEEP,'1'
-SRPPEA:
+SRPPEA:;Skip_read_Pres_PEEP_Alta
+			;inr		ZL,Presion_cmH2OL
+			;inr		ZH,Presion_cmH2OH
 			call	Carga_offset_PEEP
 			inr		XL,Presion_antL
 			inr		XH,Presion_antH
@@ -951,6 +949,21 @@ SRPPEA:
 			cpc		R25,XH
 			rbrlo	out_PEEP_Alta
 ;*****************************cambio
+			inr 	YL,Cont_VV
+			adiw	YL,1
+			cpi		YL,0xFC
+			brsh	skip_cont_VV
+			outr	Cont_VV,YL			
+skip_cont_VV:
+			inr		XL,reg_PWM_Val_ExL
+			inr		XH,reg_PWM_Val_ExH
+			cpi		XL,low(50)
+			cpci	XH,high(50)
+			rbrlo	salir_control
+			inr		ZL,skip_cont_VV
+			inr		ZH,0x00
+			;sub		XL,ZL
+			;sbc		XH,ZH
 			sbiw	XL,1
 			outr	reg_PWM_Val_ExH,XH
 			outr	reg_PWM_Val_ExL,XL
@@ -959,30 +972,9 @@ SRPPEA:
 ;************************************************************
 ;************************************************************
 out_PEEP_Alta:
+			outi	skip_cont_VV,0
 			outi	B_Dec_PEEP,'0'
 			rjmp	salir_control
-;************************************************************
-;************************************************************
-CHK_PEEP_Alta:
-			outi	PWM_FLUJOL,low(40)
-			outi	PWM_FLUJOH,high(40)
-			call	Carga_offset_PEEP
-			inr		xl,Pres_objL
-			inr		xh,Pres_objH
-			subi	XL,low(-500)
-			sbci	XH,high(-500)
-			cp		R24,XL
-			cpc		R25,XH
-			rbrlo	skip_PEEP_Alta
-			;ASIGNA_PWM_V_ex  				0,0
-
-			outi	reg_PWM_Val_ExH,0x00
-			outi	reg_PWM_Val_ExL,0x00
-			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
-			
-			rjmp	salir_control
-;************************************************************
-
 ;************************************************************
 ;************************************************************
 Carga_offset_PEEP:

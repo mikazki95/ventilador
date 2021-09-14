@@ -595,6 +595,10 @@ skip_cp_1:	outr		tst_electro_exp,r16
 			cp_limites	tmp_reg_PWM2_AireH,tmp_reg_PWM2_AireL,		1,	Val_PWMmax,tx_error_rango_rx
 
 					cli
+
+					;outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
+					;outi	PWM_FLUJOL,low(PWMZERO);;
+					
 					inr			r16,tmp_reg_PWM0L
 					outr		reg_PWM0L,r16
 					inr			r16,tmp_reg_PWM0H
@@ -604,6 +608,8 @@ skip_cp_1:	outr		tst_electro_exp,r16
 					outr		reg_PWM1_O2L,r16
 					inr			r16,tmp_reg_PWM1_O2H
 					outr		reg_PWM1_O2H,r16
+
+
 
 					inr			r16,tmp_reg_PWM2_AireL
 					outr		reg_PWM2_AireL,r16
