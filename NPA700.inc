@@ -336,10 +336,10 @@ control_presion:
 									outi	ucsr1b,0x18
 			cpri	FASE,STANDBY
 			rbreq	salir_control
-			cpri	FASE,CALIBRA_O2_21
-			rbreq	salir_control
+			cpri	FASE,pre_CALIBRA_O2_21
+			rbreq	aire_100_ON
 			cpri	FASE,CALIBRA_O2_100
-			rbreq	salir_control
+			rbreq	O2_100_ON
 
 			cpri	FASE,EXHALACION
 			rbreq	tst_PEEP
@@ -378,47 +378,61 @@ control_presion:
 salir_control:
 									outi	ucsr1b,0x98
 			ret
-/*
-libera_presion:
-			OFF_PRESION_0p
+
+libera_pres:
+			outi	reg_PWM_Val_ExH,0x00
+			outi	reg_PWM_Val_ExL,0x00
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
+			outi		PWM_FLUJOH,high(60)
+			outi		PWM_FLUJOL,low(60)
 			rjmp	salir_control
-*/
+
 tst_P_PRUEBA:
-			cli
+			cpri				B_TST_Run,'0'
+			rbreq				fin_tst
+			
 			inr		r16,cont_10msL	;Si el tiempo de la fase es menor a 20ms
 			inr		r17,cont_10msH	;ya no se ejecuta el control
-			sei
 			cpi		r16,low(50)
 			cpci	r17,high(50)
 			rbrlo	verf_pres
-
+			;sbi		led_run
+			outi		tmr_U,150
 			jmp		sigue_control_P_inspiracion
 
 verf_pres:
-			outiw	cont_10msH,cont_10msL,0x000A
-			sbi		led_run
+			;outiw	cont_10msH,cont_10msL,0x000A
+			;sbi		led_run
+			;rjmp	salir_control
+			cpri	B_PR_TST,'0'
+			rbrne	sin_flujo
+			outi	envia_trama_U,'1';Se habilita el envió de la trama U para la primera vez
+			outi	tmr_U,150		;10ms
+			outi	tx_U,'1'
+			outi	B_PR_TST,'1'
 			jmp		sin_flujo
 
-			cpri	B_PR_TST,'0'
-			rbreq	salir_control
-			;outi	B_PR_TST,'0'
-			;delay_ms	30
-			inr		r17,Presion_cmH2OH
-			inr		r16,Presion_cmH2OL
-			cpi		r16,low(30*100)
-			cpci	r17,high(30*100)
-			rbrlo	salir_control
 			OFF_PRESION_TST
-			;outi	B_PR_TST,'0'
-			;cpri	B_PR_TST,'1'
-			;breq	salir_control
-SDS:		outi	envia_trama_U,'1';Se habilita el envió de la trama U para la primera vez
-			outi	tmr_U,150		;10ms
-			outi	tx_U,'1'		;Validación de tx cada (ya transcurrieron los 300ms)
-			
-			rjmp	salir_control
+fin_tst:
+			sbi		led_run
+			outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
+			outi	PWM_FLUJOL,low(PWMZERO)
+			outi	reg_PWM_Val_ExH,0x00
+			outi	reg_PWM_Val_ExL,0x0A
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
+			jmp					salir_control
 
-
+;************************************************************
+;************************************************************
+aire_100_ON:
+			jmp		sigue_control_P_inspiracion
+			jmp					salir_control
+;************************************************************
+;************************************************************
+O2_100_ON:
+			jmp		sigue_control_P_inspiracion
+			jmp					salir_control
+;************************************************************
 ;************************************************************
 tst_P_INSPIRACION:
 control_P_INS_MODO_PRESION:
@@ -445,8 +459,8 @@ control_P_INS_MODO_PRESION:
 			cpri	B_Vol,'1'
 			rbreq	sin_Flujo
 
-			;ASIGNA_PWM_FLUJO		offset_PreH,offset_PreL
-			ASIGNA_PWM_FLUJO					reg_PWM0H,reg_PWM0L
+			ASIGNA_PWM_FLUJO		offset_PreH,offset_PreL
+			;ASIGNA_PWM_FLUJO					reg_PWM0H,reg_PWM0L
 			rjmp	salir_control
 
 
@@ -454,7 +468,12 @@ control_P_INS_MODO_PRESION:
 
 
 sigue_control_P_inspiracion:
-			
+
+			inr		Xl,Pres_objL
+			inr		Xh,Pres_objH
+			cpi		XL,0x00
+			cpci	XH,0x00
+			rbreq	libera_pres
 			call	CARGA_PR_OFFSET
 			cpi		R24,low(45)
 			cpci	R25,high(45)
@@ -463,7 +482,7 @@ sigue_control_P_inspiracion:
 ;************************************************************
 PIP_control:
 			
-			
+			;sbi		led_run
 			;outi	inhibe_compensacion,'1'
 			call	CARGA_PR_OFFSET
 			inr		xl,Pres_objL
@@ -528,7 +547,8 @@ Skip_PIP_V_OK_B:
 			;ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
 			rjmp	salir_control
 ;************************************************************
-PIP_Ok_P:
+PIP_Ok_P:	
+			outi	B_PR_TST,'1'
 			inr		XL,reg_PWM_Val_ExL
 			inr		XH,reg_PWM_Val_ExH
 			cpi		XL,low(500)
@@ -690,7 +710,7 @@ out_carga_offset:
 			ret
 ;************************************************************
 ;************************************************************
-pip_nul:				
+pip_nul:			
 			inr		ZL,PWM_FLUJOL
 			inr		ZH,PWM_FLUJOH
 			cpi		ZL,low(450)
@@ -767,6 +787,12 @@ peep_CPAP:
 PEEP_control:
 			;inr		r24,Presion_cmH2OL
 			;inr		r25,Presion_cmH2OH
+			inr		Xl,reg_PEEPL_100porciento
+			inr		Xh,reg_PEEPH_100porciento
+			cpi		XL,0x00
+			cpci	XH,0x00
+			rbreq	libera_pres
+			
 			call	Carga_offset_PEEP
 			inr		xl,reg_PEEPL_100porciento
 			inr		xh,reg_PEEPH_100porciento

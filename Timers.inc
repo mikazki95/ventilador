@@ -13,7 +13,6 @@ timer_10ms:
 			pushr	sreg
 			pushx
 			pushz
-
 ;			cpri	tmr_de_presion,0
 ;			breq	skip_tmr_presion
 ;			decr	tmr_de_presion
@@ -244,16 +243,22 @@ tiempo_fase:
 			cpri		FASE,TST_ELECTROVALVULAS
 			brne		verifica_otras_fases
 			cpri		envia_trama_U,'0'
-			rbreq		salir_contar_pulsos
-			decr		tmr_U
-			inr			r25,tmr_U 	////nuevo
-			cpi			r25,0x02	////nuevo
-			rbrsh		salir_contar_pulsos///rbrne
+			rbreq		temporizacion_general
+			;rjmp		salir_contar_pulsos
+			;decr		tmr_U
+			inr			R25,tmr_U 	////nuevo
+			cpi			R25,0x02	////nuevo
+			rbrlo		rst_tmr_U///rbrne
+			subi		R25,1
+			outr		tmr_U,R25
+			rjmp		salir_contar_pulsos
+rst_tmr_U:
 			outi		tmr_U,150		;30 x 10ms = 300ms
 			outi		tx_U,'1'
 			rjmp		salir_contar_pulsos
 
 verifica_otras_fases:
+			
 			outi	start_exha,'0'
 			
 	/*		cpri		FASE,STANDBY		;Si la fase es STANDBY, se cancela el resto
@@ -292,7 +297,6 @@ temporizacion_ventana:
 		;	rjmp		temporizacion_general
 
 temporizacion_general:
-			;sbi		led_run
 			inr			r24,cont_10msL
 			inr			r25,cont_10msH
 			ldiw		xh,xl,6001
@@ -323,7 +327,10 @@ temporizacion_general:
 			rjmp		salir_contar_pulsos
 ;TST_FASE:	
 
-fin_ciclo:	outi		presion_maxima,'0'
+fin_ciclo:	
+			cpri		FASE,TST_ELECTROVALVULAS
+			rbreq		salir_contar_pulsos
+			outi		presion_maxima,'0'
 			cpri		CPAP_alarma_APNEA,'1'
 			rbreq		tst_fase_inspiracion ;breq =/brsh >/brlo<
 			cpri		FASE,CPAP_SIN_APNEA
@@ -332,6 +339,8 @@ fin_ciclo:	outi		presion_maxima,'0'
 			ASIGNA_TIEMPO_10ms;3p99s
 			outi	stop_ventilador,0x00
 			rjmp	salir_contar_pulsos
+
+
 
 salir_contar_pulsos:
 			;ret

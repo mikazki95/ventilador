@@ -40,7 +40,7 @@
 #define		PIN_PS				portl,2		;Indicador de presión soporte
 #define		PWM1				portl,4		;OC5B, control de concentración de O2
 #define		PWM2				portl,5		;OC5C, control de paso de aire
-#define		PIN_INSP_EXHA		portl,6		;Señalización de inspiración/exhalación para
+;#define		PIN_INSP_EXHA		portl,6		;Señalización de inspiración/exhalación para
 											;la tarjeta SV
 
 #define		STANDBY				'0'
@@ -66,6 +66,9 @@
 
 #define		CALIBRA_O2_21		'H'
 #define		CALIBRA_O2_100		'L'
+
+#define		pre_CALIBRA_O2_21	'h'
+#define		pre_CALIBRA_O2_100	'l'
 
 #define		PWM_V_exH			ocr1bh
 #define		PWM_V_exL			ocr1bl
@@ -491,14 +494,14 @@ fin_macro_exhalacion:
 			outi	reg_PWM_Val_ExL,0x00
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
 			
-			OUTI	FASE,						CALIBRA_O2_21
+			OUTI	FASE,						pre_CALIBRA_O2_21
 			INSP_EXHA							0
 			PIN_PS0
 			CBI		T_PAUSA
 			ASIGNA_TIEMPO						0,0
 
-			outi		PWM_FLUJOH,high(170)
-			outi		PWM_FLUJOL,low(170)
+			outi		Pres_objL,0x01
+			outi		Pres_objH,0xF4
 		;	ASIGNA_PWM_FLUJO					90,90
 			;ASIGNA_PWM_V_ex  					0,0;ELECTROVALVULAS						0	;Fase de expiración
 			ASIGNA_PWM_O2						0,0
@@ -526,9 +529,8 @@ fin_macro_o2_100:
 			.endm
 
 .macro		FASE_TST
-			outi	reg_PWM_Val_ExH,0x01
-			outi	reg_PWM_Val_ExL,0xF4
-			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
+			outi	B_PR_TST,'0'
+
 			
 			outi	inhibe_inc_dec_pwm,'0'
 			outi	tmr_inhibe_on_off_pwm,		3
@@ -545,18 +547,29 @@ fin_macro_o2_100:
 ;***********************************************************************
 			outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
 			outi	PWM_FLUJOL,low(PWMZERO);;
-			outiw		cont_10msH,cont_10msL,0x0064
-			outi		Pres_objL,0xB8
+			outiw	cont_10msH,cont_10msL,0x07D6
+			outi	envia_trama_U,'0'
+			/*outi		Pres_objL,0x2C
+			outi		Pres_objH,0x01
+			
+			ASIGNA_TIEMPO					Pres_objH,Pres_objL;	tmr_TIEMPO_INSH,tmr_TIEMPO_INSL
+			*/outi		Pres_objL,0xB8
 			outi		Pres_objH,0x0B
+			
 ;***********************************************************************
 ;***********************************************************************
 			outi		FASE,				TST_ELECTROVALVULAS
-			outi	B_PR_TST,'1'
-			cpri	tst_electro_exp,'1'
+			cpri	tst_electro_exp,'0'
 			breq	activa_exp_tst
 			;ASIGNA_PWM_V_ex  				0,0;ELECTROVALVULAS						0
+			outi	reg_PWM_Val_ExH,0x00
+			outi	reg_PWM_Val_ExL,0x10
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
+			
 			jmp		fin_macro_tst
 activa_exp_tst:
+			outi		Pres_objL,0x00
+			outi		Pres_objH,0x00
 			;ASIGNA_PWM_V_ex  				0x01,0x00;ELECTROVALVULAS						PWM_VV_Max
 			
 					
@@ -1110,6 +1123,8 @@ fin_macro_dec_volumen:
 
 .equ		B_P_PIP						=	Reg_misc+252
 
+.equ		B_TST_Run					=	Reg_misc+253
+
 
 .equ		buffer_tx0					=	0x0800
 
@@ -1654,6 +1669,9 @@ init_io:	outi	ddra, 0b11111111
 			outi		B_FIO2_ALTO,'0'	
 			outi		C_A_FiO2,0
 			outi		B_ox_max,0
+			outi		B_TST_Run,'0'
+			outi		B_PR_TST,'0'
+			;B_TMR_TST
 
 
             sei                                 ;Habilita de manera global las interrupciones

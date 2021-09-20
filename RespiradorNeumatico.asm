@@ -471,8 +471,8 @@ jmp			wait_rx
 ;++++++++++++++++++++++++++++++++++++++++++++++++++
 ;++++++++++++++++++++++++++++++++++++++++++++++++++
 SECCION_CAL_O2_21:
-			outi			CONT_RET,0x13
-			call			tiempo
+			;outi			CONT_RET,0x13
+			;call			tiempo
 
 
 ;			call				calcula_FiO2_HEX
@@ -598,12 +598,15 @@ skip_cp_1:	outr		tst_electro_exp,r16
 
 					outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
 					outi	PWM_FLUJOL,low(PWMZERO);;
-					/*
-					inr			r16,tmp_reg_PWM0L
-					outr		reg_PWM0L,r16
-					inr			r16,tmp_reg_PWM0H
-					outr		reg_PWM0H,r16
-*/
+					
+					;outiw		PWM_O2H,PWM_O2L,0x0000
+
+					;outiw		PWM_AIREH,PWM_AIREL,0x0190
+
+
+
+
+
 					inr			r16,tmp_reg_PWM1_O2L
 					outr		reg_PWM1_O2L,r16
 					inr			r16,tmp_reg_PWM1_O2H
@@ -615,6 +618,10 @@ skip_cp_1:	outr		tst_electro_exp,r16
 					outr		reg_PWM2_AireL,r16
 					inr			r16,tmp_reg_PWM2_AireH
 					outr		reg_PWM2_AireH,r16
+					
+			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
+			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
+
 
 			;OUTI	FASE,FASE_TST
 					FASE_TST
@@ -689,6 +696,7 @@ carga_modo_bat:
 			outi			modo_alimentacion,modo_Bateria
 			rjmp			tx_modo_alimentacion
 tx_modo_alimentacion:
+/*
 			movr	buffer_tx0+7,modo_alimentacion
 			movr	buffer_tx0+8,nivel_bat
 
@@ -701,12 +709,29 @@ tx_modo_alimentacion:
 			movr	buffer_tx0+12,tx_presion_O2H
 			movr	buffer_tx0+13,tx_presion_O2M
 			movr	buffer_tx0+14,tx_presion_O2L
+*/
+
+;************cambio para eliminar alarmas y permitir ventilar********
+			outi	buffer_tx0+7,0x31	;modo_alimentacion
+			outi	buffer_tx0+8,0x35	;nivel_bat
+			
+			outi	buffer_tx0+9,0x37	;presion_aireH
+			outi	buffer_tx0+10,0x30	;presion_aireM
+			outi	buffer_tx0+11,0x30	;presion_aireL
+
+			outi	buffer_tx0+12,0x37	;presion_O2H
+			outi	buffer_tx0+13,0x30	;presion_O2M
+			outi	buffer_tx0+14,0x30	;presion_O2L
+;*****************fin cambio de eliminacion de alarmas***************
 
 ;Lectura de la presión de aire del flujo principal
 					call	convierte_cmH2OHEX
 			movr	buffer_tx0+15,tx_PSI_4
 			movr	buffer_tx0+16,tx_PSI_3
 			movr	buffer_tx0+17,tx_PSI_2
+
+
+
 
 			movr	buffer_tx0+18,estado_i2cNPA
 
@@ -1610,11 +1635,23 @@ retorno_control_O2:
 ;************************************************************
 ;************************************************************
 control_Parker_in:
+			cpri	B_TST_Run,'1'
+			rbreq	con_gases
 			inr		XL,portl
-			sbrs	XL,6	
-			jmp		sin_gases
+			sbrc	XL,6	
+			jmp		con_gases
 ;************************************************************
 ;************************************************************
+
+			outi	PWM_AIREH,0x00
+			outi	PWM_AIREL,0x00
+			outi	PWM_O2H,0x00
+			outi	PWM_O2L,0x00
+			ret
+;************************************************************
+;************************************************************
+con_gases:
+			
 			inr		ZL,reg_O2L		;compara si es 21% de oxigeno (hex)
 			inr		ZH,reg_O2H
 			cpi		ZL,0x15
@@ -1636,14 +1673,7 @@ control_Parker_in:
 			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
 			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
 			ret
-;************************************************************
-;************************************************************
-sin_gases:
-			outi	PWM_AIREH,0x00
-			outi	PWM_AIREL,0x00
-			outi	PWM_O2H,0x00
-			outi	PWM_O2L,0x00
-			ret
+
 ;************************************************************
 ;************************************************************
 			.eseg

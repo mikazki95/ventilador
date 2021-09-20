@@ -253,6 +253,11 @@ rx_bytes_tst:
 
 			movr		rx_tst_run,buffer_rx0+13
 
+
+			movr		B_TST_Run,rx_tst_electro_exp
+
+			
+
 			cpri				rx_tst_run,'1'
 			breq				carga_tst
 			cpri				rx_tst_run,'0'
@@ -261,11 +266,12 @@ rx_bytes_tst:
 
 carga_tst:	outi		FASE,PRE_TST_ELECTROVALVULAS
 			outi		ON_OFF,'2'
+			outi		B_TST_Run,'1'
 			jmp			salir_int_rx0
 
 finaliza_tst:
 			FASE_STANDBY
-
+			outi		B_TST_Run,'0'
 ;tx_respuesta_T:
 			outi	cont_rx0,0x00	;Desecha los datos que se Rx
 			outi	apuntador_buffer_tx0H,high(buffer_tx0+1)
