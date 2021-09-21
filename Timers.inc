@@ -319,9 +319,9 @@ temporizacion_general:
 
 fin_ciclo:	
 			cpri		FASE,pre_CALIBRA_O2_21
-			rbrne		W_CALIBRA_O2_21
+			rbreq		W_CALIBRA_O2_21
 			cpri		FASE,pre_CALIBRA_O2_100
-			rbrne		W_CALIBRA_O2_100
+			rbreq		W_CALIBRA_O2_100
 			cpri		FASE,TST_ELECTROVALVULAS
 			rbreq		salir_contar_pulsos
 			outi		presion_maxima,'0'
@@ -335,15 +335,16 @@ fin_ciclo:
 			rjmp	salir_contar_pulsos
 
 W_CALIBRA_O2_21:
-			
+			;sbi		led_run
 			;outi	FASE,					CALIBRA_O2_21
 			FASE_O2_21
 			rjmp	salir_contar_pulsos
 
 W_CALIBRA_O2_100:
-			;sbi		led_run
+			
 			;outi	FASE,					CALIBRA_O2_21
 			FASE_O2_100
+			;sbi		led_run
 salir_contar_pulsos:
 			;ret
 			cpri	timer_O2H,0

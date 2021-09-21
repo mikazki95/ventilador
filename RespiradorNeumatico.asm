@@ -16,7 +16,7 @@
 #define	version_firmwareP	'.'
 #define	version_firmwareM	'2'
 ;#define	version_firmwareLP	'.'
-#define	version_firmwareL	'A'
+#define	version_firmwareL	'F'
 
 .equ	fxtal		=	11059200		;Frecuencia del cristal
 
@@ -365,8 +365,8 @@ cancela_tx_S:
 ;************************************************************************************
 SECCION_CAL_O2_100:
 			
-			outi			CONT_RET,0x13
-			call	tiempo
+			;outi			CONT_RET,0x13
+			;call	tiempo
 			inr					r16,FiO2_nuevoL	;Se obtiene el valor HEX en % de O2
 			inr					r17,FiO2_nuevoH
 
