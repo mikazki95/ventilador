@@ -359,10 +359,12 @@ tst_ejecuta_O:
 			cpi					r16,'1'		;Si este byte es '1', indica que efectuara
 			rbrne				tx_error_rango_int_rx	;la calibración al 100%
 
-calibra_100:FASE_O2_100
+calibra_100:
+			pre_FASE_O2_100
 			jmp		salir_int_rx0
 
-calibra_21:	FASE_O2_21
+calibra_21:	
+			pre_FASE_O2_21
 			jmp		salir_int_rx0
 ;************************************************************************************
 ;************************************************************************************

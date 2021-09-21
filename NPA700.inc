@@ -336,9 +336,13 @@ control_presion:
 									outi	ucsr1b,0x18
 			cpri	FASE,STANDBY
 			rbreq	salir_control
+			cpri	FASE,CALIBRA_O2_21
+			rbreq	prueba_aire100;salir_control;libera_pres
 			cpri	FASE,pre_CALIBRA_O2_21
 			rbreq	aire_100_ON
-			cpri	FASE,CALIBRA_O2_100
+			cpri	FASE,CALIBRA_O2_100;
+			rbreq	salir_control
+			cpri	FASE,pre_CALIBRA_O2_100
 			rbreq	O2_100_ON
 
 			cpri	FASE,EXHALACION
@@ -414,7 +418,7 @@ verf_pres:
 
 			OFF_PRESION_TST
 fin_tst:
-			sbi		led_run
+			;sbi		led_run
 			outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
 			outi	PWM_FLUJOL,low(PWMZERO)
 			outi	reg_PWM_Val_ExH,0x00
@@ -423,17 +427,110 @@ fin_tst:
 			jmp					salir_control
 
 ;************************************************************
+prueba_aire100:
+			;sbi		led_run
+			jmp					salir_control
 ;************************************************************
 aire_100_ON:
-			jmp		sigue_control_P_inspiracion
-			jmp					salir_control
+			
+			outi		Pres_objL,low(1500)
+			outi		Pres_objH,high(1500)
+			outi		B_TST_Run,'1'
+			outi	reg_PWM1_O2H,0x00;;*************modificacion
+			outi	reg_PWM1_O2L,0x00
+			outi	reg_PWM2_AireH,high(480);;*************modificacion
+			outi	reg_PWM2_AireL,low(480)
+			ASIGNA_PWM_O2					reg_PWM1_O2H,reg_PWM1_O2L
+			ASIGNA_PWM_AIRE					reg_PWM2_AireH,reg_PWM2_AireL
+			
+			jmp		control_pres_cal_gases
 ;************************************************************
 ;************************************************************
 O2_100_ON:
-			jmp		sigue_control_P_inspiracion
-			jmp					salir_control
+			outi		Pres_objL,low(1500)
+			outi		Pres_objH,high(1500)
+			outi		B_TST_Run,'1'
+			outi	reg_PWM1_O2H,high(480);;*************modificacion
+			outi	reg_PWM1_O2L,low(480)
+			outi	reg_PWM2_AireH,0x00;;*************modificacion
+			outi	reg_PWM2_AireL,0x00
+			ASIGNA_PWM_O2					reg_PWM1_O2H,reg_PWM1_O2L
+			ASIGNA_PWM_AIRE					reg_PWM2_AireH,reg_PWM2_AireL
+			
+			jmp		control_pres_cal_gases
 ;************************************************************
 ;************************************************************
+control_pres_cal_gases:
+			outi	reg_PWM_Val_ExH,0x00
+			outi	reg_PWM_Val_ExL,0x00
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
+
+			call	CARGA_PR_OFFSET
+			cpi		R24,low(45)
+			cpci	R25,high(45)
+			rbrlo	pip_nul
+;************************************************************
+			call	CARGA_PR_OFFSET
+			inr		xl,Pres_objL
+			inr		xh,Pres_objH
+			subi	XL,low(100)
+			sbci	XH,high(100)
+			cp		R24,XL
+			cpc		R25,XH
+			rbrsh	Pres_cal_Alta
+;************************************************************
+			call	CARGA_PR_OFFSET
+			inr		xl,Pres_objL
+			inr		xh,Pres_objH
+			subi	XL,low(100)
+			sbci	XH,high(100)
+			cp		R24,XL
+			cpc		R25,XH
+			rbrsh	salir_control
+;************************************************************
+			cpri	B_Dec_PEEP,'1'
+			rbreq	SRPCGA
+			call	CARGA_PR_OFFSET
+			outr	Presion_antH,R25 
+			outr	Presion_antL,R24
+			outi	B_Dec_PEEP,'1'
+SRPCGA:;Skip_read_Pres_calibracion de gases
+			inr		XL,Presion_antL
+			inr		XH,Presion_antH
+			subi	XL,low(-10)
+			sbci	XH,high(-10)
+			cp		ZL,XL
+			cpc		ZH,XH
+			rbrsh	out_PIP_Baja
+			inr		XL,PWM_FLUJOL
+			inr		XH,PWM_FLUJOH
+			cpi		XL,low(450)
+			cpci	XH,high(450)
+			rbrsh	salir_control
+			adiw	XL,1
+			outr	PWM_FLUJOH,XH
+			outr	PWM_FLUJOL,XL
+			;ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
+			rjmp	salir_control
+;************************************************************
+;************************************************************
+out_PCG_Baja:
+			outi	B_Dec_PEEP,'0'
+			rjmp	salir_control
+;************************************************************
+Pres_cal_Alta:
+			inr		ZL,PWM_FLUJOL
+			inr		ZH,PWM_FLUJOH
+			cpi		ZL,low(60)
+			cpci	ZH,high(60)
+			rbrlo	CHK_PIP_Alta
+			sbiw	Z,3
+			outr	PWM_FLUJOH,ZH
+			outr	PWM_FLUJOL,ZL
+			rjmp	salir_control
+;************************************************************
+;************************************************************
+
 tst_P_INSPIRACION:
 control_P_INS_MODO_PRESION:
 ;			cpri	tmr_de_presion,0x00
@@ -468,7 +565,6 @@ control_P_INS_MODO_PRESION:
 
 
 sigue_control_P_inspiracion:
-
 			inr		Xl,Pres_objL
 			inr		Xh,Pres_objH
 			cpi		XL,0x00

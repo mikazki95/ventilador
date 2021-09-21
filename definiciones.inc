@@ -67,8 +67,8 @@
 #define		CALIBRA_O2_21		'H'
 #define		CALIBRA_O2_100		'L'
 
-#define		pre_CALIBRA_O2_21	'h'
-#define		pre_CALIBRA_O2_100	'l'
+#define		pre_CALIBRA_O2_21	'I'
+#define		pre_CALIBRA_O2_100	'J'
 
 #define		PWM_V_exH			ocr1bh
 #define		PWM_V_exL			ocr1bl
@@ -270,7 +270,6 @@ fin_macro_standby:
 
 			CBI		T_PAUSA
 			outi	presion_maxima,				'0'
-					outi		bandera_Tinsp_50p,'0'
 					outi	bandera_inc_PWM_inspiracion,'0'
 			outi	inhibe_compensacion,'0'
 			ASIGNA_TIEMPO						tmr_TIEMPO_INSH,tmr_TIEMPO_INSL
@@ -318,7 +317,6 @@ fin_macro_inspiracion:
 
 			CBI		T_PAUSA
 			outi	presion_maxima,				'0'
-			outi		bandera_Tinsp_50p,'0'
 			outi	bandera_inc_PWM_inspiracion,'0'
 			outi	inhibe_compensacion,'0'
 			;outiw		cont_10msH,cont_10msL,0x0196
@@ -489,7 +487,39 @@ fin_macro_exhalacion:
 			outi		stop_ventilador,0x00
 			.endm
 */
+
 .macro		FASE_O2_21
+			outi	reg_PWM_Val_ExH,0x00
+			outi	reg_PWM_Val_ExL,0x00
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
+			
+			OUTI	FASE,						CALIBRA_O2_21
+			INSP_EXHA							0
+			PIN_PS0
+			CBI		T_PAUSA
+			ASIGNA_TIEMPO						0,0
+			;outiw		cont_10msH,cont_10msL,0x07D6
+			outi		Pres_objL,low(700)
+			outi		Pres_objH,high(700)
+			outi		B_TST_Run,'1'
+			outi		reg_PWM1_O2H,0x00;;*************modificacion
+			outi		reg_PWM1_O2L,0x00
+			outi		reg_PWM2_AireH,0x00;;*************modificacion
+			outi		reg_PWM2_AireL,0x00
+			ASIGNA_PWM_O2					reg_PWM1_O2H,reg_PWM1_O2L
+			ASIGNA_PWM_AIRE					reg_PWM2_AireH,reg_PWM2_AireL
+			outi	B_Dec_PEEP,'0'
+			outi	ON_OFF,'0'
+			outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
+			outi	PWM_FLUJOL,low(PWMZERO)
+			;ASIGNA_PWM_O2			0,0			
+			;ASIGNA_PWM_AIRE			ocr5ah,ocr5al			
+fin_macro_o2_21:
+			.endm
+
+.macro		pre_FASE_O2_21
+			outi	reg_O2H,0x00		;compara si es 21% de oxigeno (hex)
+			outi	reg_O2L,0x15
 			outi	reg_PWM_Val_ExH,0x00
 			outi	reg_PWM_Val_ExL,0x00
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
@@ -498,18 +528,17 @@ fin_macro_exhalacion:
 			INSP_EXHA							0
 			PIN_PS0
 			CBI		T_PAUSA
-			ASIGNA_TIEMPO						0,0
-
-			outi		Pres_objL,0x01
-			outi		Pres_objH,0xF4
-		;	ASIGNA_PWM_FLUJO					90,90
-			;ASIGNA_PWM_V_ex  					0,0;ELECTROVALVULAS						0	;Fase de expiración
-			ASIGNA_PWM_O2						0,0
-			ASIGNA_PWM_AIRE						ocr5ah,ocr5al
-fin_macro_o2_21:
+			;ASIGNA_TIEMPO						0,0
+			outiw		cont_10msH,cont_10msL,0x07D6
+			outi	B_Dec_PEEP,'0'
+			outi	ON_OFF,'1'
+			;ASIGNA_PWM_O2			0,0			
+			;ASIGNA_PWM_AIRE			ocr5ah,ocr5al			
+fin_macro_pre_o2_21:
 			.endm
 
 .macro		FASE_O2_100
+				
 			outi	reg_PWM_Val_ExH,0x00
 			outi	reg_PWM_Val_ExL,0x00
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
@@ -519,13 +548,43 @@ fin_macro_o2_21:
 			PIN_PS0
 			CBI		T_PAUSA
 			ASIGNA_TIEMPO						0,0
-
-			outi		PWM_FLUJOH,high(170)
-			outi		PWM_FLUJOL,low(170)
-			;ASIGNA_PWM_V_ex  					0,0;ELECTROVALVULAS						0	;Fase de expiración
-			ASIGNA_PWM_O2						ocr5ah,ocr5al
-			ASIGNA_PWM_AIRE						0,0
+			;outiw		cont_10msH,cont_10msL,0x07D6
+			outi		Pres_objL,low(700)
+			outi		Pres_objH,high(700)
+			outi		B_TST_Run,'1'
+			outi		reg_PWM1_O2H,0x00;;*************modificacion
+			outi		reg_PWM1_O2L,0x00
+			outi		reg_PWM2_AireH,0x00;;*************modificacion
+			outi		reg_PWM2_AireL,0x00
+			ASIGNA_PWM_O2					reg_PWM1_O2H,reg_PWM1_O2L
+			ASIGNA_PWM_AIRE					reg_PWM2_AireH,reg_PWM2_AireL
+			outi	B_Dec_PEEP,'0'
+			outi	ON_OFF,'0'
+			outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
+			outi	PWM_FLUJOL,low(PWMZERO)
+			;ASIGNA_PWM_O2			0,0			
+			;ASIGNA_PWM_AIRE			ocr5ah,ocr5al	
 fin_macro_o2_100:
+			.endm
+
+.macro		pre_FASE_O2_100
+			outi	reg_O2H,0x00		;compara si es 21% de oxigeno (hex)
+			outi	reg_O2L,0x64
+			outiw		cont_10msH,cont_10msL,0x07D6
+			outi	reg_PWM_Val_ExH,0x00
+			outi	reg_PWM_Val_ExL,0x00
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
+			
+			OUTI	FASE,						pre_CALIBRA_O2_100
+			INSP_EXHA							0
+			PIN_PS0
+			CBI		T_PAUSA
+			;ASIGNA_TIEMPO						0,0
+			outi	B_Dec_PEEP,'0'
+			outi	ON_OFF,'1'
+			;ASIGNA_PWM_O2			0,0			
+			;ASIGNA_PWM_AIRE			ocr5ah,ocr5al			
+fin_macro_pre_o2_100:
 			.endm
 
 .macro		FASE_TST
@@ -1026,7 +1085,7 @@ fin_macro_dec_volumen:
 .equ		TIEMPO_INSH_50p				=	Reg_misc+95
 .equ		TIEMPO_INSL_50p				=	Reg_misc+96
 
-.equ		bandera_Tinsp_50p			=	Reg_misc+97
+;.equ		bandera_Tinsp_50p			=	Reg_misc+97
 .equ		bandera_inc_PWM_inspiracion	=	Reg_misc+98
 
 .equ		B_PS_Ok						=	Reg_misc+99

@@ -297,6 +297,7 @@ temporizacion_ventana:
 		;	rjmp		temporizacion_general
 
 temporizacion_general:
+			;sbi		led_run
 			inr			r24,cont_10msL
 			inr			r25,cont_10msH
 			ldiw		xh,xl,6001
@@ -312,22 +313,15 @@ temporizacion_general:
 			outr		cont_10msL,r24
 			outr		cont_10msH,r25
 			
-			;sbi		led_run
-;Compara el temporizador con el valor de tiempo de inspiración al 50%
-			cpri		FASE,INSPIRACION
-			brne		salir_contar_pulsos
 
-			inr			xl,TIEMPO_INSL_50p
-			inr			xh,TIEMPO_INSH_50p
-			cp			r24,xl
-			cpc			r25,xh
-			brne		salir_contar_pulsos
-			outi		bandera_Tinsp_50p,'1'
-			;ret
 			rjmp		salir_contar_pulsos
 ;TST_FASE:	
 
 fin_ciclo:	
+			cpri		FASE,pre_CALIBRA_O2_21
+			rbrne		W_CALIBRA_O2_21
+			cpri		FASE,pre_CALIBRA_O2_100
+			rbrne		W_CALIBRA_O2_100
 			cpri		FASE,TST_ELECTROVALVULAS
 			rbreq		salir_contar_pulsos
 			outi		presion_maxima,'0'
@@ -340,8 +334,16 @@ fin_ciclo:
 			outi	stop_ventilador,0x00
 			rjmp	salir_contar_pulsos
 
+W_CALIBRA_O2_21:
+			
+			;outi	FASE,					CALIBRA_O2_21
+			FASE_O2_21
+			rjmp	salir_contar_pulsos
 
-
+W_CALIBRA_O2_100:
+			;sbi		led_run
+			;outi	FASE,					CALIBRA_O2_21
+			FASE_O2_100
 salir_contar_pulsos:
 			;ret
 			cpri	timer_O2H,0
