@@ -16,7 +16,73 @@ timer_10ms:
 ;			cpri	tmr_de_presion,0
 ;			breq	skip_tmr_presion
 ;			decr	tmr_de_presion
-;skip_tmr_presion:
+
+
+
+;*******************timer control de fio2********************
+;************************************************************
+			inr		XL,portl
+			sbrs	XL,6	
+			jmp		skip_timer_ctrl_fio2
+			inr		XH,En_Ctrl_FiO2H
+			inr		XL,En_Ctrl_FiO2L
+			cpi		XL,0x00
+			cpci	XH,0x00
+			rbreq	s_tmr_Ctrl_FiO2
+			sbiw	X,1
+			outr	En_Ctrl_FiO2H,XH
+			outr	En_Ctrl_FiO2L,XL
+			inr		ZH,Set_Ctrl_FiO2H
+			inr		ZL,Set_Ctrl_FiO2L
+			cp		XL,ZL
+			cpc		XH,ZH
+			brlo	set_O2
+
+
+			inr		XL,portg
+			andi	XL,0b10
+			outr	portg,XL
+
+			outi	B_ctrl_FiO2,0x00
+
+			outi	reg_PWM1_O2H,high(0)
+			outi	reg_PWM1_O2L,low(0)
+			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
+			outi	reg_PWM2_AireH,high(450)
+			outi	reg_PWM2_AireL,low(450)
+			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
+
+
+			Jmp		skip_timer_ctrl_fio2
+
+set_O2:	
+			inr		XL,portg
+			ori		XL,0b01
+			outr	portg,XL
+		
+			outi	B_ctrl_FiO2,0x01
+
+
+			movr	reg_PWM1_O2H,PWM_FiO2_O2H
+			movr	reg_PWM1_O2L,PWM_FiO2_O2L
+			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
+
+			outi	reg_PWM2_AireH,high(0)
+			outi	reg_PWM2_AireL,low(0)
+			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
+		
+
+
+			Jmp		skip_timer_ctrl_fio2
+;************************************************************
+;************************************************************
+
+s_tmr_Ctrl_FiO2:
+			;movr	En_Ctrl_FiO2H,Set_Ctrl_FiO2H
+			;movr	En_Ctrl_FiO2L,Set_Ctrl_FiO2L
+			outi	En_Ctrl_FiO2H,0x00;17
+			outi	En_Ctrl_FiO2L,0x32
+skip_timer_ctrl_fio2:
 
 			cpri	inhibe_on_off_pwm,'1'
 			brne	timer_adc
@@ -347,11 +413,12 @@ W_CALIBRA_O2_100:
 			;sbi		led_run
 salir_contar_pulsos:
 			;ret
-			cpri	timer_O2H,0
+/*			cpri	timer_O2H,0
 			brne	dec_timer_O2
 			cpri	timer_O2L,0
 			breq	recupera_registros
 
+       antiguo control de FiO2
 dec_timer_O2:
 
 			inr		YL,PWM_FLUJOL
@@ -369,10 +436,16 @@ dec_timer_O2:
 			outr	timer_O2H,xh
 			outr	timer_O2L,xl
 			brne	recupera_registros
-			outi	habilita_control_O2,'1';'1'
+			outi	habilita_control_O2,'1';'1'*/
 ;Se verifica el número de fase en curso, para cambiarla
-
-
+			inr		xh,timer_O2H
+			inr		xl,timer_O2L
+			cpi		XL,0X00
+			cpci	XH,0X00
+			breq	recupera_registros
+			sbiw	xl,1
+			outr	timer_O2H,xh
+			outr	timer_O2L,xl
 recupera_registros:
 			popz
 			popx

@@ -524,6 +524,18 @@ fin_macro_o2_21:
 			outi	reg_PWM_Val_ExL,0x00
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
 			
+			
+			outi		Pres_objL,low(2000)
+			outi		Pres_objH,high(2000)
+			outi		B_TST_Run,'1'
+			outi	reg_PWM1_O2H,0x00;;*************modificacion
+			outi	reg_PWM1_O2L,0x00
+			outi	reg_PWM2_AireH,high(480);;*************modificacion
+			outi	reg_PWM2_AireL,low(480)
+			ASIGNA_PWM_O2					reg_PWM1_O2H,reg_PWM1_O2L
+			ASIGNA_PWM_AIRE					reg_PWM2_AireH,reg_PWM2_AireL
+
+
 			OUTI	FASE,						pre_CALIBRA_O2_21
 			INSP_EXHA							0
 			PIN_PS0
@@ -783,12 +795,12 @@ fin_macro_dec_volumen:
 .equ		rx_OPIPMH			=	Reg_rx+48
 .equ		rx_OPIPML			=	Reg_rx+49
 .equ		rx_OPIPL			=	Reg_rx+50
-.equ		rx_O_CPEEPMH		=	Reg_rx+51
-.equ		rx_O_CPEEPML		=	Reg_rx+52
-.equ		rx_O_CPEEPL			=	Reg_rx+53
-.equ		rx_O_CPIPMH			=	Reg_rx+54
-.equ		rx_O_CPIPML			=	Reg_rx+55
-.equ		rx_O_CPIPL			=	Reg_rx+56
+.equ		rx_O2_act_MH		=	Reg_rx+51
+.equ		rx_O2_act_ML		=	Reg_rx+52
+.equ		rx_O2_act_L			=	Reg_rx+53
+.equ		rx_O2_PWM_MH		=	Reg_rx+54
+.equ		rx_O2_PWM_ML		=	Reg_rx+55
+.equ		rx_O2_PWM_L			=	Reg_rx+56
 .equ		rx_O_CPRESMH		=	Reg_rx+57
 .equ		rx_O_CPRESML		=	Reg_rx+58
 .equ		rx_O_CPRESL			=	Reg_rx+59
@@ -809,6 +821,11 @@ fin_macro_dec_volumen:
 .equ		rx_Ctrl_FiO2		=	Reg_rx+73
 ;.equ		rx_flag_Test		=	Reg_rx+74
 
+.equ		En_Ctrl_FiO2H		=	Reg_rx+75
+.equ		En_Ctrl_FiO2L		=	Reg_rx+76
+
+.equ		Set_Ctrl_FiO2H		=	Reg_rx+77
+.equ		Set_Ctrl_FiO2L		=	Reg_rx+78
 //*****************************************************
 
 
@@ -909,8 +926,14 @@ fin_macro_dec_volumen:
 .equ		tmp_reg_PSL				=	Reg_hex+37+8
 .equ		tmp_reg_PmaxH			=	Reg_hex+38+8
 .equ		tmp_reg_PmaxL			=	Reg_hex+39+8
+
 .equ		reg_PWM_Val_ExH			=	Reg_hex+48
 .equ		reg_PWM_Val_ExL			=	Reg_hex+49
+
+.equ		PWM_FiO2_AireH			=	Reg_hex+50
+.equ		PWM_FiO2_AireL			=	Reg_hex+51
+.equ		PWM_FiO2_O2H			=	Reg_hex+52
+.equ		PWM_FiO2_O2L			=	Reg_hex+53
 
 
 
@@ -1173,7 +1196,7 @@ fin_macro_dec_volumen:
 .equ		VV_X						= 	Reg_misc+246
 
 .equ		Cont_VV						= 	Reg_misc+247
-.equ		Cont_VX						= 	Reg_misc+248
+.equ		B_ctrl_FiO2					= 	Reg_misc+248
 
 .equ		B_Vol						= 	Reg_misc+249
 .equ		B_Dec_PEEP					= 	Reg_misc+250
@@ -1731,6 +1754,16 @@ init_io:	outi	ddra, 0b11111111
 			outi		B_TST_Run,'0'
 			outi		B_PR_TST,'0'
 			;B_TMR_TST
+			outi		PWM_FiO2_O2H,0x00
+			outi		PWM_FiO2_O2L,0x00
+			outi		En_Ctrl_FiO2L,0x32
+			outi		En_Ctrl_FiO2H,0x00;17
+			outi		Set_Ctrl_FiO2L,0x00
+			outi		Set_Ctrl_FiO2H,0x00
+			outi		b_ctrl_FiO2,0x00
+
+			;outi		PWM_FiO2_O2H,high(200)
+			;outi		PWM_FiO2_O2L,low(200)
 
 
             sei                                 ;Habilita de manera global las interrupciones

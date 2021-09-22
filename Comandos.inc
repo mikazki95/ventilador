@@ -254,7 +254,7 @@ rx_bytes_tst:
 			movr		rx_tst_run,buffer_rx0+13
 
 
-			movr		B_TST_Run,rx_tst_electro_exp
+			;movr		B_TST_Run,rx_tst_electro_exp
 
 			
 
@@ -378,12 +378,12 @@ tst_ejecuta_C:
 			movr		rx_OPIPMH		,buffer_rx0+3		;Decimas de segundo
 			movr		rx_OPIPML		,buffer_rx0+4		;Centesimas de segundo
 			movr		rx_OPIPL		,buffer_rx0+5			;Espera los bytes del tiempo "pausa"
-			movr		rx_O_CPEEPMH	,buffer_rx0+6
-			movr		rx_O_CPEEPML	,buffer_rx0+7
-			movr		rx_O_CPEEPL		,buffer_rx0+8
-			movr		rx_O_CPIPMH		,buffer_rx0+9
-			movr		rx_O_CPIPML		,buffer_rx0+10
-			movr		rx_O_CPIPL		,buffer_rx0+11
+			movr		rx_O2_act_MH	,buffer_rx0+6
+			movr		rx_O2_act_ML	,buffer_rx0+7
+			movr		rx_O2_act_L		,buffer_rx0+8
+			movr		rx_O2_PWM_MH	,buffer_rx0+9
+			movr		rx_O2_PWM_ML	,buffer_rx0+10
+			movr		rx_O2_PWM_L		,buffer_rx0+11
 			movr		rx_O_CPRESMH	,buffer_rx0+12
 			movr		rx_O_CPRESML	,buffer_rx0+13			
 			movr		rx_O_CPRESL		,buffer_rx0+14

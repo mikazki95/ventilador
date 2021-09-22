@@ -799,16 +799,19 @@ calib_mezcl:
 			movr		offset_PIPH,temp_H
 			movr		offset_PIPL,temp_L
 
-			conv_A_H	temp_H,temp_L,				rx_O_CPEEPMH,rx_O_CPEEPML,rx_O_CPEEPL
-			cp_limites	temp_H,temp_L,				'n',	480,tx_error_rango_rx
-			movr		offset_COMFLPEEPH,temp_H
-			movr		offset_COMFLPEEPL,temp_L
+			conv_A_H	temp_H,temp_L,				rx_O2_act_MH,rx_O2_act_ML,rx_O2_act_L
 
-			conv_A_H	temp_H,temp_L,				rx_O_CPIPMH,rx_O_CPIPML,rx_O_CPIPL
+			movr		Set_Ctrl_FiO2H,temp_H
+			movr		Set_Ctrl_FiO2L,temp_L
+
+			conv_A_H	temp_H,temp_L,				rx_O2_PWM_MH,rx_O2_PWM_ML,rx_O2_PWM_L
 			cp_limites	temp_H,temp_L,				'n',	480,tx_error_rango_rx
-			movr		offset_COMFLPIPH,temp_H
+			/*movr		offset_COMFLPIPH,temp_H
 			movr		offset_COMFLPIPL,temp_L
-			
+			*/
+			movr		PWM_FiO2_O2H,temp_H
+			movr		PWM_FiO2_O2L,temp_L
+
 			conv_A_H	temp_H,temp_L,				rx_O_CPRESMH,rx_O_CPRESML,rx_O_CPRESL
 			cp_limites	temp_H,temp_L,				'n',	500,tx_error_rango_rx
 			movr		offset_PreH,temp_H
@@ -846,12 +849,12 @@ calib_mezcl:
 			movr		buffer_tx0+4	,rx_OPIPMH
 			movr		buffer_tx0+5	,rx_OPIPML
 			movr		buffer_tx0+6	,rx_OPIPL
-			movr		buffer_tx0+7	,rx_O_CPEEPMH
-			movr		buffer_tx0+8	,rx_O_CPEEPML
-			movr		buffer_tx0+9	,rx_O_CPEEPL
-			movr		buffer_tx0+10	,rx_O_CPIPMH
-			movr		buffer_tx0+11	,rx_O_CPIPML
-			movr		buffer_tx0+12	,rx_O_CPIPL
+			movr		buffer_tx0+7	,rx_O2_act_MH
+			movr		buffer_tx0+8	,rx_O2_act_ML
+			movr		buffer_tx0+9	,rx_O2_act_L
+			movr		buffer_tx0+10	,rx_O2_PWM_MH
+			movr		buffer_tx0+11	,rx_O2_PWM_ML
+			movr		buffer_tx0+12	,rx_O2_PWM_L
 			movr		buffer_tx0+13	,rx_O_CPRESMH;rx_O_BATMH;
 			movr		buffer_tx0+14	,rx_O_CPRESML;rx_O_BATML;
 			movr		buffer_tx0+15	,rx_O_CPRESL;rx_O_BATL;
@@ -1182,8 +1185,7 @@ control_FiO2:
 			rbreq	Falla_gases
 ;************************************************************
 ;************************************************************
-			cpri	habilita_control_O2,'0'
-			rbreq	retorno_control_O2
+			rjmp	salir_control_O2
 ;************************************************************
 ;************************************************************
 			movr	C_X_FiO2,C_A_FiO2
@@ -1625,6 +1627,7 @@ salir_control_O2:
 			cpi		yl,1
 			brsh	R_control_FiO2
 			
+			;sbi		led_run
 			cli
 			outi	timer_O2H,high(1400);(1500)
 			outi	timer_O2L,low(1400);(1500)

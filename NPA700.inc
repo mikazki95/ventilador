@@ -433,22 +433,14 @@ prueba_aire100:
 ;************************************************************
 aire_100_ON:
 			
-			outi		Pres_objL,low(1500)
-			outi		Pres_objH,high(1500)
-			outi		B_TST_Run,'1'
-			outi	reg_PWM1_O2H,0x00;;*************modificacion
-			outi	reg_PWM1_O2L,0x00
-			outi	reg_PWM2_AireH,high(480);;*************modificacion
-			outi	reg_PWM2_AireL,low(480)
-			ASIGNA_PWM_O2					reg_PWM1_O2H,reg_PWM1_O2L
-			ASIGNA_PWM_AIRE					reg_PWM2_AireH,reg_PWM2_AireL
+			
 			
 			jmp		control_pres_cal_gases
 ;************************************************************
 ;************************************************************
 O2_100_ON:
-			outi		Pres_objL,low(1500)
-			outi		Pres_objH,high(1500)
+			outi		Pres_objL,low(2000)
+			outi		Pres_objH,high(2000)
 			outi		B_TST_Run,'1'
 			outi	reg_PWM1_O2H,high(480);;*************modificacion
 			outi	reg_PWM1_O2L,low(480)
