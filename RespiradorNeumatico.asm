@@ -1265,12 +1265,7 @@ cp_o2_mas_5:
 			inr		zh,reg_O2H
 
 
-			adiw	zl,5
-			cp		xl,zl
-			cpc		xh,zh
-			rbreq	salir_control_O2
-			rbrlo	salir_control_O2
-			adiw	zl,5
+			adiw	zl,10
 			cp		xl,zl
 			cpc		xh,zh
 			rbrsh	cp_o2_mas_10
@@ -1325,6 +1320,11 @@ cp_o2_mas_10:
 
 aumentar_fio2:
 ;rjmp	salir_control_O2
+			inr		xl,FiO2HEX_L	;Lectura del sensor, el valor ya esta
+			inr		xh,FiO2HEX_H	;convertido de ADC a % de Oxigeno en Hex
+			inr		zl,reg_O2L		;Valor programado para FiO2 (hex)
+			inr		zh,reg_O2H
+			
 			sbiw	zl,3
 			cp		xl,zl
 			cpc		xh,zh
@@ -1340,9 +1340,9 @@ aumentar_fio2:
 			inr		xl,PWM_FiO2_O2L
 			
 
-			cpi		xl,low(30)
-			cpci	xh,high(30)
-			rbrlo	fiO2_oxigeno_min
+			cpi		xl,low(480)
+			cpci	xh,high(480)
+			rbrsh	fiO2_oxigeno_maximo
 			subi	xl,low(-1)
 			sbci	xh,high(-1)
 			
@@ -1372,9 +1372,9 @@ cp_o2_menos_5:
 			inr		xl,PWM_FiO2_O2L
 			
 
-			cpi		xl,low(30)
-			cpci	xh,high(30)
-			rbrlo	fiO2_oxigeno_min
+			cpi		xl,low(480)
+			cpci	xh,high(480)
+			rbrsh	fiO2_oxigeno_maximo
 			subi	xl,low(-4)
 			sbci	xh,high(-4)
 			
@@ -1392,9 +1392,9 @@ cp_o2_menos_10:
 			inr		xl,PWM_FiO2_O2L
 			
 
-			cpi		xl,low(30)
-			cpci	xh,high(30)
-			rbrlo	fiO2_oxigeno_min
+			cpi		xl,low(480)
+			cpci	xh,high(480)
+			rbrsh	fiO2_oxigeno_maximo
 			subi	xl,low(-8)
 			sbci	xh,high(-8)
 			
@@ -1434,8 +1434,8 @@ fiO2_oxigeno_min:
 ;************************************************************
 ;************************************************************
 fiO2_oxigeno_maximo:
-		outi	reg_PWM1_O2H,0x01
-		outi	reg_PWM1_O2L,0xE0
+		outi	PWM_FiO2_O2H,0x01
+		outi	PWM_FiO2_O2L,0xF4
 		ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
 		rjmp	salir_control_O2
 
