@@ -39,9 +39,7 @@ timer_10ms:
 			brlo	set_O2
 
 
-			inr		XL,portg
-			andi	XL,0b10
-			outr	portg,XL
+
 
 			outi	B_ctrl_FiO2,0x00
 
@@ -56,9 +54,7 @@ timer_10ms:
 			Jmp		skip_timer_ctrl_fio2
 
 set_O2:	
-			inr		XL,portg
-			ori		XL,0b01
-			outr	portg,XL
+
 		
 			outi	B_ctrl_FiO2,0x01
 
@@ -438,6 +434,8 @@ dec_timer_O2:
 			brne	recupera_registros
 			outi	habilita_control_O2,'1';'1'*/
 ;Se verifica el número de fase en curso, para cambiarla
+
+
 			inr		xh,timer_O2H
 			inr		xl,timer_O2L
 			cpi		XL,0X00
