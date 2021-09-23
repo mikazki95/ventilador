@@ -440,10 +440,15 @@ dec_timer_O2:
 			inr		xl,timer_O2L
 			cpi		XL,0X00
 			cpci	XH,0X00
-			breq	recupera_registros
+			breq	dec_timer_O2
 			sbiw	xl,1
 			outr	timer_O2H,xh
 			outr	timer_O2L,xl
+			rjmp	recupera_registros
+
+dec_timer_O2:
+			outi	habilita_control_O2,'1'
+
 recupera_registros:
 			popz
 			popx

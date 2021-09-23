@@ -38,7 +38,7 @@
   <timer_10ms><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>8</LINE></timer_10ms>
   <int_rx0_comandos><FILE>C:\Ventilador\control\Control_R\ventilador\Comandos.inc</FILE><LINE>56</LINE></int_rx0_comandos>
   <int_tx0_respuesta><FILE>C:\Ventilador\control\Control_R\ventilador\Comandos.inc</FILE><LINE>167</LINE></int_tx0_respuesta>
-  <timer_frecuencia><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>553</LINE></timer_frecuencia>
+  <timer_frecuencia><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>558</LINE></timer_frecuencia>
   <rx_trigger><FILE>C:\Ventilador\control\Control_R\ventilador\Trigger.inc</FILE><LINE>4</LINE></rx_trigger>
   <Tabla_FiO2_inicial><FILE>C:\Ventilador\control\Control_R\ventilador\Tabla_incrementoParker.inc</FILE><LINE>3</LINE></Tabla_FiO2_inicial>
   <TABLA_CONVERSION_O2_BCD><FILE>C:\Ventilador\control\Control_R\ventilador\TablaO2.inc</FILE><LINE>4</LINE></TABLA_CONVERSION_O2_BCD>
@@ -267,24 +267,25 @@
   <Fin_ciclo><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>382</LINE></Fin_ciclo>
   <W_CALIBRA_O2_21><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>399</LINE></W_CALIBRA_O2_21>
   <W_CALIBRA_O2_100><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>405</LINE></W_CALIBRA_O2_100>
-  <tst_fase_inspiracion><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>456</LINE></tst_fase_inspiracion>
-  <recupera_registros><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>447</LINE></recupera_registros>
-  <inicia_tiempo_pausa><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>499</LINE></inicia_tiempo_pausa>
-  <finaliza_PS><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>510</LINE></finaliza_PS>
-  <inicia_exhalacion><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>538</LINE></inicia_exhalacion>
-  <termino_exhalacion><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>470</LINE></termino_exhalacion>
-  <inicia_inspiracion><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>474</LINE></inicia_inspiracion>
-  <inicia_fase_inspiracion><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>492</LINE></inicia_fase_inspiracion>
-  <no_hay_pausa><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>537</LINE></no_hay_pausa>
-  <verifica_alarma_APNEA><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>517</LINE></verifica_alarma_APNEA>
-  <regresa_a_CPAP_sin_APNEA><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>520</LINE></regresa_a_CPAP_sin_APNEA>
-  <exhalacion_completa><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>539</LINE></exhalacion_completa>
-  <final_de_espera><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>544</LINE></final_de_espera>
-  <pin_alarma_0><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>565</LINE></pin_alarma_0>
-  <salir_alarma><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>599</LINE></salir_alarma>
-  <set_pin><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>590</LINE></set_pin>
-  <desactiva_mute><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>582</LINE></desactiva_mute>
-  <solo_carga><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>594</LINE></solo_carga>
+  <tst_fase_inspiracion><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>461</LINE></tst_fase_inspiracion>
+  <dec_timer_O2><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>449</LINE></dec_timer_O2>
+  <recupera_registros><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>452</LINE></recupera_registros>
+  <inicia_tiempo_pausa><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>504</LINE></inicia_tiempo_pausa>
+  <finaliza_PS><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>515</LINE></finaliza_PS>
+  <inicia_exhalacion><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>543</LINE></inicia_exhalacion>
+  <termino_exhalacion><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>475</LINE></termino_exhalacion>
+  <inicia_inspiracion><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>479</LINE></inicia_inspiracion>
+  <inicia_fase_inspiracion><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>497</LINE></inicia_fase_inspiracion>
+  <no_hay_pausa><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>542</LINE></no_hay_pausa>
+  <verifica_alarma_APNEA><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>522</LINE></verifica_alarma_APNEA>
+  <regresa_a_CPAP_sin_APNEA><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>525</LINE></regresa_a_CPAP_sin_APNEA>
+  <exhalacion_completa><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>544</LINE></exhalacion_completa>
+  <final_de_espera><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>549</LINE></final_de_espera>
+  <pin_alarma_0><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>570</LINE></pin_alarma_0>
+  <salir_alarma><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>604</LINE></salir_alarma>
+  <set_pin><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>595</LINE></set_pin>
+  <desactiva_mute><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>587</LINE></desactiva_mute>
+  <solo_carga><FILE>C:\Ventilador\control\Control_R\ventilador\Timers.inc</FILE><LINE>599</LINE></solo_carga>
   <tst_retro><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>19</LINE></tst_retro>
   <int_cancela_inspiracion><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>155</LINE></int_cancela_inspiracion>
   <salir_int_PCINT><FILE>C:\Ventilador\control\Control_R\ventilador\Retroalimentacion.inc</FILE><LINE>14</LINE></salir_int_PCINT>
