@@ -1229,19 +1229,16 @@ disminuir_fio2:
 			cpc		xh,zh
 			rbreq	salir_control_O2
 			rbrlo	salir_control_O2
-			adiw	zl,2
-			cp		xl,zl
-			cpc		xh,zh
-			rbrsh	cp_o2_mas_5
+
 ;Sensor > %O2 +5% programado
 ;Se debe de decrementar el valor de PWM de O2
 			
 
-			inr		xh,PWM_FiO2_O2H
-			inr		xl,PWM_FiO2_O2L
+			inr		xh,Set_Ctrl_FiO2H
+			inr		xl,Set_Ctrl_FiO2L
 			
-			cpi		xl,low(30)
-			cpci	xh,high(30)
+			cpi		xl,low(2)
+			cpci	xh,high(2)
 			rbrlo	fiO2_oxigeno_min
 			subi	xl,low(1)
 			sbci	xh,high(1)
@@ -1331,18 +1328,15 @@ aumentar_fio2:
 			rbrsh	salir_control_O2
 ;Sensor < %O2 -5% programado
 ;Se debe de incrementar el valor de PWM de O2
-			sbiw	zl,2
-			cp		xl,zl
-			cpc		xh,zh
-			rbrlo	cp_o2_menos_5
+
 			
-			inr		xh,PWM_FiO2_O2H
-			inr		xl,PWM_FiO2_O2L
+			inr		xh,Set_Ctrl_FiO2H
+			inr		xl,Set_Ctrl_FiO2L
 			
 
-			cpi		xl,low(30)
-			cpci	xh,high(30)
-			rbrlo	fiO2_oxigeno_min
+			cpi		xl,low(50)
+			cpci	xh,high(50)
+			rbrsh	salir_control_O2
 			subi	xl,low(-1)
 			sbci	xh,high(-1)
 			
