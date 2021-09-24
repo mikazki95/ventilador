@@ -21,7 +21,7 @@ timer_10ms:
 
 ;*******************timer control de fio2********************
 ;************************************************************
-			inr		XL,portl
+/*			inr		XL,portl
 			sbrs	XL,6	
 			jmp		skip_timer_ctrl_fio2
 			inr		XH,En_Ctrl_FiO2H
@@ -68,8 +68,8 @@ set_O2:
 			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
 		
 
-
-			Jmp		skip_timer_ctrl_fio2
+*/
+			;Jmp		skip_timer_ctrl_fio2
 ;************************************************************
 ;************************************************************
 

@@ -541,7 +541,7 @@ fin_macro_o2_21:
 			PIN_PS0
 			CBI		T_PAUSA
 			;ASIGNA_TIEMPO						0,0
-			outiw		cont_10msH,cont_10msL,0x07D6
+			outiw		cont_10msH,cont_10msL,0x1770
 			outi	B_Dec_PEEP,'0'
 			outi	ON_OFF,'1'
 			;ASIGNA_PWM_O2			0,0			
@@ -582,7 +582,7 @@ fin_macro_o2_100:
 .macro		pre_FASE_O2_100
 			outi	reg_O2H,0x00		;compara si es 21% de oxigeno (hex)
 			outi	reg_O2L,0x64
-			outiw		cont_10msH,cont_10msL,0x07D6
+			outiw		cont_10msH,cont_10msL,0x1770
 			outi	reg_PWM_Val_ExH,0x00
 			outi	reg_PWM_Val_ExL,0x00
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
