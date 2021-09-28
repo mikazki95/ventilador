@@ -718,12 +718,20 @@ PIP_Baja_P:
 			outr	Presion_antL,R24
 			outi	B_Dec_PEEP,'1'
 SRPPIA:;Skip_read_Pres_PIP_Alta
-			inr		XL,Presion_antL
+			/*inr		XL,Presion_antL
 			inr		XH,Presion_antH
 			subi	XL,low(-10)
 			sbci	XH,high(-10)
 			cp		ZL,XL
 			cpc		ZH,XH
+			rbrsh	out_PIP_Baja*/
+			inr		XL,Presion_antL
+			inr		XH,Presion_antH
+			call	CARGA_PR_OFFSET
+			subi	XL,low(-10)
+			sbci	XH,high(-10)
+			cp		R24,XL
+			cpc		R25,XH
 			rbrsh	out_PIP_Baja
 			inr		XL,PWM_FLUJOL
 			inr		XH,PWM_FLUJOH
