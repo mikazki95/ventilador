@@ -966,6 +966,7 @@ PEEP_Ok_out:
 			rjmp	salir_control
 ;************************************************************
 PEEP_Baja_P:
+			;jmp		sin_flujo
 			cpri	B_PEEP_DOWN,'1'
 			rbreq	skip_PEEP_baja_A
 			call	Carga_offset_PEEP
