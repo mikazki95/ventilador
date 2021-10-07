@@ -799,29 +799,41 @@ calib_mezcl:
 			movr		offset_COMFLPIPH,temp_H
 			movr		offset_COMFLPIPL,temp_L
 
-			;conv_A_H	0,VV_OFF,					rx_VV_Off_MH,rx_VV_Off_ML,rx_VV_Off_L
+			conv_A_H	temp_H,Modo_TST,					rx_Modo_TST_MH,rx_Modo_TST_ML,rx_Modo_TST_L
 
+			inr		YL,Modo_TST
 
-			conv_A_H	temp_H,temp_L,				rx_O2_act_MH,rx_O2_act_ML,rx_O2_act_L
+			cpi		YL,0x02
+			rbreq	Fio2_Disable
+			
+			cpi		YL,0x03
+			rbreq	Volumen_Disable
 
-			;movr		offset_COMFLPEEPH,temp_H 
-			;movr		offset_COMFLPEEPL,temp_L
+			jmp		asigna_valores
 
-			conv_A_H	temp_H,temp_L,				rx_O2_PWM_MH,rx_O2_PWM_ML,rx_O2_PWM_L
-			cp_limites	temp_H,temp_L,				'n',	480,tx_error_rango_rx
+Fio2_Disable:
+			conv_A_H	temp_H,temp_L,				rx_tem_PWM_Aire_MH,rx_tem_PWM_Aire_ML,rx_tem_PWM_Aire_L
+			cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
 
-			;movr		PWM_FiO2_O2H,temp_H
-			;movr		PWM_FiO2_O2L,temp_L
+			movr		PWM_Aire_TST_H,temp_H
+			movr		PWM_Aire_TST_L,temp_L
 
-			conv_A_H	temp_H,temp_L,				rx_O_CPRESMH,rx_O_CPRESML,rx_O_CPRESL
+			conv_A_H	temp_H,temp_L,				rx_tem_PWM_O2_MH,rx_tem_PWM_O2_ML,rx_tem_PWM_O2_L
+			cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
+			
+			movr		PWM_O2_TST_H,temp_H
+			movr		PWM_O2_TST_L,temp_L
+
+			jmp		asigna_valores
+
+Volumen_Disable:
+			conv_A_H	temp_H,temp_L,				rx_tem_PWM_MH,rx_tem_PWM_ML,rx_tem_PWM_L
 			cp_limites	temp_H,temp_L,				'n',	500,tx_error_rango_rx
-			;movr		offset_PreH,temp_H
-			;movr		offset_PreL,temp_L	
+			
+			movr		Vol_TST_H,temp_H
+			movr		Vol_TST_L,temp_L	
 			
 			
-			conv_A_H	offset_batH,offset_batL,	rx_O_BATMH,rx_O_BATML,rx_O_BATL
-
-			conv_A_H	G_batH,G_batL,				rx_O_GAN_BATMH,rx_O_GAN_BATML,rx_O_GAN_BATL
 			
 			
 ;limites
@@ -829,7 +841,7 @@ calib_mezcl:
 
 ;aSIGNAR VALORES
 
-
+asigna_valores:
 
 
 ;ecco
@@ -850,24 +862,24 @@ calib_mezcl:
 			movr		buffer_tx0+4	,rx_OPIPMH
 			movr		buffer_tx0+5	,rx_OPIPML
 			movr		buffer_tx0+6	,rx_OPIPL
-			movr		buffer_tx0+7	,rx_O2_act_MH
-			movr		buffer_tx0+8	,rx_O2_act_ML
-			movr		buffer_tx0+9	,rx_O2_act_L
-			movr		buffer_tx0+10	,rx_O2_PWM_MH
-			movr		buffer_tx0+11	,rx_O2_PWM_ML
-			movr		buffer_tx0+12	,rx_O2_PWM_L
-			movr		buffer_tx0+13	,rx_O_CPRESMH;rx_O_BATMH;
-			movr		buffer_tx0+14	,rx_O_CPRESML;rx_O_BATML;
-			movr		buffer_tx0+15	,rx_O_CPRESL;rx_O_BATL;
+			movr		buffer_tx0+7	,rx_tem_PWM_Aire_MH
+			movr		buffer_tx0+8	,rx_tem_PWM_Aire_ML
+			movr		buffer_tx0+9	,rx_tem_PWM_Aire_L
+			movr		buffer_tx0+10	,rx_tem_PWM_O2_MH
+			movr		buffer_tx0+11	,rx_tem_PWM_O2_ML
+			movr		buffer_tx0+12	,rx_tem_PWM_O2_L
+			movr		buffer_tx0+13	,rx_tem_PWM_MH;rx_O_BATMH;
+			movr		buffer_tx0+14	,rx_tem_PWM_ML;rx_O_BATML;
+			movr		buffer_tx0+15	,rx_tem_PWM_L;rx_O_BATL;
 			movr		buffer_tx0+16	,rx_O_BATMH
 			movr		buffer_tx0+17	,rx_O_BATML
 			movr		buffer_tx0+18	,rx_O_BATL
 			movr		buffer_tx0+19	,rx_O_GAN_BATMH
 			movr		buffer_tx0+20	,rx_O_GAN_BATML
 			movr		buffer_tx0+21	,rx_O_GAN_BATL
-			movr		buffer_tx0+22	,rx_VV_Off_MH
-			movr		buffer_tx0+23	,rx_VV_Off_ML
-			movr		buffer_tx0+24	,rx_VV_Off_L
+			movr		buffer_tx0+22	,rx_Modo_TST_MH
+			movr		buffer_tx0+23	,rx_Modo_TST_ML
+			movr		buffer_tx0+24	,rx_Modo_TST_L
 
 
 ;retorno
@@ -1193,7 +1205,12 @@ control_FiO2:
 ;			rbreq	retorno_control_O2
 			
 			;call	calcula_FiO2_HEX
-
+;************************************************************
+;************************************************************
+			inr		YL,Modo_TST
+			cpi		YL,0x02
+			rbreq	FiO2_manual
+			sbi		led_run
 ;************************************************************
 ;************************************************************
 			inr		ZL,reg_O2L		;compara si es 21% de oxigeno (hex)
@@ -1219,6 +1236,7 @@ control_FiO2:
 ;************************************************************
 			cpri	habilita_control_O2,'0'
 			rbreq	retorno_control_O2
+
 ;************************************************************
 ;************************************************************
 			movr	C_X_FiO2,C_A_FiO2
@@ -1673,7 +1691,28 @@ salir_control_O2:
 retorno_control_O2:
 			ret
 ;************************************************************
-
+FiO2_manual:
+			movr	reg_PWM2_AireH,PWM_Aire_TST_H
+			movr	reg_PWM2_AireL,PWM_Aire_TST_L
+			;outr	reg_PWM2_AireH,xh
+			;outr	reg_PWM2_AireL,xl
+			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
+			
+			movr	reg_PWM1_O2H,PWM_O2_TST_H
+			movr	reg_PWM1_O2L,PWM_O2_TST_L	
+			;outr	reg_PWM1_O2H,xh
+			;outr	reg_PWM1_O2L,xl
+			;outr	tmp_reg_PWM1_O2H,xh
+			;outr	tmp_reg_PWM1_O2L,xl
+			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
+			cli
+			outi	timer_O2H,high(1400);(1500)
+			outi	timer_O2L,low(1400);(1500)
+			outi	habilita_control_O2,'0'
+			sei
+			ret
+;************************************************************
+;************************************************************
 control_Parker_in:
 			cpri	B_TST_Run,'1'
 			rbreq	con_gases

@@ -361,8 +361,7 @@ fin_macro_presion_soporte:
 			outi		B_PEEP_UP,'0'
 			outi		B_PEEP_DC,'0'	
 			outi		B_Cont,'0'
-			outi		Cont_VV,50
-			outi		Cont_VV,50
+
 							
 		
 		
@@ -462,8 +461,6 @@ fin_macro_tiempo_pausa:
 					outi		B_PEEP_UP,'0'
 					outi		B_PEEP_DC,'0'	
 					outi		B_Cont,'0'
-					movr		Cont_VV,VV_OFF
-					;outi		Cont_VV,50
 					outi		C_PEEP_DOWN,0
 					outi		primer_cruce,'0'
 
@@ -794,15 +791,15 @@ fin_macro_dec_volumen:
 .equ		rx_OPIPMH			=	Reg_rx+48
 .equ		rx_OPIPML			=	Reg_rx+49
 .equ		rx_OPIPL			=	Reg_rx+50
-.equ		rx_O2_act_MH		=	Reg_rx+51
-.equ		rx_O2_act_ML		=	Reg_rx+52
-.equ		rx_O2_act_L			=	Reg_rx+53
-.equ		rx_O2_PWM_MH		=	Reg_rx+54
-.equ		rx_O2_PWM_ML		=	Reg_rx+55
-.equ		rx_O2_PWM_L			=	Reg_rx+56
-.equ		rx_O_CPRESMH		=	Reg_rx+57
-.equ		rx_O_CPRESML		=	Reg_rx+58
-.equ		rx_O_CPRESL			=	Reg_rx+59
+.equ		rx_tem_PWM_aire_MH	=	Reg_rx+51
+.equ		rx_tem_PWM_aire_ML	=	Reg_rx+52
+.equ		rx_tem_PWM_aire_L	=	Reg_rx+53
+.equ		rx_tem_PWM_O2_MH	=	Reg_rx+54
+.equ		rx_tem_PWM_O2_ML	=	Reg_rx+55
+.equ		rx_tem_PWM_O2_L		=	Reg_rx+56
+.equ		rx_tem_PWM_MH		=	Reg_rx+57
+.equ		rx_tem_PWM_ML		=	Reg_rx+58
+.equ		rx_tem_PWM_L		=	Reg_rx+59
 .equ		rx_O_BATMH			=	Reg_rx+60
 .equ		rx_O_BATML			=	Reg_rx+61
 .equ		rx_O_BATL			=	Reg_rx+62
@@ -812,9 +809,9 @@ fin_macro_dec_volumen:
 .equ		rx_OFF				=	Reg_rx+66
 .equ		Tx_OFF				=	Reg_rx+67
 .equ		rx_tst_02			=	Reg_rx+68
-.equ		rx_VV_Off_MH		=	Reg_rx+69
-.equ		rx_VV_Off_ML		=	Reg_rx+70
-.equ		rx_VV_Off_L			=	Reg_rx+71
+.equ		rx_Modo_TST_MH		=	Reg_rx+69
+.equ		rx_Modo_TST_ML		=	Reg_rx+70
+.equ		rx_Modo_TST_L		=	Reg_rx+71
 ;.equ		Tx_OFF				=	Reg_rx+67
 .equ		rx_Ctrl_Vol			=	Reg_rx+72
 .equ		rx_Ctrl_FiO2		=	Reg_rx+73
@@ -1154,8 +1151,8 @@ fin_macro_dec_volumen:
 .equ		offset_PEEPH				=	Reg_misc+221
 
 
-;.equ		offset_PreL					=	Reg_misc+222
-;.equ		offset_PreH					=	Reg_misc+223
+.equ		Vol_TST_L					=	Reg_misc+222
+.equ		Vol_TST_H					=	Reg_misc+223
 
 .equ		offset_COMFLPIPL			=	Reg_misc+224
 .equ		offset_COMFLPIPH			=	Reg_misc+225
@@ -1190,7 +1187,7 @@ fin_macro_dec_volumen:
 
 .equ		B_act						= 	Reg_misc+244
 
-.equ		VV_OFF						= 	Reg_misc+245
+.equ		Modo_TST					= 	Reg_misc+245
 
 .equ		VV_X						= 	Reg_misc+246
 
@@ -1206,6 +1203,11 @@ fin_macro_dec_volumen:
 
 .equ		B_TST_Run					=	Reg_misc+253
 
+.equ		PWM_Aire_TST_L				=	Reg_misc+254
+.equ		PWM_Aire_TST_H				=	Reg_misc+255
+
+.equ		PWM_O2_TST_L				=	Reg_misc+256
+.equ		PWM_O2_TST_H				=	Reg_misc+257
 
 .equ		buffer_tx0					=	0x0800
 
@@ -1715,11 +1717,11 @@ init_io:	outi	ddra, 0b11111111
 			outi 	offset_COMFLPEEPH,high(110)
 			outi 	offset_COMFLPEEPL,low(110)
 			
-			outi 	offset_COMFLPIPH,high(120)
-			outi 	offset_COMFLPIPL,low(120)
+			outi 	offset_COMFLPIPH,high(140)
+			outi 	offset_COMFLPIPL,low(140)
 
-			;outi 	offset_PreH,high(100)
-			;outi 	offset_PreL,low(100)
+			outi 	Vol_TST_H,high(100)
+			outi 	Vol_TST_L,low(100)
 			
 			outi 	offset_batH,high(585)
 			outi 	offset_batL,low(585)
@@ -1730,7 +1732,7 @@ init_io:	outi	ddra, 0b11111111
 			outi	rx_Ctrl_Vol,'0'
 			outi	rx_Ctrl_FiO2,'0'
 
-			outi	VV_OFF,2
+			outi	Modo_TST,0x00
 			
 			outi	CPAP_alarma_APNEA,'0'
 			OUTI	FASE,						STANDBY
@@ -1761,6 +1763,11 @@ init_io:	outi	ddra, 0b11111111
 			outi		Set_Ctrl_FiO2H,0x00
 			outi		b_ctrl_FiO2,0x00
 
+			outi 		PWM_Aire_TST_H,high(220)
+			outi	 	PWM_Aire_TST_L,low(220)
+					
+			outi 		PWM_O2_TST_H,high(220)
+			outi 		PWM_O2_TST_L,low(220)
 			;outi		PWM_FiO2_O2H,high(200)
 			;outi		PWM_FiO2_O2L,low(200)
 

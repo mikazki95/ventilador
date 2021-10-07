@@ -549,9 +549,15 @@ control_P_INS_MODO_PRESION:
 			rbreq	sin_Flujo
 
 			;ASIGNA_PWM_FLUJO		offset_PreH,offset_PreL
-			;ASIGNA_PWM_FLUJO					reg_PWM0H,reg_PWM0L
+			inr		YL,Modo_TST
+			cpi		YL,0x03
+			rbreq	control_manual
+			ASIGNA_PWM_FLUJO					reg_PWM0H,reg_PWM0L
 			rjmp	salir_control
 
+control_manual:
+			ASIGNA_PWM_FLUJO		Vol_TST_H,Vol_TST_L
+			rjmp	salir_control
 
 
 

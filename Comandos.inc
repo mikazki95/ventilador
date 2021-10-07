@@ -372,30 +372,30 @@ calibra_21:
 tst_ejecuta_C:
 			outi		tmr_debug,0x00
 
-			movr		rx_OPEEPMH		,buffer_rx0+0			;Rx_modo
-			movr		rx_OPEEPML		,buffer_rx0+1		;Decenas
-			movr		rx_OPEEPL		,buffer_rx0+2		;Unidades
-			movr		rx_OPIPMH		,buffer_rx0+3		;Decimas de segundo
-			movr		rx_OPIPML		,buffer_rx0+4		;Centesimas de segundo
-			movr		rx_OPIPL		,buffer_rx0+5			;Espera los bytes del tiempo "pausa"
-			movr		rx_O2_act_MH	,buffer_rx0+6
-			movr		rx_O2_act_ML	,buffer_rx0+7
-			movr		rx_O2_act_L		,buffer_rx0+8
-			movr		rx_O2_PWM_MH	,buffer_rx0+9
-			movr		rx_O2_PWM_ML	,buffer_rx0+10
-			movr		rx_O2_PWM_L		,buffer_rx0+11
-			movr		rx_O_CPRESMH	,buffer_rx0+12
-			movr		rx_O_CPRESML	,buffer_rx0+13			
-			movr		rx_O_CPRESL		,buffer_rx0+14
-			movr		rx_O_BATMH		,buffer_rx0+15
-			movr		rx_O_BATML		,buffer_rx0+16
-			movr		rx_O_BATL		,buffer_rx0+17
-			movr		rx_O_GAN_BATMH	,buffer_rx0+18
-			movr		rx_O_GAN_BATML	,buffer_rx0+19
-			movr		rx_O_GAN_BATL	,buffer_rx0+20
-			movr		rx_VV_off_MH	,buffer_rx0+21
-			movr		rx_VV_off_ML	,buffer_rx0+22
-			movr		rx_VV_off_L		,buffer_rx0+23			
+			movr		rx_OPEEPMH			,buffer_rx0+0			;Rx_modo
+			movr		rx_OPEEPML			,buffer_rx0+1		;Decenas
+			movr		rx_OPEEPL			,buffer_rx0+2		;Unidades
+			movr		rx_OPIPMH			,buffer_rx0+3		;Decimas de segundo
+			movr		rx_OPIPML			,buffer_rx0+4		;Centesimas de segundo
+			movr		rx_OPIPL			,buffer_rx0+5			;Espera los bytes del tiempo "pausa"
+			movr		rx_tem_PWM_aire_MH	,buffer_rx0+6
+			movr		rx_tem_PWM_aire_ML	,buffer_rx0+7
+			movr		rx_tem_PWM_aire_L	,buffer_rx0+8
+			movr		rx_tem_PWM_O2_MH	,buffer_rx0+9
+			movr		rx_tem_PWM_O2_ML	,buffer_rx0+10
+			movr		rx_tem_PWM_O2_L		,buffer_rx0+11
+			movr		rx_tem_PWM_MH		,buffer_rx0+12
+			movr		rx_tem_PWM_ML		,buffer_rx0+13			
+			movr		rx_tem_PWM_L		,buffer_rx0+14
+			movr		rx_O_BATMH			,buffer_rx0+15
+			movr		rx_O_BATML			,buffer_rx0+16
+			movr		rx_O_BATL			,buffer_rx0+17
+			movr		rx_O_GAN_BATMH		,buffer_rx0+18
+			movr		rx_O_GAN_BATML		,buffer_rx0+19
+			movr		rx_O_GAN_BATL		,buffer_rx0+20
+			movr		rx_Modo_TST_MH		,buffer_rx0+21
+			movr		rx_Modo_TST_ML		,buffer_rx0+22
+			movr		rx_Modo_TST_L			,buffer_rx0+23			
 			outi		cmd_pendiente,'C'
 			jmp		salir_int_rx0
 ;************************************************************************************
