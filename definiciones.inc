@@ -1206,9 +1206,6 @@ fin_macro_dec_volumen:
 .equ		PWM_Aire_TST_L				=	Reg_misc+254
 .equ		PWM_Aire_TST_H				=	Reg_misc+255
 
-.equ		PWM_O2_TST_L				=	Reg_misc+256
-.equ		PWM_O2_TST_H				=	Reg_misc+257
-
 .equ		buffer_tx0					=	0x0800
 
 .equ		buffer_rx0					=	0x0880
@@ -1252,6 +1249,9 @@ fin_macro_dec_volumen:
 .equ		FIO2_NH					=	FiO2+25
 .equ		FIO2_NL					=	FiO2+26
 .equ		C_FIO2					=	FiO2+27
+
+.equ		PWM_O2_TST_L			=	FiO2+28
+.equ		PWM_O2_TST_H			=	FiO2+29
 
 ;Sección agregada para lectura de la bateria
 .equ		bateria					=	0x0A00

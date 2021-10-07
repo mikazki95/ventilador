@@ -16,7 +16,7 @@
 #define	version_firmwareP	'.'
 #define	version_firmwareM	'2'
 ;#define	version_firmwareLP	'.'
-#define	version_firmwareL	'F'
+#define	version_firmwareL	'T'
 
 .equ	fxtal		=	11059200		;Frecuencia del cristal
 
@@ -799,19 +799,6 @@ calib_mezcl:
 			movr		offset_COMFLPIPH,temp_H
 			movr		offset_COMFLPIPL,temp_L
 
-			conv_A_H	temp_H,Modo_TST,					rx_Modo_TST_MH,rx_Modo_TST_ML,rx_Modo_TST_L
-
-			inr		YL,Modo_TST
-
-			cpi		YL,0x02
-			rbreq	Fio2_Disable
-			
-			cpi		YL,0x03
-			rbreq	Volumen_Disable
-
-			jmp		asigna_valores
-
-Fio2_Disable:
 			conv_A_H	temp_H,temp_L,				rx_tem_PWM_Aire_MH,rx_tem_PWM_Aire_ML,rx_tem_PWM_Aire_L
 			cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
 
@@ -824,9 +811,6 @@ Fio2_Disable:
 			movr		PWM_O2_TST_H,temp_H
 			movr		PWM_O2_TST_L,temp_L
 
-			jmp		asigna_valores
-
-Volumen_Disable:
 			conv_A_H	temp_H,temp_L,				rx_tem_PWM_MH,rx_tem_PWM_ML,rx_tem_PWM_L
 			cp_limites	temp_H,temp_L,				'n',	500,tx_error_rango_rx
 			
@@ -834,7 +818,11 @@ Volumen_Disable:
 			movr		Vol_TST_L,temp_L	
 			
 			
-			
+			conv_A_H	offset_batH,offset_batL,	rx_O_BATMH,rx_O_BATML,rx_O_BATL
+
+			conv_A_H	G_batH,G_batL,				rx_O_GAN_BATMH,rx_O_GAN_BATML,rx_O_GAN_BATL
+
+			conv_A_H	temp_H,Modo_TST,					rx_Modo_TST_MH,rx_Modo_TST_ML,rx_Modo_TST_L
 			
 ;limites
 
@@ -966,7 +954,13 @@ arranque_inicial:
 ;En este caso si el valor de los registros (reg) es mayor o igual a Valor_min
 ; "Y" menor o igual a Valor_max, continua en la siguiente linea, en caso
 ;contrario salta a tx_error
-modo_ok:	cp_limites	tmp_tmr_TIEMPO_INSH,tmp_tmr_TIEMPO_INSL,	1,	T_max,tx_error_rango_rx
+modo_ok:	
+
+			outi	timer_O2H,high(1400);(1500)
+			outi	timer_O2L,low(1400);(1500)
+
+
+			cp_limites	tmp_tmr_TIEMPO_INSH,tmp_tmr_TIEMPO_INSL,	1,	T_max,tx_error_rango_rx
 			cp_limites	tmp_tmr_TIEMPOpausaH,tmp_tmr_TIEMPOpausaL,	'n',T_max,tx_error_rango_rx
 			cp_limites	tmp_tmr_TIEMPO_EXPH,tmp_tmr_TIEMPO_EXPL,	1,	T_max,tx_error_rango_rx
 			
@@ -985,7 +979,7 @@ modo_ok:	cp_limites	tmp_tmr_TIEMPO_INSH,tmp_tmr_TIEMPO_INSL,	1,	T_max,tx_error_r
 
 			;call		calcula_presionesFP
 
-/*			CLI
+			CLI
 			inr			xh,reg_O2H	;Toma % actual de O2
 			inr			xl,reg_O2L
 			inr			yh,tmp_reg_O2H	;Toma % reprogramado de O2
@@ -993,7 +987,7 @@ modo_ok:	cp_limites	tmp_tmr_TIEMPO_INSH,tmp_tmr_TIEMPO_INSL,	1,	T_max,tx_error_r
 			cp			xl,yl		;Si el valor de % es igual al anterior, no se
 			cpc			xh,yh		;modifica el PWM
 			brne		skip_cambia_PWM_O2
-*/
+
 ;***************************************************************
 ;***************************************************************
 			inr		xl,tmp_reg_O2L
@@ -1210,7 +1204,7 @@ control_FiO2:
 			inr		YL,Modo_TST
 			cpi		YL,0x02
 			rbreq	FiO2_manual
-			sbi		led_run
+			
 ;************************************************************
 ;************************************************************
 			inr		ZL,reg_O2L		;compara si es 21% de oxigeno (hex)
@@ -1692,28 +1686,27 @@ retorno_control_O2:
 			ret
 ;************************************************************
 FiO2_manual:
-			movr	reg_PWM2_AireH,PWM_Aire_TST_H
-			movr	reg_PWM2_AireL,PWM_Aire_TST_L
-			;outr	reg_PWM2_AireH,xh
-			;outr	reg_PWM2_AireL,xl
+
+			movr	reg_PWM2_AireH,PWM_Aire_TST_H;PWM_AIREH
+			movr	reg_PWM2_AireL,PWM_Aire_TST_L;PWM_AIREL
 			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
 			
-			movr	reg_PWM1_O2H,PWM_O2_TST_H
-			movr	reg_PWM1_O2L,PWM_O2_TST_L	
-			;outr	reg_PWM1_O2H,xh
-			;outr	reg_PWM1_O2L,xl
-			;outr	tmp_reg_PWM1_O2H,xh
-			;outr	tmp_reg_PWM1_O2L,xl
+			movr	reg_PWM1_O2H,PWM_O2_TST_H;PWM_Aire_TST_H;
+			movr	reg_PWM1_O2L,PWM_O2_TST_L;PWM_Aire_TST_L;
 			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
+			
+
 			cli
 			outi	timer_O2H,high(1400);(1500)
 			outi	timer_O2L,low(1400);(1500)
 			outi	habilita_control_O2,'0'
 			sei
+
 			ret
 ;************************************************************
 ;************************************************************
 control_Parker_in:
+			;ret
 			cpri	B_TST_Run,'1'
 			rbreq	con_gases
 			inr		XL,portl
@@ -1730,7 +1723,11 @@ control_Parker_in:
 ;************************************************************
 ;************************************************************
 con_gases:
-			
+			inr		YL,Modo_TST
+			cpi		YL,0x02
+			rbreq	FiO2_manual
+;************************************************************
+;************************************************************
 			inr		ZL,reg_O2L		;compara si es 21% de oxigeno (hex)
 			inr		ZH,reg_O2H
 			cpi		ZL,0x15
