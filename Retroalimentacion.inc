@@ -16,7 +16,11 @@ salir_int_PCINT:
 			popw
 			reti
 
-tst_retro:	inr		r25,pinl
+tst_retro:	
+			inr		R25,Modo_TST
+			cpi		R25,0x03
+			rbreq	salir_int_PCINT
+			inr		r25,pinl
 			andi	r25,0b00000011
 			cpi		r25,0x00
 			rbreq	int_INC_PWM0

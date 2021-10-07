@@ -956,8 +956,8 @@ arranque_inicial:
 ;contrario salta a tx_error
 modo_ok:	
 
-			outi	timer_O2H,high(1400);(1500)
-			outi	timer_O2L,low(1400);(1500)
+			outi	timer_O2H,high(4000);(1500)
+			outi	timer_O2L,low(4000);(1500)
 
 
 			cp_limites	tmp_tmr_TIEMPO_INSH,tmp_tmr_TIEMPO_INSL,	1,	T_max,tx_error_rango_rx
