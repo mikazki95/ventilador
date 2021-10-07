@@ -362,7 +362,6 @@ fin_macro_presion_soporte:
 			outi		B_PEEP_DC,'0'	
 			outi		B_Cont,'0'
 			outi		Cont_VV,50
-			movr		VV_X,VV_OFF
 			outi		Cont_VV,50
 							
 		
@@ -932,7 +931,7 @@ fin_macro_dec_volumen:
 
 .equ		PWM_FiO2_AireH			=	Reg_hex+50
 .equ		PWM_FiO2_AireL			=	Reg_hex+51
-.equ		PWM_FiO2_O2H			=	Reg_hex+52
+;.equ		PWM_FiO2_O2H			=	Reg_hex+52
 .equ		PWM_FiO2_O2L			=	Reg_hex+53
 
 
@@ -1155,8 +1154,8 @@ fin_macro_dec_volumen:
 .equ		offset_PEEPH				=	Reg_misc+221
 
 
-.equ		offset_PreL					=	Reg_misc+222
-.equ		offset_PreH					=	Reg_misc+223
+;.equ		offset_PreL					=	Reg_misc+222
+;.equ		offset_PreH					=	Reg_misc+223
 
 .equ		offset_COMFLPIPL			=	Reg_misc+224
 .equ		offset_COMFLPIPH			=	Reg_misc+225
@@ -1719,8 +1718,8 @@ init_io:	outi	ddra, 0b11111111
 			outi 	offset_COMFLPIPH,high(120)
 			outi 	offset_COMFLPIPL,low(120)
 
-			outi 	offset_PreH,high(100)
-			outi 	offset_PreL,low(100)
+			;outi 	offset_PreH,high(100)
+			;outi 	offset_PreL,low(100)
 			
 			outi 	offset_batH,high(585)
 			outi 	offset_batL,low(585)
@@ -1754,7 +1753,7 @@ init_io:	outi	ddra, 0b11111111
 			outi		B_TST_Run,'0'
 			outi		B_PR_TST,'0'
 			;B_TMR_TST
-			outi		PWM_FiO2_O2H,0x00
+			;outi		PWM_FiO2_O2H,0x00
 			outi		PWM_FiO2_O2L,0x00
 			outi		En_Ctrl_FiO2L,0x32
 			outi		En_Ctrl_FiO2H,0x00;17

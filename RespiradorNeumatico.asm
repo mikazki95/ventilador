@@ -791,39 +791,39 @@ calib_mezcl:
 			
 			conv_A_H	temp_H,temp_L,				rx_OPEEPMH,rx_OPEEPML,rx_OPEEPL
 			cp_limites	temp_H,temp_L,				'n',	480,	tx_error_rango_rx
-			;movr		offset_PEEPH,temp_H
-			;movr		offset_PEEPL,temp_L
+			movr		offset_COMFLPEEPH,temp_H
+			movr		offset_COMFLPEEPL,temp_L
 					
 			conv_A_H	temp_H,temp_L,				rx_OPIPMH,rx_OPIPML,rx_OPIPL
 			cp_limites	temp_H,temp_L,				'n',	480,tx_error_rango_rx
-			;movr		offset_PIPH,temp_H
-			;movr		offset_PIPL,temp_L
+			movr		offset_COMFLPIPH,temp_H
+			movr		offset_COMFLPIPL,temp_L
+
+			;conv_A_H	0,VV_OFF,					rx_VV_Off_MH,rx_VV_Off_ML,rx_VV_Off_L
+
 
 			conv_A_H	temp_H,temp_L,				rx_O2_act_MH,rx_O2_act_ML,rx_O2_act_L
 
-			movr		offset_COMFLPEEPH,temp_H 
-			movr		offset_COMFLPEEPL,temp_L
-
-			;movr		Set_Ctrl_FiO2H,temp_H 
-			;movr		Set_Ctrl_FiO2L,temp_L
+			;movr		offset_COMFLPEEPH,temp_H 
+			;movr		offset_COMFLPEEPL,temp_L
 
 			conv_A_H	temp_H,temp_L,				rx_O2_PWM_MH,rx_O2_PWM_ML,rx_O2_PWM_L
 			cp_limites	temp_H,temp_L,				'n',	480,tx_error_rango_rx
 
-			movr		PWM_FiO2_O2H,temp_H
-			movr		PWM_FiO2_O2L,temp_L
+			;movr		PWM_FiO2_O2H,temp_H
+			;movr		PWM_FiO2_O2L,temp_L
 
 			conv_A_H	temp_H,temp_L,				rx_O_CPRESMH,rx_O_CPRESML,rx_O_CPRESL
 			cp_limites	temp_H,temp_L,				'n',	500,tx_error_rango_rx
-			movr		offset_PreH,temp_H
-			movr		offset_PreL,temp_L	
+			;movr		offset_PreH,temp_H
+			;movr		offset_PreL,temp_L	
 			
 			
 			conv_A_H	offset_batH,offset_batL,	rx_O_BATMH,rx_O_BATML,rx_O_BATL
 
 			conv_A_H	G_batH,G_batL,				rx_O_GAN_BATMH,rx_O_GAN_BATML,rx_O_GAN_BATL
 			
-			conv_A_H	0,VV_OFF,					rx_VV_Off_MH,rx_VV_Off_ML,rx_VV_Off_L
+			
 ;limites
 
 
