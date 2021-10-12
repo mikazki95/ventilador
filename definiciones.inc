@@ -427,8 +427,8 @@ fin_macro_tiempo_pausa:
 ;*********************************************************************
 
 .macro		FASE_EXHALACION
-			outi	reg_PWM_Val_ExH,0x00
-			outi	reg_PWM_Val_ExL,0xF0
+			outi	reg_PWM_Val_ExH,0x01
+			outi	reg_PWM_Val_ExL,0xB0
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
 			
 			outi	tmr_inhibe_on_off_pwm,		3
@@ -439,8 +439,6 @@ fin_macro_tiempo_pausa:
 			PIN_PS0
 			CBI		T_PAUSA
 			ASIGNA_TIEMPO						tmr_TIEMPO_EXPH,tmr_TIEMPO_EXPL
-;			cpri	presion_liberada,'1'
-;			breq	fin_macro_exhalacion
 					outi		B_Dec_PEEP,'0'
 					ASIGNA_PWM_O2						  reg_PWM1_O2H,reg_PWM1_O2L
 					ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
@@ -450,9 +448,7 @@ fin_macro_tiempo_pausa:
 ;************************************************************
 ;************************************************************
 			
-					;delay_ms	30
-					;outi		PWM_FLUJOH,high(0)
-					;outi		PWM_FLUJOL,low(0)
+
 					outi		bandera_inc_compensacion,'0'
 					outi		B_Dec,'0'
 					outi		B_PEEP_AC,'0'

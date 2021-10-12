@@ -869,7 +869,7 @@ sigue_control_PEEP:
 tst_PEEP2:			;PEEP_Control
 tst_PEEP:
 			tst_PEEP_0					salir_control
-			tst_tiempo_final_fase	10,	sin_flujo
+			;tst_tiempo_final_fase	10,	sin_flujo
 
 peep_CPAP:
 
@@ -890,8 +890,8 @@ PEEP_control:
 			call	Carga_offset_PEEP
 			inr		xl,reg_PEEPL_100porciento
 			inr		xh,reg_PEEPH_100porciento
-			subi	XL,low(-100)
-			sbci	XH,high(-100)
+			subi	XL,low(-50)
+			sbci	XH,high(-50)
 			cp		R24,XL
 			cpc		R25,XH
 			rbrsh	PEEP_Alta
@@ -902,57 +902,60 @@ PEEP_control:
 			call	Carga_offset_PEEP
 			inr		xl,reg_PEEPL_100porciento
 			inr		xh,reg_PEEPH_100porciento
-			subi	XL,low(100)
-			sbci	XH,high(100)
+			subi	XL,low(50)
+			sbci	XH,high(50)
 			cp		R24,XL
 			cpc		R25,XH
 			rbrlo	PEEP_Baja_P
 ;***********************peep ok*************************************	
 PEEP_Ok:
+			;jmp		PEEP_Baja_P
 			outi	B_PEEP_DOWN,'0'
-			;inr		r24,Presion_cmH2OL
-			;inr		r25,Presion_cmH2OH
-			call	Carga_offset_PEEP
-			inr		xl,reg_PEEPL_100porciento
-			inr		xh,reg_PEEPH_100porciento
-			cp		R24,XL
-			cpc		R25,XH
-			rbrsh	check_Flujo_PEEP
-			;rjmp	salir_control
 
-;************************************************************
-			cpri	B_Dec_PEEP,'1'
-			rbreq	SRPPOk
-			call	Carga_offset_PEEP
-			outr	Presion_antL,R24
-			outr	Presion_antH,R25
-			outi	B_Dec_PEEP,'1'
-SRPPOk:;Skip_read_Pres_PEEP_OK
-			;inr		ZL,Presion_cmH2OL
-			;inr		ZH,Presion_cmH2OH
 			call	Carga_offset_PEEP
 			inr		XL,Presion_antL
 			inr		XH,Presion_antH
-			subi	XL,low(-10)
-			sbci	XH,high(-10)
+			subi	XL,low(-5)
+			sbci	XH,high(-5)
 			cp		R24,XL
 			cpc		R25,XH
-			rbrsh	check_Flujo_PEEP
-			rbreq	check_Flujo_PEEP
+			rbrsh	dec_Flujo_PEEP
+			call	Carga_offset_PEEP
+			inr		XL,Presion_antL
+			inr		XH,Presion_antH
+			subi	XL,low(4)
+			sbci	XH,high(4)
+			cp		R24,XL
+			cpc		R25,XH
+			rbreq	inc_Flujo_PEEP
+			jmp		actualizar_Pres_PEEP
 ;************************************************************
 
+
+dec_Flujo_PEEP:
 			inr		XL,reg_PWM_Val_ExL
 			inr		XH,reg_PWM_Val_ExH
 			cpi		XL,low(500)
 			cpci	XH,high(500)
-			rbrsh	salir_control
+			rbrsh	SRPPOk;salir_control
 			adiw	XL,1
 			outr	reg_PWM_Val_ExH,XH
 			outr	reg_PWM_Val_ExL,XL
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
-			outi	B_Dec_PEEP,'0'
-			rjmp	salir_control
-check_Flujo_PEEP:
+SRPPOk:
+			inr		ZL,PWM_FLUJOL
+			inr		ZH,PWM_FLUJOH
+			;inr		XL,offset_COMFLPEEPL
+			;inr		XH,offset_COMFLPEEPH
+			cpi		ZL,low(40)
+			cpci	ZH,high(40)
+			rbrlo	actualizar_Pres_PEEP;PEEP_Ok_out;
+			sbiw	ZL,1
+			outr	PWM_FLUJOH,ZH
+			outr	PWM_FLUJOL,ZL
+			rjmp	actualizar_Pres_PEEP
+;************************************************************
+inc_Flujo_PEEP:
 			inr		ZL,PWM_FLUJOL
 			inr		ZH,PWM_FLUJOH
 			inr		XL,offset_COMFLPEEPL
@@ -960,18 +963,19 @@ check_Flujo_PEEP:
 			cp		ZL,XL
 			cpc		ZH,XH
 			rbrlo	PEEP_Ok_out;salir_control
-			sbiw	ZL,3
+			adiw	ZL,1
 			outr	PWM_FLUJOH,ZH
 			outr	PWM_FLUJOL,ZL
-			rjmp	salir_control
+			rjmp	actualizar_Pres_PEEP
 ;************************************************************
 PEEP_Ok_out:
 			;outi	B_Dec_PEEP,'0'
 			movr	PWM_FLUJOH,offset_COMFLPEEPH
 			movr	PWM_FLUJOL,offset_COMFLPEEPL
-			rjmp	salir_control
+			rjmp	actualizar_Pres_PEEP
 ;************************************************************
 PEEP_Baja_P:
+			;sbi		led_run
 			;jmp		sin_flujo
 			cpri	B_PEEP_DOWN,'1'
 			rbreq	skip_PEEP_baja_A
@@ -979,6 +983,7 @@ PEEP_Baja_P:
 			outr	Presion_antL,R24
 			outr	Presion_antH,R25
 			outi	B_PEEP_DOWN,'1'
+			rbrsh	salir_control
 skip_PEEP_baja_A:			
 			;inr		ZL,Presion_cmH2OL
 			;inr		ZH,Presion_cmH2OH
@@ -989,56 +994,49 @@ skip_PEEP_baja_A:
 			sbci	XH,high(-10)
 			cp		R24,XL
 			cpc		R25,XH
-			rbrsh	salir_control
+			rbrsh	actualizar_Pres_PEEP;salir_control
 ;******************anterior PEEP baja*************************************
-			;inr		XL,Presion_antL
-			;inr		XH,Presion_antH
-			;sbiw	XL,5
-			;outr	Presion_antH,XH
-			;outr	Presion_antL,XL
 			inr		XL,reg_PWM_Val_ExL
 			inr		XH,reg_PWM_Val_ExH
 			cpi		XL,low(500)
 			cpci	XH,high(500)
 			rbrsh	skip_PEEP_Baja
-			adiw	XL,2
+			adiw	XL,1
 			outr	reg_PWM_Val_ExH,XH
 			outr	reg_PWM_Val_ExL,XL
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
 skip_PEEP_Baja:
-			inr		ZL,PWM_FLUJOL
-			inr		ZH,PWM_FLUJOH
-			cpi		ZL,low(480)
-			cpci	ZH,high(480)
-			rbrsh	salir_control
-			adiw	ZL,1
-			outr	PWM_FLUJOH,ZH
-			outr	PWM_FLUJOL,ZL
-			rjmp	salir_control
+			sbi		led_run
+			inr		XL,PWM_FLUJOL
+			inr		XH,PWM_FLUJOH
+			cpi		XL,low(450)
+			cpci	XH,high(450)
+			rbrsh	actualizar_Pres_PEEP;salir_control
+			adiw	XL,1
+			outr	PWM_FLUJOH,XH
+			outr	PWM_FLUJOL,XL
+
+
+			;rjmp	salir_control
 ;*********************aca termina PEEP baja anterior**************************************
+;************************************************************		
+actualizar_Pres_PEEP:
+			call	Carga_offset_PEEP
+			outr	Presion_antH,R25
+			outr	Presion_antL,R24
+			rjmp	salir_control
 ;************************************************************		
 ;************************************************************
 PEEP_Alta:
 			outi	B_PEEP_DOWN,'0'
-			inr		ZL,PWM_FLUJOL
-			inr		ZH,PWM_FLUJOH
-			cpi		ZL,low(40)
-			cpci	ZH,high(40)
-			rbrlo	skip_PEEP_Alta
-			;sbiw	ZL,1
-			sbiw	ZL,3
-			outr	PWM_FLUJOH,ZH
-			outr	PWM_FLUJOL,ZL
-skip_PEEP_Alta:
 			cpri	B_Dec_PEEP,'1'
 			rbreq	SRPPEA
 			call	Carga_offset_PEEP
 			outr	Presion_antL,R24;Presion_cmH2OL
 			outr	Presion_antH,R25;Presion_cmH2OH
 			outi	B_Dec_PEEP,'1'
-SRPPEA:;Skip_read_Pres_PEEP_Alta
-			;inr		ZL,Presion_cmH2OL
-			;inr		ZH,Presion_cmH2OH
+
+SRPPEA:
 			call	Carga_offset_PEEP
 			inr		XL,Presion_antL
 			inr		XH,Presion_antH
@@ -1046,35 +1044,54 @@ SRPPEA:;Skip_read_Pres_PEEP_Alta
 			sbci	XH,high(30)
 			cp		R24,XL
 			cpc		R25,XH
-			rbrlo	out_PEEP_Alta
+			rbrlo	actualizar_Pres_PEEP;out_PEEP_Alta
 ;*****************************cambio
-			inr 	YL,Cont_VV
-			adiw	YL,1
-			cpi		YL,0xFC
-			brsh	skip_cont_VV
-			outr	Cont_VV,YL			
-skip_cont_VV:
+;************************************************************
+			call	Carga_offset_PEEP
+			inr		XL,Presion_antL
+			inr		XH,Presion_antH
+			subi	XL,low(10)
+			sbci	XH,high(10)
+			cp		R24,XL
+			cpc		R25,XH
+			rbrlo	CHK_PEEP_Alta;SRPPEA
+			inr		ZL,PWM_FLUJOL
+			inr		ZH,PWM_FLUJOH
+			cpi		ZL,low(40)
+			cpci	ZH,high(40)
+			rbrlo	CHK_PEEP_Alta
+			sbiw	ZL,1
+			outr	PWM_FLUJOH,ZH
+			outr	PWM_FLUJOL,ZL
+;************************************************************
+CHK_PEEP_Alta:
 			inr		XL,reg_PWM_Val_ExL
 			inr		XH,reg_PWM_Val_ExH
 			cpi		XL,low(50)
 			cpci	XH,high(50)
-			rbrlo	salir_control
-			inr		ZL,skip_cont_VV
-			inr		ZH,0x00
-			;sub		XL,ZL
-			;sbc		XH,ZH
+			rbrlo	actualizar_Pres_PEEP;salir_control
 			sbiw	XL,1
 			outr	reg_PWM_Val_ExH,XH
 			outr	reg_PWM_Val_ExL,XL
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
-			rjmp	salir_control
+			rjmp	actualizar_Pres_PEEP;salir_control
 ;************************************************************
-;************************************************************
-out_PEEP_Alta:
-			outi	skip_cont_VV,0
-			outi	B_Dec_PEEP,'0'
-			rjmp	salir_control
-;************************************************************
+			call	Carga_offset_PEEP
+			inr		XL,Presion_antL
+			inr		XH,Presion_antH
+			subi	XL,low(30)
+			sbci	XH,high(30)
+			cp		R24,XL
+			cpc		R25,XH
+			rbrlo	SRPPEA
+			inr		ZL,PWM_FLUJOL
+			inr		ZH,PWM_FLUJOH
+			cpi		ZL,low(40)
+			cpci	ZH,high(40)
+			rbrlo	SRPPEA
+			sbiw	ZL,3
+			outr	PWM_FLUJOH,ZH
+			outr	PWM_FLUJOL,ZL
 ;************************************************************
 Carga_offset_PEEP:
 			inr		r24,Presion_cmH2OL
