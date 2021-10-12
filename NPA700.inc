@@ -620,7 +620,7 @@ SRPPIOK_A:;Skip_read_Pres_PIP_OK
 			sbci	XH,high(-10)
 			cp		R24,XL
 			cpc		R25,XH
-			rbrlo	salir_control;;;apagado de basndera de actualizacion 
+			rbrlo	actualizar_Pres_PIP;;;apagado de basndera de actualizacion 
 			inr		XL,reg_PWM_Val_ExL
 			inr		XH,reg_PWM_Val_ExH
 			cpi		XL,low(50)
@@ -634,12 +634,12 @@ Skip_PIP_V_OK_B:
 			inr		XH,PWM_FLUJOH
 			cpi		XL,low(110)
 			cpci	XH,high(110)
-			rbrlo	salir_control
+			rbrlo	actualizar_Pres_PIP
 			sbiw	XL,1
 			outr	PWM_FLUJOH,XH
 			outr	PWM_FLUJOL,XL
 			;ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
-			rjmp	salir_control
+			rjmp	actualizar_Pres_PIP
 ;************************************************************
 PIP_Ok_P:	
 			outi	B_PR_TST,'1'
@@ -660,15 +660,13 @@ Skip_PIP_V_OK:
 			outi	B_Dec_PEEP,'1'
 SRPPIOK:;Skip_read_Pres_PIP_OK
 			call	CARGA_PR_OFFSET
-			;outr	Presion_antH,R25 
-			;outr	Presion_antL,R24
 			inr		XL,Presion_antL
 			inr		XH,Presion_antH
 			subi	XL,low(-10)
 			sbci	XH,high(-10)
 			cp		R24,XL
 			cpc		R25,XH
-			rbrsh	salir_control
+			rbrsh	actualizar_Pres_PIP
 			inr		ZL,Presion_antL
 			inr		ZH,Presion_antH
 			adiw	XL,5
@@ -680,32 +678,15 @@ SRPPIOK:;Skip_read_Pres_PIP_OK
 			inr		XH,PWM_FLUJOH
 			cp		XL,ZL
 			cpc		XH,ZH
-			rbrlo	salir_control
+			rbrlo	actualizar_Pres_PIP
 			sbiw	XL,1
 			outr	PWM_FLUJOH,XH
 			outr	PWM_FLUJOL,XL
 			;ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
-			rjmp	salir_control
+			rjmp	actualizar_Pres_PIP
 
 ;************************************************************
-;************************************************************
-
-
-
-PIP_Ok:					
-			inr		ZL,PWM_FLUJOL
-			inr		ZH,PWM_FLUJOH
-			inr		XL,offset_COMFLPIPL
-			inr		XH,offset_COMFLPIPH
-			cp		ZL,XL
-			cpc		ZH,XH
-			rbrlo	pip_OK_out
-			sbiw	ZL,3
-			outr	PWM_FLUJOH,ZH
-			outr	PWM_FLUJOL,ZL
-			rjmp	salir_control
-
-			
+;************************************************************			
 ;************************************************************
 pip_OK_out:
 			movr	PWM_FLUJOH,offset_COMFLPIPH
@@ -714,9 +695,9 @@ pip_OK_out:
 ;************************************************************
 ;************************************************************
 PIP_Baja_P:
-			outi	reg_PWM_Val_ExH,0x01
-			outi	reg_PWM_Val_ExL,0xF4
-			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
+			;outi	reg_PWM_Val_ExH,0x01
+			;outi	reg_PWM_Val_ExL,0xF4
+			;ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
 			cpri	B_Dec_PEEP,'1'
 			rbreq	SRPPIA
 			call	CARGA_PR_OFFSET
@@ -724,23 +705,34 @@ PIP_Baja_P:
 			outr	Presion_antL,R24
 			outi	B_Dec_PEEP,'1'
 SRPPIA:;Skip_read_Pres_PIP_Alta
+			call	CARGA_PR_OFFSET
 			inr		XL,Presion_antL
 			inr		XH,Presion_antH
-			subi	XL,low(-10)
-			sbci	XH,high(-10)
-			cp		ZL,XL
-			cpc		ZH,XH
-			rbrsh	out_PIP_Baja
+			subi	XL,low(-1)
+			sbci	XH,high(-1)
+			cp		R24,XL
+			cpc		R25,XH
+			rbrsh	actualizar_Pres_PIP
+			inr		XL,reg_PWM_Val_ExL
+			inr		XH,reg_PWM_Val_ExH
+			cpi		XL,low(500)
+			cpci	XH,high(500)
+			rbrsh	ChF_PIP_B
+			adiw	XL,1
+			outr	reg_PWM_Val_ExH,XH
+			outr	reg_PWM_Val_ExL,XL
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL
+ChF_PIP_B:
 			inr		XL,PWM_FLUJOL
 			inr		XH,PWM_FLUJOH
 			cpi		XL,low(450)
 			cpci	XH,high(450)
-			rbrsh	salir_control
+			rbrsh	actualizar_Pres_PIP
 			adiw	XL,1
 			outr	PWM_FLUJOH,XH
 			outr	PWM_FLUJOL,XL
 			;ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
-			rjmp	salir_control
+			rjmp	actualizar_Pres_PIP
 ;************************************************************
 ;************************************************************
 out_PIP_Baja:
@@ -752,6 +744,15 @@ out_PIP_Baja:
 
 ;************************************************************
 PIP_Alta:
+;************************************************************
+			call	CARGA_PR_OFFSET
+			inr		XL,Presion_antL
+			inr		XH,Presion_antH
+			subi	XL,low(1)
+			sbci	XH,high(1)
+			cp		R24,XL
+			cpc		R25,XH
+			rbrlo	actualizar_Pres_PIP
 			inr		ZL,PWM_FLUJOL
 			inr		ZH,PWM_FLUJOH
 			cpi		ZL,low(60)
@@ -760,8 +761,6 @@ PIP_Alta:
 			sbiw	Z,3
 			outr	PWM_FLUJOH,ZH
 			outr	PWM_FLUJOL,ZL
-			;rjmp	salir_control		///nuevo
-;************************************************************
 CHK_PIP_Alta:
 			call	CARGA_PR_OFFSET
 			inr		xl,Pres_objL
@@ -770,17 +769,34 @@ CHK_PIP_Alta:
 			sbci	XH,high(-500)
 			cp		R24,XL
 			cpc		R25,XH
-			rbrlo	salir_control
-			;ASIGNA_PWM_V_ex  				0,0
-			outi	PWM_FLUJOL,low(0)
-			outi	PWM_FLUJOH,high(0)
-			outi	reg_PWM_Val_ExH,0x00
-			outi	reg_PWM_Val_ExL,0x00
+			rbrlo	actualizar_Pres_PIP
+			sbi		led_run
+			inr		Xl,PWM_FLUJOL
+			inr		Xh,PWM_FLUJOH
+			cpi		XL,low(50)
+			cpci	XH,high(50)
+			rbrlo	CHK_Flujo_PIP_Alta
+			sbiw	XL,5
+			outr	PWM_FLUJOH,XH
+			outr	PWM_FLUJOL,XL
+			;outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
+			;outi	PWM_FLUJOL,low(PWMZERO)
+CHK_Flujo_PIP_Alta:
+			inr		Xl,reg_PWM_Val_ExL
+			inr		Xh,reg_PWM_Val_ExH
+			cpi		XL,low(50)
+			cpci	XH,high(50)
+			rbrlo	actualizar_Pres_PIP
+			sbiw	XL,5
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
-			
-			rjmp	salir_control
+			rjmp	actualizar_Pres_PIP
 ;************************************************************
-
+;************************************************************		
+actualizar_Pres_PIP:
+			call	CARGA_PR_OFFSET
+			outr	Presion_antH,R25
+			outr	Presion_antL,R24
+			rjmp	salir_control
 ;************************************************************
 ;************************************************************
 CARGA_PR_OFFSET:
@@ -990,8 +1006,8 @@ skip_PEEP_baja_A:
 			call	Carga_offset_PEEP
 			inr		XL,Presion_antL
 			inr		XH,Presion_antH
-			subi	XL,low(-10)
-			sbci	XH,high(-10)
+			subi	XL,low(-5)
+			sbci	XH,high(-5)
 			cp		R24,XL
 			cpc		R25,XH
 			rbrsh	actualizar_Pres_PEEP;salir_control
@@ -1006,7 +1022,6 @@ skip_PEEP_baja_A:
 			outr	reg_PWM_Val_ExL,XL
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
 skip_PEEP_Baja:
-			sbi		led_run
 			inr		XL,PWM_FLUJOL
 			inr		XH,PWM_FLUJOH
 			cpi		XL,low(450)
