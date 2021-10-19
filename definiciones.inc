@@ -428,7 +428,7 @@ fin_macro_tiempo_pausa:
 
 .macro		FASE_EXHALACION
 			outi	reg_PWM_Val_ExH,0x00;10;01
-			outi	reg_PWM_Val_ExL,0xD0;00;B0
+			outi	reg_PWM_Val_ExL,0xF0;00;B0
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
 			
 			outi	tmr_inhibe_on_off_pwm,		3
