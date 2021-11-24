@@ -886,12 +886,14 @@ sigue_control_PEEP:
 .endm
 ;************************************************************
 
-
-;************************************************************
-			;PEEP_Control
+prueba_gases:
+			outi		B_Ctrl_Parker,'1'
+			;tst_tiempo_final_fase	10,	sin_flujo
+			jmp	peep_CPAP
+;******************;PEEP_Control******************************
 tst_PEEP:
 			tst_PEEP_0					salir_control
-			;tst_tiempo_final_fase	10,	sin_flujo
+			tst_tiempo_final_fase	20,	prueba_gases;sin_flujo
 
 peep_CPAP:
 

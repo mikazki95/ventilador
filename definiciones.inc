@@ -212,6 +212,7 @@ salir_macro_insp_exha:
 
 ;*********************************************************************
 .macro		FASE_STANDBY
+			outi		B_Ctrl_Parker,'0'
 			outi	reg_PWM_Val_ExH,0x00
 			outi	reg_PWM_Val_ExL,0x00
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
@@ -241,6 +242,7 @@ fin_macro_standby:
 			.endm
 
 .macro		FASE_INSPIRACION
+			outi		B_Ctrl_Parker,'1'
 			outi	reg_PWM_Val_ExH,0x01
 			outi	reg_PWM_Val_ExL,0xF4
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
@@ -294,6 +296,7 @@ fin_macro_inspiracion:
 			.endm
 
 .macro		FASE_PRESION_SOPORTE
+			outi		B_Ctrl_Parker,'1'
 			outi	reg_PWM_Val_ExH,0x01
 			outi	reg_PWM_Val_ExL,0xF4
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
@@ -331,6 +334,7 @@ fin_macro_presion_soporte:
 			.endm
 
 .macro		FASE_CPAP_SIN_APNEA
+			outi		B_Ctrl_Parker,'0'
 			outi	reg_PWM_Val_ExH,0x01
 			outi	reg_PWM_Val_ExL,0xF4
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
@@ -379,6 +383,7 @@ fin_macro_sin_apnea:
 			.endm
 
 .macro		FASE_TIEMPO_PAUSA
+			outi		B_Ctrl_Parker,'0'
 			outi	reg_PWM_Val_ExH,0x01
 			outi	reg_PWM_Val_ExL,0xF4
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
@@ -400,6 +405,7 @@ fin_macro_tiempo_pausa:
 ;Se combinan estados del tiempo pausa de un ciclo normal con los valores
 ;para exhalación
 .macro		FASE_TIEMPO_PAUSA_PS
+			outi		B_Ctrl_Parker,'0'
 			outi	reg_PWM_Val_ExH,0x01
 			outi	reg_PWM_Val_ExL,0xF4
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
@@ -427,6 +433,7 @@ fin_macro_tiempo_pausa:
 ;*********************************************************************
 
 .macro		FASE_EXHALACION
+			outi		B_Ctrl_Parker,'0'
 			outi	reg_PWM_Val_ExH,0x00;10;01
 			outi	reg_PWM_Val_ExL,0xF0;00;B0
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
@@ -481,6 +488,7 @@ fin_macro_exhalacion:
 */
 
 .macro		FASE_O2_21
+			outi		B_Ctrl_Parker,'1'
 			outi	reg_PWM_Val_ExH,0x00
 			outi	reg_PWM_Val_ExL,0x00
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
@@ -542,7 +550,7 @@ fin_macro_pre_o2_21:
 			.endm
 
 .macro		FASE_O2_100
-				
+			outi		B_Ctrl_Parker,'1'
 			outi	reg_PWM_Val_ExH,0x00
 			outi	reg_PWM_Val_ExL,0x00
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
@@ -593,8 +601,7 @@ fin_macro_pre_o2_100:
 
 .macro		FASE_TST
 			outi	B_PR_TST,'0'
-
-			
+			outi		B_Ctrl_Parker,'1'
 			outi	inhibe_inc_dec_pwm,'0'
 			outi	tmr_inhibe_on_off_pwm,		3
 			INSP_EXHA							0
@@ -924,8 +931,8 @@ fin_macro_dec_volumen:
 
 .equ		PWM_FiO2_AireH			=	Reg_hex+50
 .equ		PWM_FiO2_AireL			=	Reg_hex+51
-;.equ		PWM_FiO2_O2H			=	Reg_hex+52
-.equ		PWM_FiO2_O2L			=	Reg_hex+53
+.equ		TMR_FiO2_O2H			=	Reg_hex+52
+.equ		TMR_FiO2_O2L			=	Reg_hex+53
 
 
 
@@ -1248,6 +1255,12 @@ fin_macro_dec_volumen:
 
 .equ		PWM_O2_TST_L			=	FiO2+28
 .equ		PWM_O2_TST_H			=	FiO2+29
+
+.equ		FIO2_ANTH				=	FiO2+30
+.equ		FIO2_ANTL				=	FiO2+31
+
+.equ		B_FIO2_ANTL				=	FiO2+32
+.equ		B_Ctrl_Parker			=	FiO2+33
 
 ;Sección agregada para lectura de la bateria
 .equ		bateria					=	0x0A00
@@ -1752,7 +1765,7 @@ init_io:	outi	ddra, 0b11111111
 			outi		B_PR_TST,'0'
 			;B_TMR_TST
 			;outi		PWM_FiO2_O2H,0x00
-			outi		PWM_FiO2_O2L,0x00
+			;outi		PWM_FiO2_O2L,0x00
 			outi		En_Ctrl_FiO2L,0x32
 			outi		En_Ctrl_FiO2H,0x00;17
 			outi		Set_Ctrl_FiO2L,0x00
@@ -1766,6 +1779,8 @@ init_io:	outi	ddra, 0b11111111
 			outi 		PWM_O2_TST_L,low(220)
 			;outi		PWM_FiO2_O2H,high(200)
 			;outi		PWM_FiO2_O2L,low(200)
+			outi		B_FIO2_ANTL,'0'
+			outi		B_Ctrl_Parker,'0'
 
 
             sei                                 ;Habilita de manera global las interrupciones
