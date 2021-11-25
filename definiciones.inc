@@ -433,7 +433,7 @@ fin_macro_tiempo_pausa:
 ;*********************************************************************
 
 .macro		FASE_EXHALACION
-
+			outi		cont_Prs_Aux, 0x00
 			movr 	Prs_Aux0L,Presion_cmH2OL
 			movr 	Prs_Aux0H,Presion_cmH2OH
 			movr 	Prs_Aux1L,Presion_cmH2OL
@@ -1472,6 +1472,7 @@ fin_macro_dec_volumen:
 .equ		Prs_Aux8H				=	reg_NPA700+129
 .equ		Prs_Aux9L				=	reg_NPA700+130
 .equ		Prs_Aux9H				=	reg_NPA700+131
+.equ		cont_Prs_Aux			=	reg_NPA700+132
 
 ;Definición base de la libreria de punto flotante
 .equ		reg_lib					=	0x0D00
@@ -1836,6 +1837,7 @@ init_io:	outi	ddra, 0b11111111
 			outi		Set_Ctrl_FiO2H,0x08
 			outi 		TMR_FiO2_O2H,high(120)
 			outi 		TMR_FiO2_O2L,low(120)
+			outi		cont_Prs_Aux, 0x00
 
             sei                                 ;Habilita de manera global las interrupciones
             ret

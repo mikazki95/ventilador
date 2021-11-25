@@ -110,6 +110,7 @@ inicio2:
 ;************************************************************
 ;salto simulacion
 ;call	PIP_Baja_P
+;jmp	actualizar_Pres_PEEP
 
 ;jmp	inicio2
 

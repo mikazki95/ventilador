@@ -923,8 +923,8 @@ PEEP_control:
 			call	Carga_offset_PEEP
 			inr		xl,reg_PEEPL_100porciento
 			inr		xh,reg_PEEPH_100porciento
-			subi	XL,low(-50)
-			sbci	XH,high(-50)
+			subi	XL,low(-25)
+			sbci	XH,high(-25)
 			cp		R24,XL
 			cpc		R25,XH
 			rbrsh	PEEP_Alta ;PEEP_Alta_lim
@@ -935,14 +935,27 @@ PEEP_control:
 			call	Carga_offset_PEEP
 			inr		xl,reg_PEEPL_100porciento
 			inr		xh,reg_PEEPH_100porciento
-			subi	XL,low(50)
-			sbci	XH,high(50)
+			subi	XL,low(25)
+			sbci	XH,high(25)
 			cp		R24,XL
 			cpc		R25,XH
 			rbrlo	PEEP_Baja_P
 ;***********************peep ok*************************************	
 ;************************************************************
 PEEP_Ok:	
+
+			inr		XL,reg_PWM_Val_ExL
+			inr		XH,reg_PWM_Val_ExH
+			cpi		XL,low(500)
+			cpci	XH,high(500)
+			rbrsh	actualizar_Pres_PEEP
+			adiw	XL,1
+			outr	reg_PWM_Val_ExH,XH
+			outr	reg_PWM_Val_ExL,XL
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL
+			rjmp	actualizar_Pres_PEEP
+
+
 			call	Carga_offset_PEEP
 			inr		xl,Pres_objL
 			inr		xh,Pres_objH
@@ -995,6 +1008,16 @@ PEEP_Ok_1:
 PEEP_Baja_P:
 			;sbi		led_run
 			;jmp		sin_flujo
+			inr		XL,reg_PWM_Val_ExL
+			inr		XH,reg_PWM_Val_ExH
+			cpi		XL,low(500)
+			cpci	XH,high(500)
+			rbrsh	actualizar_Pres_PEEP
+			adiw	XL,2
+			outr	reg_PWM_Val_ExH,XH
+			outr	reg_PWM_Val_ExL,XL
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL
+			;rjmp	actualizar_Pres_PEEP
 ;************************************************************			
 			call	Carga_offset_PEEP
 			inr		XL,Presion_antL
@@ -1078,8 +1101,15 @@ skip_PEEP_Baja:
 ;*********************aca termina PEEP baja anterior**************************************
 ;************************************************************		
 actualizar_Pres_PEEP:
-			movr	Presion_antH,Prs_Aux9H
-			movr	Presion_antL,Prs_Aux9L
+
+			inr		XL,cont_Prs_Aux
+			inc		XL
+			outr	cont_Prs_Aux,XL
+			cpi		XL,0x0A
+			rbrlo	salir_control
+			outi		cont_Prs_Aux, 0x00
+			;movr	Presion_antH,Prs_Aux9H
+			;movr	Presion_antL,Prs_Aux9L
 			movr	Prs_Aux9H,Prs_Aux8H
 			movr	Prs_Aux9L,Prs_Aux8L
 			movr	Prs_Aux8H,Prs_Aux7H
@@ -1099,8 +1129,10 @@ actualizar_Pres_PEEP:
 			movr	Prs_Aux1H,Prs_Aux0H
 			movr	Prs_Aux1L,Prs_Aux0L
 			call	Carga_offset_PEEP
-			outr	Prs_Aux0H,R25
-			outr	Prs_Aux0L,R24
+			;outr	Prs_Aux0H,R25
+			;outr	Prs_Aux0L,R24
+			outr	Presion_antH,R25
+			outr	Presion_antL,R24
 			rjmp	salir_control
 ;************************************************************		
 ;************************************************************
