@@ -408,28 +408,31 @@ W_CALIBRA_O2_100:
 			FASE_O2_100
 			;sbi		led_run
 salir_contar_pulsos:
+			;ret
+			cpri	timer_O2H,0
+			brne	dec_timer_O2
+			cpri	timer_O2L,0
+			breq	recupera_registros
 
-			inr		xh,timer_O2H
-			inr		xl,timer_O2L
-			cpi		XL,0X00
-			cpci	XH,0X00
-			breq	dec_timer_O2
+dec_timer_O2:
+
 			inr		YL,PWM_FLUJOL
 			inr		YH,PWM_FLUJOH
-			inr		xh,offset_COMFLPEEPH
-			inr		xl,offset_COMFLPEEPL
+			inr		xh,offset_PWM_FlujoH
+			inr		xl,offset_PWM_FlujoL
 			cp		YL,XL
 			cpc		YH,XH
 			rbrlo	recupera_registros
+			;sbi		led_run
 			inr		xh,timer_O2H
 			inr		xl,timer_O2L
 			sbiw	xl,1
 			outr	timer_O2H,xh
 			outr	timer_O2L,xl
-			rjmp	recupera_registros
+			brne	recupera_registros
+			outi	habilita_control_O2,'1';'1'
+;Se verifica el número de fase en curso, para cambiarla
 
-dec_timer_O2:
-			outi	habilita_control_O2,'1'
 
 recupera_registros:
 			popz

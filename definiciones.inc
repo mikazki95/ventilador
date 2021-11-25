@@ -433,9 +433,35 @@ fin_macro_tiempo_pausa:
 ;*********************************************************************
 
 .macro		FASE_EXHALACION
+
+			movr 	Prs_Aux0L,Presion_cmH2OL
+			movr 	Prs_Aux0H,Presion_cmH2OH
+			movr 	Prs_Aux1L,Presion_cmH2OL
+			movr 	Prs_Aux1H,Presion_cmH2OH
+			movr 	Prs_Aux2L,Presion_cmH2OL
+			movr 	Prs_Aux2H,Presion_cmH2OH
+			movr 	Prs_Aux3L,Presion_cmH2OL
+			movr 	Prs_Aux3H,Presion_cmH2OH
+			movr 	Prs_Aux4L,Presion_cmH2OL
+			movr 	Prs_Aux4H,Presion_cmH2OH
+			movr 	Prs_Aux5L,Presion_cmH2OL
+			movr 	Prs_Aux5H,Presion_cmH2OH
+			movr 	Prs_Aux6L,Presion_cmH2OL
+			movr 	Prs_Aux6H,Presion_cmH2OH
+			movr 	Prs_Aux7L,Presion_cmH2OL
+			movr 	Prs_Aux7H,Presion_cmH2OH
+			movr 	Prs_Aux8L,Presion_cmH2OL
+			movr 	Prs_Aux8H,Presion_cmH2OH
+			movr 	Prs_Aux9L,Presion_cmH2OL
+			movr 	Prs_Aux9H,Presion_cmH2OH
+
 			outi		B_Ctrl_Parker,'0'
-			outi	reg_PWM_Val_ExH,0x00;10;01
-			outi	reg_PWM_Val_ExL,0xF0;00;B0
+;			outi	reg_PWM_Val_ExH,0x00;10;01
+;			outi	reg_PWM_Val_ExL,0xF0;00;B0
+
+			movr	reg_PWM_Val_ExH,PWM_Aire_TST_H
+			movr	reg_PWM_Val_ExL,PWM_Aire_TST_L
+
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
 			
 			outi	tmr_inhibe_on_off_pwm,		3
@@ -1422,6 +1448,31 @@ fin_macro_dec_volumen:
 .equ		B_FIO2_BAJO				=	reg_NPA700+108
 .equ		B_FIO2_ALTO				=	reg_NPA700+109
 
+
+.equ		offset_PWM_FlujoL		=	reg_NPA700+110
+.equ		offset_PWM_FlujoH		=	reg_NPA700+111
+
+.equ		Prs_Aux0L				=	reg_NPA700+112
+.equ		Prs_Aux0H				=	reg_NPA700+113
+.equ		Prs_Aux1L				=	reg_NPA700+114
+.equ		Prs_Aux1H				=	reg_NPA700+115
+.equ		Prs_Aux2L				=	reg_NPA700+116
+.equ		Prs_Aux2H				=	reg_NPA700+117
+.equ		Prs_Aux3L				=	reg_NPA700+118
+.equ		Prs_Aux3H				=	reg_NPA700+119
+.equ		Prs_Aux4L				=	reg_NPA700+120
+.equ		Prs_Aux4H				=	reg_NPA700+121
+.equ		Prs_Aux5L				=	reg_NPA700+122
+.equ		Prs_Aux5H				=	reg_NPA700+123
+.equ		Prs_Aux6L				=	reg_NPA700+124
+.equ		Prs_Aux6H				=	reg_NPA700+125
+.equ		Prs_Aux7L				=	reg_NPA700+126
+.equ		Prs_Aux7H				=	reg_NPA700+127
+.equ		Prs_Aux8L				=	reg_NPA700+128
+.equ		Prs_Aux8H				=	reg_NPA700+129
+.equ		Prs_Aux9L				=	reg_NPA700+130
+.equ		Prs_Aux9H				=	reg_NPA700+131
+
 ;Definición base de la libreria de punto flotante
 .equ		reg_lib					=	0x0D00
 
@@ -1781,7 +1832,10 @@ init_io:	outi	ddra, 0b11111111
 			;outi		PWM_FiO2_O2L,low(200)
 			outi		B_FIO2_ANTL,'0'
 			outi		B_Ctrl_Parker,'0'
-
+			outi		Set_Ctrl_FiO2H,0x00
+			outi		Set_Ctrl_FiO2H,0x08
+			outi 		TMR_FiO2_O2H,high(120)
+			outi 		TMR_FiO2_O2L,low(120)
 
             sei                                 ;Habilita de manera global las interrupciones
             ret

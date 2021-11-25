@@ -14,9 +14,9 @@
 
 #define	version_firmwareH	'4'
 #define	version_firmwareP	'.'
-#define	version_firmwareM	'3'
+#define	version_firmwareM	'2'
 ;#define	version_firmwareLP	'.'
-#define	version_firmwareL	'1'
+#define	version_firmwareL	'A'
 
 .equ	fxtal		=	11059200		;Frecuencia del cristal
 
@@ -790,14 +790,17 @@ calib_mezcl:
 			outi		cmd_pendiente,0x00
 			
 			conv_A_H	temp_H,temp_L,				rx_OPEEPMH,rx_OPEEPML,rx_OPEEPL
-			cp_limites	temp_H,temp_L,				'n',	480,	tx_error_rango_rx
-			movr		offset_COMFLPEEPH,temp_H
-			movr		offset_COMFLPEEPL,temp_L
+			cp_limites	temp_H,temp_L,				'n',	520,	tx_error_rango_rx
+			;movr		Set_Ctrl_FiO2H,temp_H
+			;movr		Set_Ctrl_FiO2L,temp_L
+			movr		TMR_FiO2_O2H,temp_H
+			movr		TMR_FiO2_O2L,temp_L	
 					
 			conv_A_H	temp_H,temp_L,				rx_OPIPMH,rx_OPIPML,rx_OPIPL
-			cp_limites	temp_H,temp_L,				'n',	480,tx_error_rango_rx
-			movr		offset_COMFLPIPH,temp_H
-			movr		offset_COMFLPIPL,temp_L
+			cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
+			movr		offset_PWM_FlujoH,temp_H
+			movr		offset_PWM_FlujoL,temp_L
+
 
 			conv_A_H	temp_H,temp_L,				rx_tem_PWM_Aire_MH,rx_tem_PWM_Aire_ML,rx_tem_PWM_Aire_L
 			cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
@@ -812,7 +815,7 @@ calib_mezcl:
 			movr		PWM_O2_TST_L,temp_L
 
 			conv_A_H	temp_H,temp_L,				rx_tem_PWM_MH,rx_tem_PWM_ML,rx_tem_PWM_L
-			cp_limites	temp_H,temp_L,				'n',	500,tx_error_rango_rx
+			cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
 			
 			movr		Vol_TST_H,temp_H
 			movr		Vol_TST_L,temp_L	
@@ -990,30 +993,18 @@ modo_ok:
 
 ;***************************************************************
 ;***************************************************************
-			inr		xl,tmp_reg_O2L
-			inr		xh,tmp_reg_O2H
-			ldiw	zh,zl,Tabla_FiO2_inicial*2
-			lsl		xl
-			rol		xh
-			add		zl,xl
-			adc		zh,xh
-			outi	rampz,0x00
-			lpm		xl,z+
-			lpm		xh,z
-			
-			outr	Set_Ctrl_FiO2H,XH
-			outr	Set_Ctrl_FiO2L,XL
+
 
 ;************************************************************
 ;************************************************************
 
 
 
-/*			movr		tmp_reg_PWM2_AireH,reg_PWM2_AireH
-			movr		tmp_reg_PWM2_AireL,reg_PWM2_AireL
-			movr		tmp_reg_PWM1_O2H,reg_PWM1_O2H
-			movr		tmp_reg_PWM1_O2L,reg_PWM1_O2L
-*/
+			movr		reg_PWM2_AireH,	tmp_reg_PWM2_AireH
+			movr		reg_PWM2_AireL,	tmp_reg_PWM2_AireL
+			movr		reg_PWM1_O2H,	tmp_reg_PWM1_O2H
+			movr		reg_PWM1_O2L,	tmp_reg_PWM1_O2L
+
 skip_cambia_PWM_O2:
 ;Copia los 24 bytes de parametros "tmp" a los registros de trabajo
 			COPY_SRAM	tmr_TIEMPO_INSL,tmp_tmr_TIEMPO_INSL,24
@@ -1192,8 +1183,6 @@ tx_listo:	outi	cont_rx0,0x00	;Desecha los datos que se Rx
 
 ;************************************************************
 control_FiO2:
-
-
 			call	calcula_FiO2_HEX
 ;************************************************************
 ;************************************************************
@@ -1217,8 +1206,10 @@ control_FiO2:
 ;************************************************************
 			cpri	habilita_control_O2,'0'
 			rbreq	retorno_control_O2
-
-			;sbi		led_run
+			
+			inr		YL,Modo_TST
+			cpi		YL,0x02
+			rbreq	FiO2_manual
 ;************************************************************
 ;************************************************************
 			cpri	B_FIO2_ANTL,'1'
@@ -1301,7 +1292,6 @@ aumentar_fio2_1:
 			outi 	C_X_FiO2,0
 ;**********************aumentar FiO2*************************
 aumentar_fio2:
-			;sbi		led_run 
 			inr		xl,FiO2HEX_L	
 			inr		xh,FiO2HEX_H
 			inr		zl,FIO2_ANTL	
@@ -1524,7 +1514,7 @@ Fio2_Ok:
 ;************************************************************
 salir_control_O2:
 			cli
-			sbi		led_run
+			
 			;outi	timer_O2H,high(100);(1500)
 			;outi	timer_O2L,low(100);(1500)
 			inr		XH,TMR_FiO2_O2H
@@ -1554,8 +1544,8 @@ FiO2_manual:
 			
 
 			cli
-			outi	timer_O2H,high(1400);(1500)
-			outi	timer_O2L,low(1400);(1500)
+			outi	timer_O2H,high(140);(1500)
+			outi	timer_O2L,low(140);(1500)
 			outi	habilita_control_O2,'0'
 			sei
 
