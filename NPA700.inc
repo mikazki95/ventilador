@@ -1143,14 +1143,14 @@ PEEP_Alta:
 			call	Carga_offset_PEEP ;44
 			inr		XL,Presion_antL
 			inr		XH,Presion_antH
-			inr		ZL,Vol_TST_L
+			/*inr		ZL,Vol_TST_L
 			inr		ZH,Vol_TST_H
 			sub		XL,ZL
-			sbc		XH,ZH
+			sbc		XH,ZH*/
 			;add		XL,ZL
 			;adc		XH,ZH
-			;subi	XL,low(6)
-			;sbci	XH,high(6)
+			subi	XL,low(15)
+			sbci	XH,high(15)
 			cp		R24,XL
 			cpc		R25,XH
 			rbrsh	CHK_PEEP_Alta_2;out;actualizar_Pres_PEEP;CHK_PEEP_Alta;SRPPEA
@@ -1167,12 +1167,12 @@ CHK_PEEP_Alta_out:
 			call	Carga_offset_PEEP
 			inr		XL,Presion_antL
 			inr		XH,Presion_antH
-			inr		ZL,PWM_O2_TST_L
+			/*inr		ZL,PWM_O2_TST_L
 			inr		ZH,PWM_O2_TST_H
 			sub		XL,ZL
-			sbc		XH,ZH
-			;subi	XL,low(100)
-			;sbci	XH,high(100)
+			sbc		XH,ZH*/
+			subi	XL,low(25)
+			sbci	XH,high(25)
 			cp		R24,XL
 			cpc		R25,XH
 			rbrsh	actualizar_Pres_PEEP

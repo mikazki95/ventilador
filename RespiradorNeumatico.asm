@@ -812,8 +812,8 @@ calib_mezcl:
 			conv_A_H	temp_H,temp_L,				rx_tem_PWM_O2_MH,rx_tem_PWM_O2_ML,rx_tem_PWM_O2_L
 			cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
 			
-			movr		PWM_O2_TST_H,temp_H
-			movr		PWM_O2_TST_L,temp_L
+			movr		offset_COMFLPEEPH,temp_H;PWM_O2_TST_H,temp_H
+			movr		offset_COMFLPEEPL,temp_L;PWM_O2_TST_L,temp_L
 
 			conv_A_H	temp_H,temp_L,				rx_tem_PWM_MH,rx_tem_PWM_ML,rx_tem_PWM_L
 			cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
