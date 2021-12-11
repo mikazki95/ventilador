@@ -16,7 +16,7 @@
 #define	version_firmwareP	'.'
 #define	version_firmwareM	'2'
 ;#define	version_firmwareLP	'.'
-#define	version_firmwareL	'A'
+#define	version_firmwareL	'B'
 
 .equ	fxtal		=	11059200		;Frecuencia del cristal
 
@@ -134,6 +134,8 @@ wait_rx:	call	rd_NPA700
 			rbreq	tx_datos_P
 			cpri	cmd_pendiente,'M'
 			rbreq	verifica_M
+			cpri	cmd_pendiente,'B'
+			rbreq	modo_manual
 			cpri	cmd_pendiente,'C'
 			rbreq	calib_mezcl
 			cpri	cmd_pendiente,'A'
@@ -474,7 +476,7 @@ jmp			wait_rx
 SECCION_CAL_O2_21:
 			;outi			CONT_RET,0x13
 			;call			tiempo
-
+				
 
 ;			call				calcula_FiO2_HEX
 			inr					r16,FiO2_nuevoL	;Se obtiene el valor HEX en % de O2
@@ -700,29 +702,30 @@ tx_modo_alimentacion:
 /*
 			movr	buffer_tx0+7,modo_alimentacion
 			movr	buffer_tx0+8,nivel_bat
-
+*/
 ;6 BYTES DE LA LECTURA DE PRESION DE ENTRADA DE AIRE Y O2 (EN PSI)
-					call			calcula_PRESION_AIRE
-					call			calcula_PRESION_O2
+			call			calcula_PRESION_AIRE
+			call			calcula_PRESION_O2
 			movr	buffer_tx0+9,tx_presion_aireH
 			movr	buffer_tx0+10,tx_presion_aireM
 			movr	buffer_tx0+11,tx_presion_aireL
 			movr	buffer_tx0+12,tx_presion_O2H
 			movr	buffer_tx0+13,tx_presion_O2M
 			movr	buffer_tx0+14,tx_presion_O2L
-*/
+
 
 ;************cambio para eliminar alarmas y permitir ventilar********
 			outi	buffer_tx0+7,0x31	;modo_alimentacion
 			outi	buffer_tx0+8,0x35	;nivel_bat
 			
-			outi	buffer_tx0+9,0x37	;presion_aireH
+/*		outi	buffer_tx0+9,0x37	;presion_aireH
 			outi	buffer_tx0+10,0x30	;presion_aireM
 			outi	buffer_tx0+11,0x30	;presion_aireL
 
 			outi	buffer_tx0+12,0x37	;presion_O2H
 			outi	buffer_tx0+13,0x30	;presion_O2M
 			outi	buffer_tx0+14,0x30	;presion_O2L
+*/
 ;*****************fin cambio de eliminacion de alarmas***************
 
 ;Lectura de la presión de aire del flujo principal
@@ -790,43 +793,47 @@ tx_APAG:
 calib_mezcl:
 			outi		cmd_pendiente,0x00
 			
-			conv_A_H	temp_H,temp_L,				rx_OPEEPMH,rx_OPEEPML,rx_OPEEPL
-			cp_limites	temp_H,temp_L,				'n',	520,	tx_error_rango_rx
-			;movr		Set_Ctrl_FiO2H,temp_H
-			;movr		Set_Ctrl_FiO2L,temp_L
-			movr		TMR_FiO2_O2H,temp_H
-			movr		TMR_FiO2_O2L,temp_L	
-					
-			conv_A_H	temp_H,temp_L,				rx_OPIPMH,rx_OPIPML,rx_OPIPL
-			cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
+			conv_A_H	temp_H,temp_L,				rx_flujo_O2_MH,rx_flujo_O2_ML,rx_flujo_O2_L
+			;cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
 			movr		offset_PWM_FlujoH,temp_H
 			movr		offset_PWM_FlujoL,temp_L
 
+			conv_A_H	temp_H,temp_L,				rx_TMR_O2_MH,rx_TMR_O2_ML,rx_TMR_O2_L
+			;cp_limites	temp_H,temp_L,				'n',	520,	tx_error_rango_rx
+			movr		TMR_FiO2_O2H,temp_H
+			movr		TMR_FiO2_O2L,temp_L	
 
-			conv_A_H	temp_H,temp_L,				rx_tem_PWM_Aire_MH,rx_tem_PWM_Aire_ML,rx_tem_PWM_Aire_L
-			cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
-
-			movr		PWM_Aire_TST_H,temp_H
-			movr		PWM_Aire_TST_L,temp_L
-
-			conv_A_H	temp_H,temp_L,				rx_tem_PWM_O2_MH,rx_tem_PWM_O2_ML,rx_tem_PWM_O2_L
-			cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
+			conv_A_H	temp_H,temp_L,				rx_Cont_O2_MH,rx_Cont_O2_ML,rx_Cont_O2_L
+			;cp_limites	temp_H,temp_L,				'n',	520,	tx_error_rango_rx
+			movr		Set_Ctrl_FiO2H,temp_H
+			movr		Set_Ctrl_FiO2L,temp_L	
 			
-			movr		offset_COMFLPEEPH,temp_H;PWM_O2_TST_H,temp_H
-			movr		offset_COMFLPEEPL,temp_L;PWM_O2_TST_L,temp_L
+					
+			conv_A_H	temp_H,temp_L,				rx_desc_min_MH,rx_desc_min_ML,rx_desc_min_L
+			;cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
+			movr		desc_min_H,temp_H
+			movr		desc_min_L,temp_L
 
-			conv_A_H	temp_H,temp_L,				rx_tem_PWM_MH,rx_tem_PWM_ML,rx_tem_PWM_L
-			cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
+			conv_A_H	temp_H,temp_L,				rx_desc_max_MH,rx_desc_max_ML,rx_desc_max_L
+			;cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
 			
-			movr		Vol_TST_H,temp_H
-			movr		Vol_TST_L,temp_L	
-			
-			
-			conv_A_H	offset_batH,offset_batL,	rx_O_BATMH,rx_O_BATML,rx_O_BATL
+			movr		desc_max_H,temp_H;PWM_O2_TST_H,temp_H
+			movr		desc_max_L,temp_L;PWM_O2_TST_L,temp_L
 
+			conv_A_H	temp_H,temp_L,				rx_PWM_EXH_MIN_MH,rx_PWM_EXH_MIN_ML,rx_PWM_EXH_MIN_L
+			;cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
+			
+			movr		PWM_min_val_exha_H,temp_H
+			movr		PWM_min_val_exha_L,temp_L	
+			
+			
+			;conv_A_H	offset_batH,offset_batL,	rx_O_BATMH,rx_O_BATML,rx_O_BATL
+			conv_A_H	temp_H,temp_L,				rx_O_BATMH,rx_O_BATML,rx_O_BATL
+			movr		PWM_EXH_IN_H,temp_H
+			movr		PWM_EXH_IN_L,temp_L
+			
 			conv_A_H	G_batH,G_batL,				rx_O_GAN_BATMH,rx_O_GAN_BATML,rx_O_GAN_BATL
 
-			conv_A_H	temp_H,Modo_TST,					rx_Modo_TST_MH,rx_Modo_TST_ML,rx_Modo_TST_L
 			
 ;limites
 
@@ -848,32 +855,30 @@ asigna_valores:
 										;de forma directa
 
 
-			movr		buffer_tx0+1	,rx_OPEEPMH
-			movr		buffer_tx0+2	,rx_OPEEPML
-			movr		buffer_tx0+3	,rx_OPEEPL
-			movr		buffer_tx0+4	,rx_OPIPMH
-			movr		buffer_tx0+5	,rx_OPIPML
-			movr		buffer_tx0+6	,rx_OPIPL
-			movr		buffer_tx0+7	,rx_tem_PWM_Aire_MH
-			movr		buffer_tx0+8	,rx_tem_PWM_Aire_ML
-			movr		buffer_tx0+9	,rx_tem_PWM_Aire_L
-			movr		buffer_tx0+10	,rx_tem_PWM_O2_MH
-			movr		buffer_tx0+11	,rx_tem_PWM_O2_ML
-			movr		buffer_tx0+12	,rx_tem_PWM_O2_L
-			movr		buffer_tx0+13	,rx_tem_PWM_MH;rx_O_BATMH;
-			movr		buffer_tx0+14	,rx_tem_PWM_ML;rx_O_BATML;
-			movr		buffer_tx0+15	,rx_tem_PWM_L;rx_O_BATL;
-			movr		buffer_tx0+16	,rx_O_BATMH
-			movr		buffer_tx0+17	,rx_O_BATML
-			movr		buffer_tx0+18	,rx_O_BATL
-			movr		buffer_tx0+19	,rx_O_GAN_BATMH
-			movr		buffer_tx0+20	,rx_O_GAN_BATML
-			movr		buffer_tx0+21	,rx_O_GAN_BATL
-			movr		buffer_tx0+22	,rx_Modo_TST_MH
-			movr		buffer_tx0+23	,rx_Modo_TST_ML
-			movr		buffer_tx0+24	,rx_Modo_TST_L
-
-
+			movr		buffer_tx0+1	,rx_flujo_O2_MH
+			movr		buffer_tx0+2	,rx_flujo_O2_ML
+			movr		buffer_tx0+3	,rx_flujo_O2_L
+			movr		buffer_tx0+4	,rx_TMR_O2_MH
+			movr		buffer_tx0+5	,rx_TMR_O2_ML
+			movr		buffer_tx0+6	,rx_TMR_O2_L
+			movr		buffer_tx0+7	,rx_Cont_O2_MH
+			movr		buffer_tx0+8	,rx_Cont_O2_ML
+			movr		buffer_tx0+9	,rx_Cont_O2_L
+			movr		buffer_tx0+10	,rx_desc_min_MH
+			movr		buffer_tx0+11	,rx_desc_min_ML
+			movr		buffer_tx0+12	,rx_desc_min_L
+			movr		buffer_tx0+13	,rx_desc_max_MH
+			movr		buffer_tx0+14	,rx_desc_max_ML
+			movr		buffer_tx0+15	,rx_desc_max_L
+			movr		buffer_tx0+16	,rx_PWM_EXH_MIN_MH
+			movr		buffer_tx0+17	,rx_PWM_EXH_MIN_ML
+			movr		buffer_tx0+18	,rx_PWM_EXH_MIN_L
+			movr		buffer_tx0+19	,rx_O_BATMH
+			movr		buffer_tx0+20	,rx_O_BATML
+			movr		buffer_tx0+21	,rx_O_BATL
+			movr		buffer_tx0+22	,rx_O_GAN_BATMH
+			movr		buffer_tx0+23	,rx_O_GAN_BATML
+			movr		buffer_tx0+24	,rx_O_GAN_BATL
 ;retorno
 			outi		buffer_tx0+25	,0x0A
 			outi		cont_tx0,25
@@ -882,11 +887,90 @@ asigna_valores:
 										;Time out
 										;El resto de la tx depende de la int de tx
 
-			rjmp		wait_rx
+			jmp		wait_rx
 		
 
+;************************************************************************************
+;************************************************************************************
+modo_manual:
+
+			conv_A_H	temp_H,temp_L,				rx_PWM_Aire_MH,rx_PWM_Aire_H,rx_PWM_Aire_L
+			cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
+			movr		PWM_Aire_TST_H,temp_H
+			movr		PWM_Aire_TST_L,temp_L
+							
+			conv_A_H	temp_H,temp_L,				rx_PWM_O2_MH,rx_PWM_O2_H,rx_PWM_O2_L
+			cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
+			movr		PWM_O2_TST_H,temp_H
+			movr		PWM_O2_TST_L,temp_L
+
+			conv_A_H	temp_H,temp_L,				rx_PWM_Flujo_MH,rx_PWM_Flujo_H,rx_PWM_Flujo_L
+			cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
+			movr		Vol_TST_H,temp_H
+			movr		Vol_TST_L,temp_L
+				
+			;conv_A_H	temp_H,temp_L,				rx_Modo_trabajo_MH,rx_Modo_trabajo_H,rx_Modo_trabajo_L
+			;movr		Vol_TST_H,temp_H
+			;movr		Modo_TST,temp_L	
+			
+			conv_A_H	temp_H,Modo_TST,			rx_Modo_trabajo_MH,rx_Modo_trabajo_H,rx_Modo_trabajo_L
+			
+;limites
 
 
+;aSIGNAR VALORES
+
+			outi		cmd_pendiente,0x00
+
+;ecco
+			call		desactiva_alarma_ping_int_rx
+			outi	cont_rx0,0x00	;Desecha los datos que se Rx
+			outi	apuntador_buffer_tx0H,high(buffer_tx0+1)
+			outi	apuntador_buffer_tx0L,low(buffer_tx0+1)
+
+					usart0		115200,8,n,1,rxtx,itx;Se deshabilita la int de Rx
+
+			outi		buffer_tx0+0	,'B'	;Escritura dummy (en realidad se tx el primer byte
+										;de forma directa
+
+
+
+			movr		buffer_tx0+1	,rx_PWM_Aire_MH
+			movr		buffer_tx0+2	,rx_PWM_Aire_H
+			movr		buffer_tx0+3	,rx_PWM_Aire_L
+			movr		buffer_tx0+4	,rx_PWM_O2_MH
+			movr		buffer_tx0+5	,rx_PWM_O2_H
+			movr		buffer_tx0+6	,rx_PWM_O2_L
+			movr		buffer_tx0+7	,rx_PWM_Flujo_MH
+			movr		buffer_tx0+8	,rx_PWM_Flujo_H
+			movr		buffer_tx0+9	,rx_PWM_Flujo_L
+			movr		buffer_tx0+10	,rx_Modo_trabajo_MH;rx_O_BATMH;
+			movr		buffer_tx0+11	,rx_Modo_trabajo_H;rx_O_BATML;
+			movr		buffer_tx0+12	,rx_Modo_trabajo_L
+
+			/*
+			movr		buffer_tx0+10	,rx_PWM_VAL_EXH_MH
+			movr		buffer_tx0+11	,rx_PWM_VAL_EXH_H
+			movr		buffer_tx0+12	,rx_PWM_VAL_EXH_L
+
+			movr		buffer_tx0+16	,rx_O_BATMH
+			movr		buffer_tx0+17	,rx_O_BATML
+			movr		buffer_tx0+18	,rx_O_BATL
+			movr		buffer_tx0+19	,rx_O_GAN_BATMH
+			movr		buffer_tx0+20	,rx_O_GAN_BATML
+			movr		buffer_tx0+21	,rx_O_GAN_BATL
+*/
+
+;retorno
+			outi		buffer_tx0+13	,0x0A
+			outi		cont_tx0,13
+
+			outi		udr_debug,'B'	;Inicia la tx del primer byte de respuesta del
+										;Time out
+										;El resto de la tx depende de la int de tx
+
+			jmp		wait_rx
+;************************************************************************************
 ;************************************************************************************
 verifica_M:	;outi	cmd_pendiente,0x00
 			inr					r16,rx_ON_OFF
@@ -975,12 +1059,12 @@ modo_ok:
 			cp_limites	tmp_reg_PWM2_AireH,tmp_reg_PWM2_AireL,		1,	Val_PWMmax,tx_error_rango_rx
 
 			cp_limites	tmp_reg_O2H,tmp_reg_O2L,				21,101,tx_error_rango_rx
-
+/*
 			cp_limites	tmp_reg_PEEPH,tmp_reg_PEEPL,				'n',PEEP_max,tx_error_rango_rx
 			cp_limites	tmp_reg_PinspiracionH,tmp_reg_PinspiracionL,'n',Pins_max,tx_error_rango_rx	
 			cp_limites	tmp_reg_PSH,tmp_reg_PSL,					'n',PS_max,tx_error_rango_rx
 			cp_limites	tmp_reg_PmaxH,tmp_reg_PmaxL,			'n',P_max,tx_error_rango_rx
-
+*/
 			;call		calcula_presionesFP
 
 			CLI

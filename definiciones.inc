@@ -456,12 +456,14 @@ fin_macro_tiempo_pausa:
 			movr 	Prs_Aux9H,Presion_cmH2OH
 
 			outi		B_Ctrl_Parker,'0'
-;			outi	reg_PWM_Val_ExH,0x00;10;01
-;			outi	reg_PWM_Val_ExL,0xF0;00;B0
+			outi	reg_PWM_Val_ExH,0x00;10;01
+			outi	reg_PWM_Val_ExL,0xF0;00;B0
 
-			movr	reg_PWM_Val_ExH,PWM_Aire_TST_H
-			movr	reg_PWM_Val_ExL,PWM_Aire_TST_L
+			;movr	reg_PWM_Val_ExH,PWM_Aire_TST_H
+			;movr	reg_PWM_Val_ExL,PWM_Aire_TST_L
 
+			movr	reg_PWM_Val_ExH,PWM_EXH_IN_H
+			movr	reg_PWM_Val_ExL,PWM_EXH_IN_L
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
 			
 			outi	tmr_inhibe_on_off_pwm,		3
@@ -525,6 +527,7 @@ fin_macro_exhalacion:
 			CBI		T_PAUSA
 			ASIGNA_TIEMPO						0,0
 			;outiw		cont_10msH,cont_10msL,0x07D6
+
 			outi		Pres_objL,low(700)
 			outi		Pres_objH,high(700)
 			outi		B_TST_Run,'1'
@@ -549,20 +552,12 @@ fin_macro_o2_21:
 			outi	reg_PWM_Val_ExH,0x00
 			outi	reg_PWM_Val_ExL,0x00
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
-			
-			
 			outi		Pres_objL,low(2000)
 			outi		Pres_objH,high(2000)
 			outi		B_TST_Run,'1'
-			outi	reg_PWM1_O2H,0x00;;*************modificacion
-			outi	reg_PWM1_O2L,0x00
-			outi	reg_PWM2_AireH,high(480);;*************modificacion
-			outi	reg_PWM2_AireL,low(480)
-			ASIGNA_PWM_O2					reg_PWM1_O2H,reg_PWM1_O2L
-			ASIGNA_PWM_AIRE					reg_PWM2_AireH,reg_PWM2_AireL
-
 
 			OUTI	FASE,						pre_CALIBRA_O2_21
+			
 			INSP_EXHA							0
 			PIN_PS0
 			CBI		T_PAUSA
@@ -606,18 +601,32 @@ fin_macro_o2_100:
 			.endm
 
 .macro		pre_FASE_O2_100
-			outi	reg_O2H,0x00		;compara si es 21% de oxigeno (hex)
+			outi	reg_O2H,0x00		;compara si es 100% de oxigeno (hex)
 			outi	reg_O2L,0x64
-			outiw		cont_10msH,cont_10msL,0x1770
 			outi	reg_PWM_Val_ExH,0x00
 			outi	reg_PWM_Val_ExL,0x00
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
+			outi		Pres_objL,low(2000)
+			outi		Pres_objH,high(2000)
+			outi		B_TST_Run,'1'
+			outi		B_TST_O2,'1'
 			
+
+		/*	outi	reg_PWM1_O2H,high(480);;*************modificacion
+			outi	reg_PWM1_O2L,low(480)
+			outi	reg_PWM2_AireH,high(40);;*************modificacion
+			outi	reg_PWM2_AireL,low(40)
+			ASIGNA_PWM_O2					reg_PWM1_O2H,reg_PWM1_O2L
+			ASIGNA_PWM_AIRE					reg_PWM2_AireH,reg_PWM2_AireL
+		*/
+
 			OUTI	FASE,						pre_CALIBRA_O2_100
+
 			INSP_EXHA							0
 			PIN_PS0
 			CBI		T_PAUSA
 			;ASIGNA_TIEMPO						0,0
+			outiw		cont_10msH,cont_10msL,0x1770
 			outi	B_Dec_PEEP,'0'
 			outi	ON_OFF,'1'
 			;ASIGNA_PWM_O2			0,0			
@@ -851,6 +860,48 @@ fin_macro_dec_volumen:
 
 .equ		Set_Ctrl_FiO2H		=	Reg_rx+77
 .equ		Set_Ctrl_FiO2L		=	Reg_rx+78
+
+.equ		rx_PWM_Flujo_MH		=	Reg_rx+79
+.equ		rx_PWM_Flujo_H		=	Reg_rx+80
+.equ		rx_PWM_Flujo_L		=	Reg_rx+81
+
+.equ		rx_PWM_O2_MH		=	Reg_rx+82
+.equ		rx_PWM_O2_H			=	Reg_rx+83
+.equ		rx_PWM_O2_L			=	Reg_rx+84
+
+.equ		rx_PWM_Aire_MH		=	Reg_rx+85
+.equ		rx_PWM_Aire_H		=	Reg_rx+86
+.equ		rx_PWM_Aire_L		=	Reg_rx+87
+
+.equ		rx_PWM_VAL_EXH_MH	=	Reg_rx+88
+.equ		rx_PWM_VAL_EXH_H	=	Reg_rx+89
+.equ		rx_PWM_VAL_EXH_L	=	Reg_rx+90
+
+.equ		rx_Modo_trabajo_MH	=	Reg_rx+88
+.equ		rx_Modo_trabajo_H	=	Reg_rx+89
+.equ		rx_Modo_trabajo_L	=	Reg_rx+90
+
+
+.equ		rx_flujo_O2_MH		=	Reg_rx+91
+.equ		rx_flujo_O2_ML		=	Reg_rx+92
+.equ		rx_flujo_O2_L		=	Reg_rx+93
+.equ		rx_TMR_O2_MH		=	Reg_rx+94
+.equ		rx_TMR_O2_ML		=	Reg_rx+95
+.equ		rx_TMR_O2_L			=	Reg_rx+96
+.equ		rx_Cont_O2_MH		=	Reg_rx+97
+.equ		rx_Cont_O2_ML		=	Reg_rx+98
+.equ		rx_Cont_O2_L		=	Reg_rx+99
+
+.equ		rx_desc_min_MH		=	Reg_rx+100
+.equ		rx_desc_min_ML		=	Reg_rx+101
+.equ		rx_desc_min_L		=	Reg_rx+102
+.equ		rx_desc_max_MH		=	Reg_rx+103
+.equ		rx_desc_max_ML		=	Reg_rx+104
+.equ		rx_desc_max_L		=	Reg_rx+105
+.equ		rx_PWM_EXH_MIN_MH	=	Reg_rx+106
+.equ		rx_PWM_EXH_MIN_ML	=	Reg_rx+107
+.equ		rx_PWM_EXH_MIN_L	=	Reg_rx+108
+
 //*****************************************************
 
 
@@ -900,6 +951,13 @@ fin_macro_dec_volumen:
 .equ		PmaxM				=	Reg_internos+42
 .equ		PmaxL				=	Reg_internos+43
 .equ		ON_OFF				=	Reg_internos+44
+
+.equ		PWM_min_val_exha_H	=	Reg_internos+45
+.equ		PWM_min_val_exha_L	=	Reg_internos+46
+
+.equ		PWM_EXH_IN_H		=	Reg_internos+47
+.equ		PWM_EXH_IN_L		=	Reg_internos+48
+
 
 .equ		Reg_hex				=	0x0600
 .equ		tmr_TIEMPO_INSL		=	Reg_hex+0
@@ -960,7 +1018,10 @@ fin_macro_dec_volumen:
 .equ		TMR_FiO2_O2H			=	Reg_hex+52
 .equ		TMR_FiO2_O2L			=	Reg_hex+53
 
-
+.equ		desc_max_H				=	Reg_hex+54
+.equ		desc_max_L				=	Reg_hex+55
+.equ		desc_min_H				=	Reg_hex+56
+.equ		desc_min_L				=	Reg_hex+57
 
 
 
@@ -1145,7 +1206,7 @@ fin_macro_dec_volumen:
 
 .equ		datos_actualizados			=	Reg_misc+200
 
-;.equ		tmr_de_presion				=	Reg_misc+201
+.equ		B_TST_O2				=	Reg_misc+201
 
 
 .equ		CCF_H						= 	Reg_misc+202
@@ -1474,6 +1535,7 @@ fin_macro_dec_volumen:
 .equ		Prs_Aux9H				=	reg_NPA700+131
 .equ		cont_Prs_Aux			=	reg_NPA700+132
 
+
 ;Definición base de la libreria de punto flotante
 .equ		reg_lib					=	0x0D00
 
@@ -1775,8 +1837,8 @@ init_io:	outi	ddra, 0b11111111
 			outi 	offset_PIPH,high(300)
 			outi 	offset_PIPL,low(300)
 
-			outi 	offset_COMFLPEEPH,high(110)
-			outi 	offset_COMFLPEEPL,low(110)
+			outi 	PWM_min_val_exha_H,high(110)
+			outi 	PWM_min_val_exha_L,low(110)
 			
 			outi 	offset_COMFLPIPH,high(140)
 			outi 	offset_COMFLPIPL,low(140)
@@ -1820,12 +1882,10 @@ init_io:	outi	ddra, 0b11111111
 			;outi		PWM_FiO2_O2L,0x00
 			outi		En_Ctrl_FiO2L,0x32
 			outi		En_Ctrl_FiO2H,0x00;17
-			outi		Set_Ctrl_FiO2L,0x00
-			outi		Set_Ctrl_FiO2H,0x00
 			outi		b_ctrl_FiO2,0x00
 
-			outi 		PWM_Aire_TST_H,high(220)
-			outi	 	PWM_Aire_TST_L,low(220)
+			outi 		PWM_EXH_IN_H,high(220)
+			outi	 	PWM_EXH_IN_L,low(220)
 					
 			outi 		PWM_O2_TST_H,high(220)
 			outi 		PWM_O2_TST_L,low(220)
@@ -1838,6 +1898,8 @@ init_io:	outi	ddra, 0b11111111
 			outi 		TMR_FiO2_O2H,high(120)
 			outi 		TMR_FiO2_O2L,low(120)
 			outi		cont_Prs_Aux, 0x00
+			outi		B_TST_O2,'0'
+			
 
             sei                                 ;Habilita de manera global las interrupciones
             ret

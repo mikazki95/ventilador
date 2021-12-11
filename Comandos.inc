@@ -85,6 +85,8 @@ int_rx0_comandos:
 			rbreq		conf_mezcl
 			cpi			r16,'A'
 			rbreq		comando_ok
+			cpi			r16,'B'
+			rbreq		carga_parametros
 			jmp			salir_int_rx0
 /**//////////////////////////////////////
 APAG	:	outi		tmr_debug,0x00
@@ -98,6 +100,15 @@ APAG	:	outi		tmr_debug,0x00
 
 ///*****************************************************
 conf_O2:	call		desactiva_alarma_ping_int_rx
+			outr		comando_rx0,r16
+			outi		tmr_debug,200
+			incr		cont_rx0
+			outi		apuntador_buffer_rx0H,high(buffer_rx0)
+			outi		apuntador_buffer_rx0L,low(buffer_rx0)
+			jmp			salir_int_rx0
+			///*****************************************************
+carga_parametros:
+			call		desactiva_alarma_ping_int_rx
 			outr		comando_rx0,r16
 			outi		tmr_debug,200
 			incr		cont_rx0
@@ -153,6 +164,8 @@ fin_rx_cadena:
 			rbreq	tst_O2
 			cpri	comando_rx0,'P'
 			rbreq	ejecuta_P
+			cpri	comando_rx0,'B'
+			rbreq	modo_manual_Rx
 			jmp		tst_ejecuta_T
 
 salir_int_rx0:
@@ -227,7 +240,7 @@ ejecuta_Q:	call	desactiva_alarma_ping_int_rx
 ;Este comando solo se acepta si esta en STANDBY
 tst_ejecuta_T:
 			outi		tmr_debug,0x00
-			;outi		B_PR_TST,'0'
+			outi		B_PR_TST,'0'
 			cpri		FASE,STANDBY
 			breq		rx_bytes_tst
 			cpri		FASE,TST_ELECTROVALVULAS
@@ -372,41 +385,40 @@ calibra_21:
 tst_ejecuta_C:
 			outi		tmr_debug,0x00
 
-			movr		rx_OPEEPMH			,buffer_rx0+0			;Rx_modo
-			movr		rx_OPEEPML			,buffer_rx0+1		;Decenas
-			movr		rx_OPEEPL			,buffer_rx0+2		;Unidades
-			movr		rx_OPIPMH			,buffer_rx0+3		;Decimas de segundo
-			movr		rx_OPIPML			,buffer_rx0+4		;Centesimas de segundo
-			movr		rx_OPIPL			,buffer_rx0+5			;Espera los bytes del tiempo "pausa"
-			movr		rx_tem_PWM_aire_MH	,buffer_rx0+6
-			movr		rx_tem_PWM_aire_ML	,buffer_rx0+7
-			movr		rx_tem_PWM_aire_L	,buffer_rx0+8
-			movr		rx_tem_PWM_O2_MH	,buffer_rx0+9
-			movr		rx_tem_PWM_O2_ML	,buffer_rx0+10
-			movr		rx_tem_PWM_O2_L		,buffer_rx0+11
-			movr		rx_tem_PWM_MH		,buffer_rx0+12
-			movr		rx_tem_PWM_ML		,buffer_rx0+13			
-			movr		rx_tem_PWM_L		,buffer_rx0+14
-			movr		rx_O_BATMH			,buffer_rx0+15
-			movr		rx_O_BATML			,buffer_rx0+16
-			movr		rx_O_BATL			,buffer_rx0+17
-			movr		rx_O_GAN_BATMH		,buffer_rx0+18
-			movr		rx_O_GAN_BATML		,buffer_rx0+19
-			movr		rx_O_GAN_BATL		,buffer_rx0+20
-			movr		rx_Modo_TST_MH		,buffer_rx0+21
-			movr		rx_Modo_TST_ML		,buffer_rx0+22
-			movr		rx_Modo_TST_L			,buffer_rx0+23			
+			movr		rx_flujo_O2_MH			,buffer_rx0+0			;Rx_modo
+			movr		rx_flujo_O2_ML			,buffer_rx0+1		;Decenas
+			movr		rx_flujo_O2_L			,buffer_rx0+2		;Unidades
+			movr		rx_TMR_O2_MH			,buffer_rx0+3		;Decimas de segundo
+			movr		rx_TMR_O2_ML			,buffer_rx0+4		;Centesimas de segundo
+			movr		rx_TMR_O2_L				,buffer_rx0+5			;Espera los bytes del tiempo "pausa"
+			movr		rx_Cont_O2_MH			,buffer_rx0+6
+			movr		rx_Cont_O2_ML			,buffer_rx0+7
+			movr		rx_Cont_O2_L			,buffer_rx0+8
+			movr		rx_desc_min_MH			,buffer_rx0+9
+			movr		rx_desc_min_ML			,buffer_rx0+10
+			movr		rx_desc_min_L			,buffer_rx0+11
+			movr		rx_desc_max_MH			,buffer_rx0+12
+			movr		rx_desc_max_ML			,buffer_rx0+13			
+			movr		rx_desc_max_L			,buffer_rx0+14
+			movr		rx_PWM_EXH_MIN_MH		,buffer_rx0+15
+			movr		rx_PWM_EXH_MIN_ML		,buffer_rx0+16
+			movr		rx_PWM_EXH_MIN_L		,buffer_rx0+17
+			movr		rx_O_BATMH				,buffer_rx0+18
+			movr		rx_O_BATML				,buffer_rx0+19
+			movr		rx_O_BATL				,buffer_rx0+20
+			movr		rx_O_GAN_BATMH			,buffer_rx0+21
+			movr		rx_O_GAN_BATML			,buffer_rx0+22
+			movr		rx_O_GAN_BATL			,buffer_rx0+23
+				
 			outi		cmd_pendiente,'C'
 			jmp		salir_int_rx0
 ;************************************************************************************
 tst_O2:
-			outi		tmr_debug,0x00
+			outi	cont_rx0,0x00
 
+			outi		tmr_debug,0x00
 			movr		rx_CAL_O2		,buffer_rx0+0			;Rx_modo
 			outi		FASE,STANDBY
-			
-			
-
 			inr					r16,rx_CAL_O2
 			cpi					r16,'0'	
 			rbreq				calibra_21
@@ -415,6 +427,32 @@ tst_O2:
 		;	rbrne				tx_error_rango_int_rx
 			;outi		cmd_pendiente,'O'
 			jmp		salir_int_rx0
+;************************************************************************************
+
+;Sección del comando M
+modo_manual_Rx:
+
+
+			outi		tmr_debug,0x00
+
+			movr		rx_PWM_Aire_MH		,buffer_rx0+0
+			movr		rx_PWM_Aire_H		,buffer_rx0+1
+			movr		rx_PWM_Aire_L		,buffer_rx0+2
+			movr		rx_PWM_O2_MH		,buffer_rx0+3		;Decimas de segundo
+			movr		rx_PWM_O2_H			,buffer_rx0+4		;Centesimas de segundo
+			movr		rx_PWM_O2_L			,buffer_rx0+5			;Espera los bytes del tiempo "pausa"
+			movr		rx_PWM_Flujo_MH		,buffer_rx0+6			;Rx_modo
+			movr		rx_PWM_Flujo_H		,buffer_rx0+7		;Decenas
+			movr		rx_PWM_Flujo_L		,buffer_rx0+8
+			movr		rx_Modo_trabajo_MH	,buffer_rx0+9
+			movr		rx_Modo_trabajo_H	,buffer_rx0+10			;Frecuencia respiratoria
+			movr		rx_Modo_trabajo_L	,buffer_rx0+11
+
+			outi		cmd_pendiente,'B'
+			jmp		salir_int_rx0
+;************************************************************************************
+
+
 ;************************************************************************************
 
 ;Sección del comando M

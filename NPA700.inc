@@ -337,7 +337,7 @@ control_presion:
 			cpri	FASE,STANDBY
 			rbreq	salir_control
 			cpri	FASE,CALIBRA_O2_21
-			rbreq	prueba_aire100;salir_control;libera_pres
+			rbreq	salir_control;libera_pres;prueba_aire100
 			cpri	FASE,pre_CALIBRA_O2_21
 			rbreq	aire_100_ON
 			cpri	FASE,CALIBRA_O2_100;
@@ -394,7 +394,7 @@ libera_pres:
 tst_P_PRUEBA:
 			cpri				B_TST_Run,'0'
 			rbreq				fin_tst
-			
+			outi		B_Ctrl_Parker,'1'
 			inr		r16,cont_10msL	;Si el tiempo de la fase es menor a 20ms
 			inr		r17,cont_10msH	;ya no se ejecuta el control
 			cpi		r16,low(50)
@@ -419,6 +419,7 @@ verf_pres:
 			OFF_PRESION_TST
 fin_tst:
 			;sbi		led_run
+			outi		B_Ctrl_Parker,'0'
 			outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
 			outi	PWM_FLUJOL,low(PWMZERO)
 			outi	reg_PWM_Val_ExH,0x00
@@ -428,18 +429,18 @@ fin_tst:
 
 ;************************************************************
 prueba_aire100:
-			;sbi		led_run
+			outi		B_Ctrl_Parker,'1'
+
 			jmp					salir_control
 ;************************************************************
 aire_100_ON:
-			
-			
-			
+			;sbi		led_run
+			outi		B_Ctrl_Parker,'1'
 			jmp		control_pres_cal_gases
 ;************************************************************
 ;************************************************************
 O2_100_ON:
-			outi		Pres_objL,low(2000)
+			/*outi		Pres_objL,low(2000)
 			outi		Pres_objH,high(2000)
 			outi		B_TST_Run,'1'
 			outi	reg_PWM1_O2H,high(480);;*************modificacion
@@ -448,7 +449,9 @@ O2_100_ON:
 			outi	reg_PWM2_AireL,0x00
 			ASIGNA_PWM_O2					reg_PWM1_O2H,reg_PWM1_O2L
 			ASIGNA_PWM_AIRE					reg_PWM2_AireH,reg_PWM2_AireL
-			
+			*/
+
+			outi		B_Ctrl_Parker,'1'
 			jmp		control_pres_cal_gases
 ;************************************************************
 ;************************************************************
@@ -776,7 +779,6 @@ CHK_PIP_Alta:
 			cp		R24,XL
 			cpc		R25,XH
 			rbrlo	actualizar_Pres_PIP
-			sbi		led_run
 			inr		Xl,PWM_FLUJOL
 			inr		Xh,PWM_FLUJOH
 			cpi		XL,low(50)
@@ -1143,14 +1145,14 @@ PEEP_Alta:
 			call	Carga_offset_PEEP ;44
 			inr		XL,Presion_antL
 			inr		XH,Presion_antH
-			/*inr		ZL,Vol_TST_L
-			inr		ZH,Vol_TST_H
+			inr		ZL,desc_min_L
+			inr		ZH,desc_min_H
 			sub		XL,ZL
-			sbc		XH,ZH*/
+			sbc		XH,ZH
 			;add		XL,ZL
 			;adc		XH,ZH
-			subi	XL,low(15)
-			sbci	XH,high(15)
+			;subi	XL,low(15)
+			;sbci	XH,high(15)
 			cp		R24,XL
 			cpc		R25,XH
 			rbrsh	CHK_PEEP_Alta_2;out;actualizar_Pres_PEEP;CHK_PEEP_Alta;SRPPEA
@@ -1167,12 +1169,12 @@ CHK_PEEP_Alta_out:
 			call	Carga_offset_PEEP
 			inr		XL,Presion_antL
 			inr		XH,Presion_antH
-			/*inr		ZL,PWM_O2_TST_L
-			inr		ZH,PWM_O2_TST_H
+			inr		ZL,desc_max_L
+			inr		ZH,desc_min_H
 			sub		XL,ZL
-			sbc		XH,ZH*/
-			subi	XL,low(25)
-			sbci	XH,high(25)
+			sbc		XH,ZH
+			;subi	XL,low(25)
+			;sbci	XH,high(25)
 			cp		R24,XL
 			cpc		R25,XH
 			rbrsh	actualizar_Pres_PEEP
@@ -1199,8 +1201,8 @@ CHK_PEEP_Alta_2:
 CHK_PEEP_Alta_3:
 			inr		XL,reg_PWM_Val_ExL
 			inr		XH,reg_PWM_Val_ExH
-			inr		ZL,offset_COMFLPEEPL
-			inr		ZH,offset_COMFLPEEPH
+			inr		ZL,PWM_min_val_exha_L
+			inr		ZH,PWM_min_val_exha_H
 			cp		XL,ZL
 			cpc		XH,ZH
 			rbrlo	actualizar_Pres_PEEP;salir_control
@@ -1278,8 +1280,8 @@ CHK_PEEP_Alta_lim_2:
 CHK_PEEP_Alta_lim_3:
 			inr		XL,reg_PWM_Val_ExL
 			inr		XH,reg_PWM_Val_ExH
-			inr		ZL,offset_COMFLPEEPL
-			inr		ZH,offset_COMFLPEEPH
+			inr		ZL,PWM_min_val_exha_L
+			inr		ZH,PWM_min_val_exha_H
 			cp		XL,ZL
 			cpc		XH,ZH
 			rbrlo	actualizar_Pres_PEEP;salir_control
