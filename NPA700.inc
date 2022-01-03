@@ -1109,7 +1109,10 @@ skip_PEEP_Baja:
 ;*********************aca termina PEEP baja anterior**************************************
 ;*********************PEEP BAJA Y SE REQUIERE COMPENSAR**************************************
 OL_PEEP_Baja:
-		
+			outi	reg_PWM_Val_ExH,0x01
+			outi	reg_PWM_Val_ExL,0xF4
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL
+			jmp		actualizar_Pres_PEEP
 			call	Carga_offset_PEEP
 			inr		XL,Presion_antL
 			inr		XH,Presion_antH
@@ -1143,29 +1146,7 @@ actualizar_Pres_PEEP:
 			cpi		XL,0x0A
 			rbrlo	salir_control
 			outi		cont_Prs_Aux, 0x00
-			;movr	Presion_antH,Prs_Aux9H
-			;movr	Presion_antL,Prs_Aux9L
-			movr	Prs_Aux9H,Prs_Aux8H
-			movr	Prs_Aux9L,Prs_Aux8L
-			movr	Prs_Aux8H,Prs_Aux7H
-			movr	Prs_Aux8L,Prs_Aux7L
-			movr	Prs_Aux7H,Prs_Aux6H
-			movr	Prs_Aux7L,Prs_Aux6L
-			movr	Prs_Aux6H,Prs_Aux5H
-			movr	Prs_Aux6L,Prs_Aux5L
-			movr	Prs_Aux5H,Prs_Aux4H
-			movr	Prs_Aux5L,Prs_Aux4L
-			movr	Prs_Aux4H,Prs_Aux3H
-			movr	Prs_Aux4L,Prs_Aux3L
-			movr	Prs_Aux3H,Prs_Aux2H
-			movr	Prs_Aux3L,Prs_Aux2L
-			movr	Prs_Aux2H,Prs_Aux1H
-			movr	Prs_Aux2L,Prs_Aux1L
-			movr	Prs_Aux1H,Prs_Aux0H
-			movr	Prs_Aux1L,Prs_Aux0L
 			call	Carga_offset_PEEP
-			;outr	Prs_Aux0H,R25
-			;outr	Prs_Aux0L,R24
 			outr	Presion_antH,R25
 			outr	Presion_antL,R24
 			rjmp	salir_control
@@ -1328,7 +1309,7 @@ CHK_PEEP_Alta_lim_3:
 ;************************************************************
 carga_V_Exh_AD:
 			;delay_ms	500
-			outi	B_Cont_TMR_PEEP,'1'
+			;outi	B_Cont_TMR_PEEP,'1'
 		/*	cpri	B_Cont_TMR_PEEP,'1'
 			rbreq	skip_TMR_PEEP
 			outi	B_Cont_TMR_PEEP,'1'

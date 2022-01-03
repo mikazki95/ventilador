@@ -44,7 +44,7 @@
   <TABLA_CONVERSION_O2_BCD><FILE>C:\Ventilador\control\Control_R\ventilador\TablaO2.inc</FILE><LINE>4</LINE></TABLA_CONVERSION_O2_BCD>
   <TABLA_CONVERSION_PRESION><FILE>C:\Ventilador\control\Control_R\ventilador\TablaPresion.inc</FILE><LINE>4</LINE></TABLA_CONVERSION_PRESION>
   <TABLA_CONVERSION_PRESION_NPA700><FILE>C:\Ventilador\control\Control_R\ventilador\TablaPresionNPA700.inc</FILE><LINE>4</LINE></TABLA_CONVERSION_PRESION_NPA700>
-  <init_io><FILE>C:\Ventilador\control\Control_R\ventilador\definiciones.inc</FILE><LINE>1660</LINE></init_io>
+  <init_io><FILE>C:\Ventilador\control\Control_R\ventilador\definiciones.inc</FILE><LINE>1589</LINE></init_io>
   <NORM_HEX><FILE>C:\Ventilador\control\Control_R\ventilador\fp_lib.inc</FILE><LINE>591</LINE></NORM_HEX>
   <NORM_HEX1><FILE>C:\Ventilador\control\Control_R\ventilador\fp_lib.inc</FILE><LINE>608</LINE></NORM_HEX1>
   <NORM_HEX2><FILE>C:\Ventilador\control\Control_R\ventilador\fp_lib.inc</FILE><LINE>613</LINE></NORM_HEX2>
@@ -383,8 +383,8 @@
   <tst_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>890</LINE></tst_PEEP>
   <tst_P_PRUEBA><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>394</LINE></tst_P_PRUEBA>
   <tst_P_INSPIRACION><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>525</LINE></tst_P_INSPIRACION>
-  <sin_flujo><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1407</LINE></sin_flujo>
-  <ini_Pr_Sp><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1438</LINE></ini_Pr_Sp>
+  <sin_flujo><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1388</LINE></sin_flujo>
+  <ini_Pr_Sp><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1419</LINE></ini_Pr_Sp>
   <libera_pres><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>386</LINE></libera_pres>
   <fin_tst><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>418</LINE></fin_tst>
   <verf_pres><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>406</LINE></verf_pres>
@@ -415,33 +415,33 @@
   <prueba_gases><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>885</LINE></prueba_gases>
   <peep_CPAP><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>894</LINE></peep_CPAP>
   <PEEP_control><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>901</LINE></PEEP_control>
-  <Carga_offset_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1383</LINE></Carga_offset_PEEP>
-  <carga_V_Exh_AD><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1329</LINE></carga_V_Exh_AD>
-  <carga_V_Exh_BD><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1358</LINE></carga_V_Exh_BD>
+  <Carga_offset_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1364</LINE></Carga_offset_PEEP>
+  <carga_V_Exh_AD><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1310</LINE></carga_V_Exh_AD>
+  <carga_V_Exh_BD><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1339</LINE></carga_V_Exh_BD>
   <PEEP_Baja_P><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1005</LINE></PEEP_Baja_P>
   <PEEP_Ok><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>941</LINE></PEEP_Ok>
-  <actualizar_Pres_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1138</LINE></actualizar_Pres_PEEP>
+  <actualizar_Pres_PEEP><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1141</LINE></actualizar_Pres_PEEP>
   <PEEP_Ok_1><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>991</LINE></PEEP_Ok_1>
   <OL_PEEP_Baja><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1111</LINE></OL_PEEP_Baja>
   <PEEP_Baja_1><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1058</LINE></PEEP_Baja_1>
   <PEEP_Baja_2><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1047</LINE></PEEP_Baja_2>
   <PEEP_Baja_3><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1068</LINE></PEEP_Baja_3>
   <skip_PEEP_Baja><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1097</LINE></skip_PEEP_Baja>
-  <PEEP_Alta><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1174</LINE></PEEP_Alta>
-  <CHK_PEEP_Alta_2><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1228</LINE></CHK_PEEP_Alta_2>
-  <CHK_PEEP_Alta_out><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1202</LINE></CHK_PEEP_Alta_out>
-  <CHK_PEEP_Alta_3><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1237</LINE></CHK_PEEP_Alta_3>
-  <put_PWM_Min_V_Exh><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1363</LINE></put_PWM_Min_V_Exh>
-  <CHK_PEEP_Alta><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1251</LINE></CHK_PEEP_Alta>
-  <PEEP_Alta_lim><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1266</LINE></PEEP_Alta_lim>
-  <CHK_PEEP_Alta_lim_2><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1306</LINE></CHK_PEEP_Alta_lim_2>
-  <CHK_PEEP_Alta_lim_out><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1286</LINE></CHK_PEEP_Alta_lim_out>
-  <CHK_PEEP_Alta_lim_3><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1315</LINE></CHK_PEEP_Alta_lim_3>
-  <CHK_PEEP_Alta_lim><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1369</LINE></CHK_PEEP_Alta_lim>
-  <sobre_presion><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1401</LINE></sobre_presion>
-  <libera_PS><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1420</LINE></libera_PS>
-  <Pr_Sp_control><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1457</LINE></Pr_Sp_control>
-  <out_Pr_Sp><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1465</LINE></out_Pr_Sp>
+  <PEEP_Alta><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1155</LINE></PEEP_Alta>
+  <CHK_PEEP_Alta_2><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1209</LINE></CHK_PEEP_Alta_2>
+  <CHK_PEEP_Alta_out><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1183</LINE></CHK_PEEP_Alta_out>
+  <CHK_PEEP_Alta_3><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1218</LINE></CHK_PEEP_Alta_3>
+  <put_PWM_Min_V_Exh><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1344</LINE></put_PWM_Min_V_Exh>
+  <CHK_PEEP_Alta><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1232</LINE></CHK_PEEP_Alta>
+  <PEEP_Alta_lim><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1247</LINE></PEEP_Alta_lim>
+  <CHK_PEEP_Alta_lim_2><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1287</LINE></CHK_PEEP_Alta_lim_2>
+  <CHK_PEEP_Alta_lim_out><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1267</LINE></CHK_PEEP_Alta_lim_out>
+  <CHK_PEEP_Alta_lim_3><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1296</LINE></CHK_PEEP_Alta_lim_3>
+  <CHK_PEEP_Alta_lim><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1350</LINE></CHK_PEEP_Alta_lim>
+  <sobre_presion><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1382</LINE></sobre_presion>
+  <libera_PS><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1401</LINE></libera_PS>
+  <Pr_Sp_control><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1438</LINE></Pr_Sp_control>
+  <out_Pr_Sp><FILE>C:\Ventilador\control\Control_R\ventilador\NPA700.inc</FILE><LINE>1446</LINE></out_Pr_Sp>
   <inicio2><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>108</LINE></inicio2>
   <tx_listo><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>1248</LINE></tx_listo>
   <wait_rx><FILE>C:\Ventilador\control\Control_R\ventilador\RespiradorNeumatico.asm</FILE><LINE>123</LINE></wait_rx>

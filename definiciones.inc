@@ -250,65 +250,14 @@ fin_macro_standby:
 			brsh	exh_ol_2
 			inr		ZL,PWM_EXH_IN_L
 			inr		ZH,PWM_EXH_IN_H
-			sbiw	Z,2
+			sbiw	Z,1
 			brlt	f_exh_OK;sin_dif_V_Exh
 			outr	PWM_EXH_IN_H,ZH
 			outr	PWM_EXH_IN_L,ZL
-			outi	portg,0b00000000
-			;sbi		led_run
-/*			subi	YL,0x01
-			inr		ZL,PWM_EXH_IN_L
-			inr		ZH,PWM_EXH_IN_H
-			sub		ZL,YL
-			sbci	ZH,0x00
-			brlt	sin_dif_V_Exh
-			outr	PWM_EXH_IN_H,ZH
-			outr	PWM_EXH_IN_L,ZL
-			jmp		f_exh_OK
-sin_dif_V_Exh:
-			outi	PWM_EXH_IN_H,0x00
-			outi	PWM_EXH_IN_L,0x00
-			jmp		f_exh_OK
-exh_ol_2:
 			;outi	portg,0b00000000
-			inr		XL,TMR_PEEP_ok_L
-			inr		XH,TMR_PEEP_ok_H
-			inr		ZL,PWM_EXH_IN_L
-			inr		ZH,PWM_EXH_IN_H
-			cpi		XL,low(80)
-			cpci	XH,high(80)
-			brlo	f_exh_OK
-			;outi	portg,0b00000001
-			cpi		XL,low(120)
-			cpci	XH,high(120)
-			brlo	exh_comp_1
-			;6666	inr		PORTL
-			cpi		ZL,low(80)
-			cpci	ZH,high(80)
-			brsh	f_exh_OK
-			cpi		XL,low(175)
-			cpci	XH,high(175)
-			brlo	exh_comp_2
-			adiw	Z,5
-			outr	PWM_EXH_IN_H,ZH
-			outr	PWM_EXH_IN_L,ZL
-			jmp		f_exh_OK
-exh_comp_2:
-			cpi		ZL,low(80)
-			cpci	ZH,high(80)
-			brsh	f_exh_OK
-			adiw	Z,3
-			outr	PWM_EXH_IN_H,ZH
-			outr	PWM_EXH_IN_L,ZL
-			jmp		f_exh_OK
-exh_comp_1:
-			cpi		ZL,low(80)
-			cpci	ZH,high(80)
-			brsh	f_exh_OK
-			adiw	Z,1
-			outr	PWM_EXH_IN_H,ZH
-			outr	PWM_EXH_IN_L,ZL
-			*/
+			jmp		f_exh_OK	
+			;sbi		led_run
+
 exh_ol_2:
 			inr		YL,Cont_TMR_PEEP
 			inr		XL,PWM_O2_TST_L
@@ -317,17 +266,17 @@ exh_ol_2:
 			
 			inr		ZL,PWM_EXH_IN_L
 			inr		ZH,PWM_EXH_IN_H
-			adiw	Z,2
+			adiw	Z,20
 			inr		YL,PWM_min_val_exha_L
 			inr		YH,PWM_min_val_exha_H
-			subi	YL,low(60)
-			sbci	YH,high(60)
-			cp		YL,ZL
-			cpc		YH,ZH
-			brlt	f_exh_OK;sin_dif_V_Exh
+			;subi	YL,low(60)
+			;sbci	YH,high(60)
+			cp		ZL,YL
+			cpc		ZH,YH
+			brsh	f_exh_OK;sin_dif_V_Exh
 			inr		ZL,PWM_EXH_IN_L
 			inr		ZH,PWM_EXH_IN_H
-			adiw	Z,2
+			adiw	Z,1
 			outr	PWM_EXH_IN_H,ZH
 			outr	PWM_EXH_IN_L,ZL
 			outi	portg,0b00000000
@@ -531,30 +480,10 @@ fin_macro_tiempo_pausa:
 			outi	Cont_TMR_PEEP,0X00
 			outi	B_cont_TMR_PEEP,'1'
 			outi	cont_Prs_Aux, 0x00
-			movr 	Prs_Aux0L,Presion_cmH2OL
-			movr 	Prs_Aux0H,Presion_cmH2OH
-			movr 	Prs_Aux1L,Presion_cmH2OL
-			movr 	Prs_Aux1H,Presion_cmH2OH
-			movr 	Prs_Aux2L,Presion_cmH2OL
-			movr 	Prs_Aux2H,Presion_cmH2OH
-			movr 	Prs_Aux3L,Presion_cmH2OL
-			movr 	Prs_Aux3H,Presion_cmH2OH
-			movr 	Prs_Aux4L,Presion_cmH2OL
-			movr 	Prs_Aux4H,Presion_cmH2OH
-			movr 	Prs_Aux5L,Presion_cmH2OL
-			movr 	Prs_Aux5H,Presion_cmH2OH
-			movr 	Prs_Aux6L,Presion_cmH2OL
-			movr 	Prs_Aux6H,Presion_cmH2OH
-			movr 	Prs_Aux7L,Presion_cmH2OL
-			movr 	Prs_Aux7H,Presion_cmH2OH
-			movr 	Prs_Aux8L,Presion_cmH2OL
-			movr 	Prs_Aux8H,Presion_cmH2OH
-			movr 	Prs_Aux9L,Presion_cmH2OL
-			movr 	Prs_Aux9H,Presion_cmH2OH
 
 			outi		B_Ctrl_Parker,'0'
-			outi	reg_PWM_Val_ExH,0x00;10;01
-			outi	reg_PWM_Val_ExL,0xF0;00;B0
+			;outi	reg_PWM_Val_ExH,0x00;10;01
+			;outi	reg_PWM_Val_ExL,0xF0;00;B0
 
 			;movr	reg_PWM_Val_ExH,PWM_Aire_TST_H
 			;movr	reg_PWM_Val_ExL,PWM_Aire_TST_L
