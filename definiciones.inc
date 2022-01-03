@@ -212,6 +212,7 @@ salir_macro_insp_exha:
 
 ;*********************************************************************
 .macro		FASE_STANDBY
+			outi		B_TMR_PEEP_ok,'0'
 			outi		B_Ctrl_Parker,'0'
 			outi	reg_PWM_Val_ExH,0x00
 			outi	reg_PWM_Val_ExL,0x00
@@ -242,6 +243,97 @@ fin_macro_standby:
 			.endm
 
 .macro		FASE_INSPIRACION
+			outi	portg,0b00000001
+			inr		YL,Cont_TMR_PEEP
+			inr		XL,PWM_Aire_TST_L
+			cp		YL,XL
+			brsh	exh_ol_2
+			inr		ZL,PWM_EXH_IN_L
+			inr		ZH,PWM_EXH_IN_H
+			sbiw	Z,2
+			brlt	f_exh_OK;sin_dif_V_Exh
+			outr	PWM_EXH_IN_H,ZH
+			outr	PWM_EXH_IN_L,ZL
+			outi	portg,0b00000000
+			;sbi		led_run
+/*			subi	YL,0x01
+			inr		ZL,PWM_EXH_IN_L
+			inr		ZH,PWM_EXH_IN_H
+			sub		ZL,YL
+			sbci	ZH,0x00
+			brlt	sin_dif_V_Exh
+			outr	PWM_EXH_IN_H,ZH
+			outr	PWM_EXH_IN_L,ZL
+			jmp		f_exh_OK
+sin_dif_V_Exh:
+			outi	PWM_EXH_IN_H,0x00
+			outi	PWM_EXH_IN_L,0x00
+			jmp		f_exh_OK
+exh_ol_2:
+			;outi	portg,0b00000000
+			inr		XL,TMR_PEEP_ok_L
+			inr		XH,TMR_PEEP_ok_H
+			inr		ZL,PWM_EXH_IN_L
+			inr		ZH,PWM_EXH_IN_H
+			cpi		XL,low(80)
+			cpci	XH,high(80)
+			brlo	f_exh_OK
+			;outi	portg,0b00000001
+			cpi		XL,low(120)
+			cpci	XH,high(120)
+			brlo	exh_comp_1
+			;6666	inr		PORTL
+			cpi		ZL,low(80)
+			cpci	ZH,high(80)
+			brsh	f_exh_OK
+			cpi		XL,low(175)
+			cpci	XH,high(175)
+			brlo	exh_comp_2
+			adiw	Z,5
+			outr	PWM_EXH_IN_H,ZH
+			outr	PWM_EXH_IN_L,ZL
+			jmp		f_exh_OK
+exh_comp_2:
+			cpi		ZL,low(80)
+			cpci	ZH,high(80)
+			brsh	f_exh_OK
+			adiw	Z,3
+			outr	PWM_EXH_IN_H,ZH
+			outr	PWM_EXH_IN_L,ZL
+			jmp		f_exh_OK
+exh_comp_1:
+			cpi		ZL,low(80)
+			cpci	ZH,high(80)
+			brsh	f_exh_OK
+			adiw	Z,1
+			outr	PWM_EXH_IN_H,ZH
+			outr	PWM_EXH_IN_L,ZL
+			*/
+exh_ol_2:
+			inr		YL,Cont_TMR_PEEP
+			inr		XL,PWM_O2_TST_L
+			cp		YL,XL
+			brlo	f_exh_OK
+			
+			inr		ZL,PWM_EXH_IN_L
+			inr		ZH,PWM_EXH_IN_H
+			adiw	Z,2
+			inr		YL,PWM_min_val_exha_L
+			inr		YH,PWM_min_val_exha_H
+			subi	YL,low(60)
+			sbci	YH,high(60)
+			cp		YL,ZL
+			cpc		YH,ZH
+			brlt	f_exh_OK;sin_dif_V_Exh
+			inr		ZL,PWM_EXH_IN_L
+			inr		ZH,PWM_EXH_IN_H
+			adiw	Z,2
+			outr	PWM_EXH_IN_H,ZH
+			outr	PWM_EXH_IN_L,ZL
+			outi	portg,0b00000000
+f_exh_OK:	
+			
+			outi		B_TMR_PEEP_ok,'0'
 			outi		B_Ctrl_Parker,'1'
 			outi	reg_PWM_Val_ExH,0x01
 			outi	reg_PWM_Val_ExL,0xF4
@@ -296,6 +388,7 @@ fin_macro_inspiracion:
 			.endm
 
 .macro		FASE_PRESION_SOPORTE
+			outi		B_TMR_PEEP_ok,'0'
 			outi		B_Ctrl_Parker,'1'
 			outi	reg_PWM_Val_ExH,0x01
 			outi	reg_PWM_Val_ExL,0xF4
@@ -334,11 +427,7 @@ fin_macro_presion_soporte:
 			.endm
 
 .macro		FASE_CPAP_SIN_APNEA
-			outi		B_Ctrl_Parker,'0'
-			outi	reg_PWM_Val_ExH,0x01
-			outi	reg_PWM_Val_ExL,0xF4
-			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
-			
+			outi		B_TMR_PEEP_ok,'0'
 			outi	tmr_inhibe_on_off_pwm,		3			; -> 3 int de 10ms
 			outi	inhibe_on_off_pwm,			'1'
 			OUTI	FASE,						CPAP_SIN_APNEA
@@ -346,33 +435,34 @@ fin_macro_presion_soporte:
 			PIN_PS0
 			CBI		T_PAUSA
 			ASIGNA_TIEMPO_10ms					;tmr_TIEMPO_INSH,tmr_TIEMPO_INSL
+			
+			
+			inr		XL,PWM_min_val_exha_L
+			inr		XH,PWM_min_val_exha_H
+			;inr		ZL,PWM_EXH_IN_L
+			;inr		ZH,PWM_EXH_IN_H
+			;add		XL,ZL
+			;adc		XH,ZH
+			subi	XL,low(-50)
+			sbci	XH,high(-50)
+			outr	reg_PWM_Val_ExH,XH
+			outr	reg_PWM_Val_ExH,XH
+						
 
-			;outi		PWM_FLUJOH,high(PWMmin)
-			;outi		PWM_FLUJOL,low(PWMmin)
-			;ELECTROVALVULAS						100
-			outi	primer_cruce,'0'
-
-			;ASIGNA_PWM_V_ex  					0,0
-			;ELECTROVALVULAS		0
-			;delay_ms	30
-			;outi		PWM_FLUJOH,high(0)
-			;outi		PWM_FLUJOL,low(0)
-			outi		bandera_inc_compensacion,'0'
-			outi		B_Dec,'0'
-			outi		B_PEEP_AC,'0'
-			outi		B_PEEP_D,'0'
-			outi		B_PEEP_DOWN,'0'
-			outi		B_PEEP_UP,'0'
-			outi		B_PEEP_DC,'0'	
-			outi		B_Cont,'0'
-
-							
-		
-		
-			ASIGNA_PWM_O2						  reg_PWM1_O2H,reg_PWM1_O2L
-			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
-			outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
-			outi	PWM_FLUJOL,low(PWMZERO);;		
+;			movr	reg_PWM_Val_ExH,PWM_EXH_IN_H
+;			movr	reg_PWM_Val_ExL,PWM_EXH_IN_L
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
+			
+					outi		bandera_inc_compensacion,'0'
+					outi		B_Dec,'0'
+					outi		B_PEEP_AC,'0'
+					outi		B_PEEP_D,'0'
+					outi		B_PEEP_DOWN,'0'
+					outi		B_PEEP_UP,'0'
+					outi		B_PEEP_DC,'0'	
+					outi		B_Cont,'0'
+					outi		C_PEEP_DOWN,0
+					outi		primer_cruce,'0'
 
 
 
@@ -383,6 +473,7 @@ fin_macro_sin_apnea:
 			.endm
 
 .macro		FASE_TIEMPO_PAUSA
+			outi		B_TMR_PEEP_ok,'0'
 			outi		B_Ctrl_Parker,'0'
 			outi	reg_PWM_Val_ExH,0x01
 			outi	reg_PWM_Val_ExL,0xF4
@@ -405,6 +496,7 @@ fin_macro_tiempo_pausa:
 ;Se combinan estados del tiempo pausa de un ciclo normal con los valores
 ;para exhalación
 .macro		FASE_TIEMPO_PAUSA_PS
+			outi		B_TMR_PEEP_ok,'0'
 			outi		B_Ctrl_Parker,'0'
 			outi	reg_PWM_Val_ExH,0x01
 			outi	reg_PWM_Val_ExL,0xF4
@@ -433,7 +525,12 @@ fin_macro_tiempo_pausa:
 ;*********************************************************************
 
 .macro		FASE_EXHALACION
-			outi		cont_Prs_Aux, 0x00
+			outi	TMR_PEEP_ok_H,0x00
+			outi	TMR_PEEP_ok_L,0x00
+			outi	B_TMR_PEEP_ok,'1'
+			outi	Cont_TMR_PEEP,0X00
+			outi	B_cont_TMR_PEEP,'1'
+			outi	cont_Prs_Aux, 0x00
 			movr 	Prs_Aux0L,Presion_cmH2OL
 			movr 	Prs_Aux0H,Presion_cmH2OH
 			movr 	Prs_Aux1L,Presion_cmH2OL
@@ -461,9 +558,23 @@ fin_macro_tiempo_pausa:
 
 			;movr	reg_PWM_Val_ExH,PWM_Aire_TST_H
 			;movr	reg_PWM_Val_ExL,PWM_Aire_TST_L
+			
+			inr		XL,PWM_min_val_exha_L
+			inr		XH,PWM_min_val_exha_H
+			inr		ZL,PWM_EXH_IN_L
+			inr		ZH,PWM_EXH_IN_H
+			;add		XL,ZL
+			;adc		XH,ZH
+			sub		XL,ZL
+			sbc		XH,ZH
+			;subi	XL,low(-50)
+			;sbci	XH,high(-50)
+			outr	reg_PWM_Val_ExH,XH
+			outr	reg_PWM_Val_ExH,XH
+						
 
-			movr	reg_PWM_Val_ExH,PWM_EXH_IN_H
-			movr	reg_PWM_Val_ExL,PWM_EXH_IN_L
+;			movr	reg_PWM_Val_ExH,PWM_EXH_IN_H
+;			movr	reg_PWM_Val_ExL,PWM_EXH_IN_L
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
 			
 			outi	tmr_inhibe_on_off_pwm,		3
@@ -1023,6 +1134,11 @@ fin_macro_dec_volumen:
 .equ		desc_min_H				=	Reg_hex+56
 .equ		desc_min_L				=	Reg_hex+57
 
+.equ		TMR_PEEP_ok_L			=	Reg_hex+58
+.equ		TMR_PEEP_ok_H			=	Reg_hex+59
+.equ		B_TMR_PEEP_ok			=	Reg_hex+60
+.equ		cont_TMR_PEEP			=	Reg_hex+61
+.equ		B_cont_TMR_PEEP			=	Reg_hex+62
 
 
 .equ		Reg_misc			=	0x0700
@@ -1147,7 +1263,6 @@ fin_macro_dec_volumen:
 .equ		presion_hex_O2H				=	Reg_misc+66
 .equ		presion_hex_O2L				=	Reg_misc+67
 
-;.equ		PSI_aire_HEX				=	Reg_misc+68
 .equ		B_PR_SP						=	Reg_misc+68
 
 .equ		restante_cont_10msL			=	Reg_misc+72
@@ -1423,8 +1538,8 @@ fin_macro_dec_volumen:
 .equ		reg_PmaxMHFPx100		=	reg_NPA700+46
 .equ		reg_PmaxHFPx100			=	reg_NPA700+47
 
-;.equ		reg_PEEPLFPx1p05		=	reg_NPA700+48
-;.equ		reg_PEEPMLFPx1p05		=	reg_NPA700+49
+.equ		V_X_Exha_H				=	reg_NPA700+48
+.equ		V_X_Exha_L				=	reg_NPA700+49
 ;.equ		reg_PEEPMHFPx1p05		=	reg_NPA700+50
 ;.equ		reg_PEEPHFPx1p05		=	reg_NPA700+51
 
@@ -1899,7 +2014,9 @@ init_io:	outi	ddra, 0b11111111
 			outi 		TMR_FiO2_O2L,low(120)
 			outi		cont_Prs_Aux, 0x00
 			outi		B_TST_O2,'0'
-			
+			outi		B_TMR_PEEP_ok,'0'
+			outi		B_cont_TMR_PEEP,'0'
+
 
             sei                                 ;Habilita de manera global las interrupciones
             ret

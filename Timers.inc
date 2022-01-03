@@ -26,6 +26,7 @@ timer_10ms:
 			jmp		skip_timer_ctrl_fio2
 			inr		XH,En_Ctrl_FiO2H
 			inr		XL,En_Ctrl_FiO2L
+
 			cpi		XL,0x00
 			cpci	XH,0x00
 			rbreq	s_tmr_Ctrl_FiO2
@@ -409,6 +410,33 @@ W_CALIBRA_O2_100:
 			;sbi		led_run
 salir_contar_pulsos:
 			;ret
+/****************timer de control de peep****************************/
+			cpri	B_Cont_TMR_PEEP,'0'
+			rbreq	fin_tmr_PEEP
+			inr		XL,Cont_TMR_PEEP
+			;inr		XH,TMR_PEEP_ok_H
+			cpi		XL,low(250)
+			;cpci	XH,high(500)
+			rbrsh	fin_tmr_PEEP
+			adiw	X,1
+			outr	Cont_TMR_PEEP,XL
+			sbi		led_run
+			;outr	TMR_PEEP_ok_H,XH
+/*************************************************************/
+fin_tmr_PEEP:
+/*************************************************************/
+			cpri	B_TMR_PEEP_ok,'0'
+			rbreq	timer_O2_on_of
+			inr		XL,TMR_PEEP_ok_L
+			inr		XH,TMR_PEEP_ok_H
+			cpi		XL,low(500)
+			cpci	XH,high(500)
+			rbrsh	timer_O2_on_of
+			adiw	X,1
+			outr	TMR_PEEP_ok_L,XL
+			outr	TMR_PEEP_ok_H,XH
+/*************************************************************/
+timer_O2_on_of:
 			cpri	timer_O2H,0
 			brne	dec_timer_O2
 			cpri	timer_O2L,0
