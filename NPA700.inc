@@ -938,8 +938,19 @@ PEEP_control:
 			rbrlo	PEEP_Baja_P
 ;***********************peep ok*************************************	
 ;************************************************************
-PEEP_Ok:	
+PEEP_Ok:	;cont_Aux0L
+			;outi	B_Cont_TMR_PEEP,'0'
+			cpri	reg_PEEPH,'0'
+			breq	skip_B_TMR_PEEP_OK
+			inr		XL,cont_Aux0L
+			inc		XL
+			outr	cont_Aux0L,XL
+			inr		YL,Vol_TST_L
+			cp		XL,YL
+			brlo	skip_B_TMR_PEEP_OK
 			outi	B_Cont_TMR_PEEP,'0'
+			;cpri	reg_PEEPH,0x05
+skip_B_TMR_PEEP_OK:
 			outi	B_TMR_PEEP_ok,'0'
 			inr		XL,reg_PWM_Val_ExL
 			inr		XH,reg_PWM_Val_ExH
@@ -1004,7 +1015,18 @@ PEEP_Ok_1:
 ;************************************************************
 PEEP_Baja_P:
 			;jmp		sin_flujo
+			;outi	B_Cont_TMR_PEEP,'0'
+			cpri	reg_PEEPH,'0'
+			breq	skip_B_TMR_PEEP_Baja
+			inr		XL,cont_Aux0L
+			inc		XL
+			outr	cont_Aux0L,XL
+			inr		YL,Vol_TST_L
+			cp		XL,YL
+			brlo	skip_B_TMR_PEEP_Baja
 			outi	B_Cont_TMR_PEEP,'0'
+			;cpri	reg_PEEPH,0x05
+skip_B_TMR_PEEP_Baja:
 			outi	B_TMR_PEEP_ok,'0'
 			call	Carga_offset_PEEP
 			inr		xl,reg_PEEPL_100porciento
@@ -1310,20 +1332,7 @@ CHK_PEEP_Alta_lim_3:
 carga_V_Exh_AD:
 			;delay_ms	500
 			;outi	B_Cont_TMR_PEEP,'1'
-		/*	cpri	B_Cont_TMR_PEEP,'1'
-			rbreq	skip_TMR_PEEP
-			outi	B_Cont_TMR_PEEP,'1'
-			inr		YL,Cont_TMR_PEEP
-			inc		YL
-			;sbi		led_run
-			cpi		YL,low(10)
-			brsh	ol_TMR_PEEP
-			;sbi		led_run
-			outr	Cont_TMR_PEEP,YL
-			rjmp	skip_TMR_PEEP
-ol_TMR_PEEP:
-			outi	Cont_TMR_PEEP,0x0A		
-skip_TMR_PEEP:*/
+
 			inr		XL,PWM_min_val_exha_L
 			inr		XH,PWM_min_val_exha_H
 			;subi	XL,low(50)

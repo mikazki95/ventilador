@@ -411,6 +411,7 @@ W_CALIBRA_O2_100:
 salir_contar_pulsos:
 			;ret
 /****************timer de control de peep****************************/
+			outi	portg,0b00000000
 			cpri	B_Cont_TMR_PEEP,'0'
 			rbreq	fin_tmr_PEEP
 			inr		XL,Cont_TMR_PEEP
@@ -420,7 +421,8 @@ salir_contar_pulsos:
 			rbrsh	fin_tmr_PEEP
 			adiw	X,1
 			outr	Cont_TMR_PEEP,XL
-			sbi		led_run
+			outi	portg,0b00000001
+			
 			;outr	TMR_PEEP_ok_H,XH
 /*************************************************************/
 fin_tmr_PEEP:
