@@ -245,7 +245,7 @@ fin_macro_standby:
 .macro		FASE_INSPIRACION
 			;outi	portg,0b00000001
 			inr		YL,Cont_TMR_PEEP
-			inr		XL,PWM_Aire_TST_L
+			inr		XL,cont_Aux1
 			cp		YL,XL
 			brsh	exh_ol_2
 			inr		ZL,PWM_EXH_IN_L
@@ -260,7 +260,7 @@ fin_macro_standby:
 
 exh_ol_2:
 			inr		YL,Cont_TMR_PEEP
-			inr		XL,PWM_O2_TST_L
+			inr		XL,cont_Aux2
 			cp		YL,XL
 			brlo	f_exh_OK
 			
@@ -480,7 +480,7 @@ fin_macro_tiempo_pausa:
 			outi	Cont_TMR_PEEP,0X00
 			outi	B_cont_TMR_PEEP,'1'
 			outi	cont_Prs_Aux, 0x00
-			outi	cont_Aux0L,0x00
+			outi	cont_Aux0,0x00
 			outi		B_Ctrl_Parker,'0'
 			;outi	reg_PWM_Val_ExH,0x00;10;01
 			;outi	reg_PWM_Val_ExL,0xF0;00;B0
@@ -1557,10 +1557,10 @@ fin_macro_dec_volumen:
 .equ		offset_PWM_FlujoL		=	reg_NPA700+110
 .equ		offset_PWM_FlujoH		=	reg_NPA700+111
 
-.equ		cont_Aux0L				=	reg_NPA700+112
-.equ		cont_Aux0H				=	reg_NPA700+113
-.equ		Prs_Aux1L				=	reg_NPA700+114
-.equ		Prs_Aux1H				=	reg_NPA700+115
+.equ		cont_Aux0				=	reg_NPA700+112
+.equ		cont_Aux1				=	reg_NPA700+113
+.equ		cont_Aux2				=	reg_NPA700+114;
+.equ		cont_Aux3				=	reg_NPA700+115
 .equ		Prs_Aux2L				=	reg_NPA700+116
 .equ		Prs_Aux2H				=	reg_NPA700+117
 .equ		Prs_Aux3L				=	reg_NPA700+118
@@ -1945,7 +1945,11 @@ init_io:	outi	ddra, 0b11111111
 			outi		B_TST_O2,'0'
 			outi		B_TMR_PEEP_ok,'0'
 			outi		B_cont_TMR_PEEP,'0'
-
+			outi		cont_Aux1,0x14
+			outi		cont_Aux2,0x64
+			outi		cont_Aux3,0x08
+			outi 		PWM_EXH_IN_H,high(40)
+			outi 		PWM_EXH_IN_L,low(40)
 
             sei                                 ;Habilita de manera global las interrupciones
             ret

@@ -827,11 +827,11 @@ calib_mezcl:
 			movr		PWM_min_val_exha_L,temp_L	
 			
 			
-			;conv_A_H	offset_batH,offset_batL,	rx_O_BATMH,rx_O_BATML,rx_O_BATL
-			conv_A_H	temp_H,temp_L,				rx_O_BATMH,rx_O_BATML,rx_O_BATL
+			conv_A_H	offset_batH,offset_batL,	rx_O_BATMH,rx_O_BATML,rx_O_BATL
+			/*conv_A_H	temp_H,temp_L,				rx_O_BATMH,rx_O_BATML,rx_O_BATL
 			movr		PWM_EXH_IN_H,temp_H
 			movr		PWM_EXH_IN_L,temp_L
-			
+			*/
 			conv_A_H	G_batH,G_batL,				rx_O_GAN_BATMH,rx_O_GAN_BATML,rx_O_GAN_BATL
 
 			

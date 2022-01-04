@@ -846,7 +846,7 @@ pip_nul:
 			brne	sigue_control_PEEP
 			cpri	reg_PEEPL,0x00
 			brne	sigue_control_PEEP
-			;ASIGNA_PWM_V_ex  				0,0;ELECTROVALVULAS			0
+			ASIGNA_PWM_V_ex  				0,0;ELECTROVALVULAS			0
 			outi		PWM_FLUJOH,high(PWMmin)
 			outi		PWM_FLUJOL,low(PWMmin)
 			rjmp		@0
@@ -942,10 +942,10 @@ PEEP_Ok:	;cont_Aux0L
 			;outi	B_Cont_TMR_PEEP,'0'
 			cpri	reg_PEEPH,'0'
 			breq	skip_B_TMR_PEEP_OK
-			inr		XL,cont_Aux0L
+			inr		XL,cont_Aux0
 			inc		XL
-			outr	cont_Aux0L,XL
-			inr		YL,Vol_TST_L
+			outr	cont_Aux0,XL
+			inr		YL,cont_Aux3
 			cp		XL,YL
 			brlo	skip_B_TMR_PEEP_OK
 			outi	B_Cont_TMR_PEEP,'0'
@@ -1018,10 +1018,10 @@ PEEP_Baja_P:
 			;outi	B_Cont_TMR_PEEP,'0'
 			cpri	reg_PEEPH,'0'
 			breq	skip_B_TMR_PEEP_Baja
-			inr		XL,cont_Aux0L
+			inr		XL,cont_Aux0
 			inc		XL
-			outr	cont_Aux0L,XL
-			inr		YL,Vol_TST_L
+			outr	cont_Aux0,XL
+			inr		YL,cont_Aux3
 			cp		XL,YL
 			brlo	skip_B_TMR_PEEP_Baja
 			outi	B_Cont_TMR_PEEP,'0'
@@ -1131,34 +1131,21 @@ skip_PEEP_Baja:
 ;*********************aca termina PEEP baja anterior**************************************
 ;*********************PEEP BAJA Y SE REQUIERE COMPENSAR**************************************
 OL_PEEP_Baja:
-			outi	reg_PWM_Val_ExH,0x01
-			outi	reg_PWM_Val_ExL,0xF4
+			;outi	reg_PWM_Val_ExH,0x01
+			;outi	reg_PWM_Val_ExL,0xF4
+			;ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL
+			outi		B_Ctrl_Parker,'1'
+			inr		XL,reg_PWM_Val_ExL
+			inr		XH,reg_PWM_Val_ExH
+			cpi		XL,low(500)
+			cpci	XH,high(500)
+			rbrsh	actualizar_Pres_PEEP
+			adiw	XL,10
+			outr	reg_PWM_Val_ExH,XH
+			outr	reg_PWM_Val_ExL,XL
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL
 			jmp		actualizar_Pres_PEEP
-			call	Carga_offset_PEEP
-			inr		XL,Presion_antL
-			inr		XH,Presion_antH
-			inr		ZL,desc_max_L
-			inr		ZH,desc_max_H
-			;sub		XL,ZL
-			;sbc		XH,ZH
-			add		XL,ZL
-			adc		XH,ZH
 
-			subi	XL,low(100)
-			sbci	XH,high(100)
-			cp		R24,XL
-			cpc		R25,XH
-			rbrsh	actualizar_Pres_PEEP
-			inr		XL,PWM_FLUJOL
-			inr		XH,PWM_FLUJOH
-			cpi		XL,low(480)
-			cpci	XH,high(480)
-			rbrsh	actualizar_Pres_PEEP;salir_control
-			adiw	XL,1
-			outr	PWM_FLUJOH,XH
-			outr	PWM_FLUJOL,XL
-			jmp		actualizar_Pres_PEEP
 ;************************************************************		
 actualizar_Pres_PEEP:
 
