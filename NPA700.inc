@@ -1131,10 +1131,10 @@ skip_PEEP_Baja:
 ;*********************aca termina PEEP baja anterior**************************************
 ;*********************PEEP BAJA Y SE REQUIERE COMPENSAR**************************************
 OL_PEEP_Baja:
-			;outi	reg_PWM_Val_ExH,0x01
-			;outi	reg_PWM_Val_ExL,0xF4
-			;ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL
-			outi		B_Ctrl_Parker,'1'
+
+			outi	PWM_FLUJOH,0x00
+			outi	PWM_FLUJOL,0xc0
+			outi	B_Ctrl_Parker,'1'
 			inr		XL,reg_PWM_Val_ExL
 			inr		XH,reg_PWM_Val_ExH
 			cpi		XL,low(500)
