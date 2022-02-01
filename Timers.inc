@@ -462,7 +462,26 @@ dec_timer_O2:
 			brne	recupera_registros
 			outi	habilita_control_O2,'1';'1'
 ;Se verifica el número de fase en curso, para cambiarla
+;************************************************************
 
+
+/*			cpri	timer_PEEP_H,0
+			brne	dec_timer_PEEP
+			cpri	timer_PEEP_L,0
+			breq	recupera_registros
+
+dec_timer_PEEP:
+
+			;sbi		led_run
+			inr		xh,timer_PEEP_H
+			inr		xl,timer_PEEP_L
+			sbiw	xl,1
+			outr	timer_PEEP_H,xh
+			outr	timer_PEEP_L,xl
+			brne	recupera_registros
+			outi	habilita_PEEP_Baja,'1'
+			outi	timer_PEEP_H,0x00
+			outi	timer_PEEP_L,0x02*/
 
 recupera_registros:
 			popz

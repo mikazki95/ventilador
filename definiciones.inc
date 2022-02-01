@@ -474,6 +474,10 @@ fin_macro_tiempo_pausa:
 ;*********************************************************************
 
 .macro		FASE_EXHALACION
+
+			outi	primer_cruce,'0'
+			outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
+			outi	PWM_FLUJOL,low(PWMZERO)
 			outi	TMR_PEEP_ok_H,0x00
 			outi	TMR_PEEP_ok_L,0x00
 			outi	B_TMR_PEEP_ok,'1'
@@ -488,18 +492,18 @@ fin_macro_tiempo_pausa:
 			;movr	reg_PWM_Val_ExH,PWM_Aire_TST_H
 			;movr	reg_PWM_Val_ExL,PWM_Aire_TST_L
 			
-			inr		XL,PWM_min_val_exha_L
-			inr		XH,PWM_min_val_exha_H
+			;inr		XL,PWM_min_val_exha_L
+			;inr		XH,PWM_min_val_exha_H
 			inr		ZL,PWM_EXH_IN_L
 			inr		ZH,PWM_EXH_IN_H
 			;add		XL,ZL
 			;adc		XH,ZH
-			sub		XL,ZL
-			sbc		XH,ZH
+			;sub		XL,ZL
+			;sbc		XH,ZH
 			;subi	XL,low(-50)
 			;sbci	XH,high(-50)
-			outr	reg_PWM_Val_ExH,XH
-			outr	reg_PWM_Val_ExH,XH
+			outr	reg_PWM_Val_ExL,ZL;XH
+			outr	reg_PWM_Val_ExH,ZH;XH
 						
 
 ;			movr	reg_PWM_Val_ExH,PWM_EXH_IN_H
@@ -517,8 +521,7 @@ fin_macro_tiempo_pausa:
 					outi		B_Dec_PEEP,'0'
 					ASIGNA_PWM_O2						  reg_PWM1_O2H,reg_PWM1_O2L
 					ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
-					outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
-					outi	PWM_FLUJOL,low(PWMZERO)
+
 					outi	B_PEEP_DOWN,'0'
 ;************************************************************
 ;************************************************************
@@ -533,7 +536,6 @@ fin_macro_tiempo_pausa:
 					outi		B_PEEP_DC,'0'	
 					outi		B_Cont,'0'
 					outi		C_PEEP_DOWN,0
-					outi		primer_cruce,'0'
 
 					
 ;;
@@ -1069,6 +1071,10 @@ fin_macro_dec_volumen:
 .equ		cont_TMR_PEEP			=	Reg_hex+61
 .equ		B_cont_TMR_PEEP			=	Reg_hex+62
 
+.equ		timer_PEEP_H			=	Reg_hex+63
+.equ		timer_PEEP_L			=	Reg_hex+64
+
+.equ		habilita_PEEP_Baja		=	Reg_hex+65
 
 .equ		Reg_misc			=	0x0700
 .equ		cont_10msL			=	Reg_misc+0
@@ -1376,6 +1382,8 @@ fin_macro_dec_volumen:
 .equ		tmp_FP_ADC_O2H			=	FiO2+20
 
 .equ		rx_CAL_O2				=	FiO2+21
+
+
 
 .equ		timer_O2H				=	FiO2+22
 .equ		timer_O2L				=	FiO2+23
@@ -1950,6 +1958,9 @@ init_io:	outi	ddra, 0b11111111
 			outi		cont_Aux3,0x08
 			outi 		PWM_EXH_IN_H,high(40)
 			outi 		PWM_EXH_IN_L,low(40)
+			outi		habilita_PEEP_Baja,'0'
+			outi 		timer_PEEP_H,0x00
+			outi 		timer_PEEP_L,0x05
 
             sei                                 ;Habilita de manera global las interrupciones
             ret

@@ -31,7 +31,7 @@
 #define		FR_max			200
 #define		T_max			6000			;60.00 segundos
 #define		PWMmin			60
-#define		PWMZERO			40	;353
+#define		PWMZERO			10	;353
 #define		PWM_VV_Max		200
 
 
@@ -823,8 +823,11 @@ calib_mezcl:
 			conv_A_H	temp_H,temp_L,				rx_PWM_EXH_MIN_MH,rx_PWM_EXH_MIN_ML,rx_PWM_EXH_MIN_L
 			;cp_limites	temp_H,temp_L,				'n',	520,tx_error_rango_rx
 			
-			movr		PWM_min_val_exha_H,temp_H
-			movr		PWM_min_val_exha_L,temp_L	
+			movr		PWM_EXH_IN_H,temp_H
+			movr		PWM_EXH_IN_L,temp_L
+			
+			;movr		PWM_min_val_exha_H,temp_H
+			;movr		PWM_min_val_exha_L,temp_L	
 			
 			
 			conv_A_H	offset_batH,offset_batL,	rx_O_BATMH,rx_O_BATML,rx_O_BATL
