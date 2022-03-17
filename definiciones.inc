@@ -10,6 +10,7 @@
 #define		MISO				portb,3
 #define		PCINT_4				pinb,4	;Int para validar el control de volumen
 #define		PCINT_5				pinb,5	;Int de sobrepresíón
+								;portb,6	pwm de valvula exhalatoria
 #define		PWM0				portb,7	;OC1C, control de flujo y presión
 
 #define		NO_BREAK_AC_BAT		pinc,0
