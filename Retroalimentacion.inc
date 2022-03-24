@@ -62,6 +62,8 @@ int_CORTA_PWM0_MODO_VOLUMEN:
 corta_PWM0_volumen:
 			;ASIGNA_PWM_FLUJO					0,0
 			outi	B_Vol,'1'
+			//CAMBIO_606001
+			//outi	B_Ctrl_Parker,'0'
 
 salir_int_CORTA_PWM0_MODO_VOLUMEN:
 			popr	sreg

@@ -141,85 +141,85 @@ asigna_inspiracion_asistida:
 ;AUTO AJUSTE DE NIVELES DE PRESION
 ;*************************************************************
 inc_Nivel_PIP:
-			inr		XL,offset_PIPL
-			inr		XH,offset_PIPH
+			inr		XL,offset_PreInsL	
+			inr		XH,offset_PreInsH	
 			adiw	XL,0x0A
 			cpi		XL,low(600)
 			cpci	XH,high(600)
 			rbrsh	salir_int_rx1
-			outr	offset_PIPH,XH
-			outr	offset_PIPL,XL
+			outr	offset_PreInsH,XH	
+			outr	offset_PreInsL,XL	
 			jmp		salir_int_rx1
 dec_Nivel_PIP:
-			inr		XL,offset_PIPL
-			inr		XH,offset_PIPH
+			inr		XL,offset_PreInsL	
+			inr		XH,offset_PreInsH	
 			sbiw	XL,0x0A
 			cpi		XL,0x00
 			cpci	XH,0x00
 			rbrlt	salir_int_rx1
-			outr	offset_PIPH,XH
-			outr	offset_PIPL,XL
+			outr	offset_PreInsH,XH	
+			outr	offset_PreInsL,XL	
 			jmp		salir_int_rx1
 inc_Nivel_PEEP:
-			inr		XL,offset_PEEPL
-			inr		XH,offset_PEEPH
+			inr		XL,offset_PrePEEPL		
+			inr		XH,offset_PrePEEPH		
 			adiw	XL,0x0A
 			cpi		XL,low(600)
 			cpci	XH,high(600)
 			rbrsh	salir_int_rx1
-			outr	offset_PEEPH,XH
-			outr	offset_PEEPL,XL
+			outr	offset_PrePEEPH,XH		
+			outr	offset_PrePEEPL,XL		
 			jmp		salir_int_rx1
 dec_Nivel_PEEP:
-			inr		XL,offset_PEEPL
-			inr		XH,offset_PEEPH
+			inr		XL,offset_PrePEEPL		
+			inr		XH,offset_PrePEEPH		
 			sbiw	XL,0x0A
 			cpi		XL,0x00
 			cpci	XH,0x00
 			rbrlt	salir_int_rx1
-			outr	offset_PEEPH,XH
-			outr	offset_PEEPL,XL
+			outr	offset_PrePEEPH,XH		
+			outr	offset_PrePEEPL,XL		
 			jmp		salir_int_rx1
 ;*************************************************************
 incP_Nivel_PIP:
-			inr		XL,offset_PIPL
-			inr		XH,offset_PIPH
+			inr		XL,offset_PreInsL	
+			inr		XH,offset_PreInsH	
 			adiw	XL,0x32
 			cpi		XL,low(600)
 			cpci	XH,high(600)
 			rbrsh	salir_int_rx1
-			outr	offset_PIPH,XH
-			outr	offset_PIPL,XL
+			outr	offset_PreInsH,XH	
+			outr	offset_PreInsL,XL	
 			jmp		salir_int_rx1
 decP_Nivel_PIP:
-			inr		XL,offset_PIPL
-			inr		XH,offset_PIPH
+			inr		XL,offset_PreInsL	
+			inr		XH,offset_PreInsH	
 			sbiw	XL,0x32
 			cpi		XL,0x00
 			cpci	XH,0x00
 			rbrlt	salir_int_rx1
-			outr	offset_PIPH,XH
-			outr	offset_PIPL,XL
+			outr	offset_PreInsH,XH	
+			outr	offset_PreInsL,XL	
 			jmp		salir_int_rx1
 incP_Nivel_PEEP:
-			inr		XL,offset_PEEPL
-			inr		XH,offset_PEEPH
+			inr		XL,offset_PrePEEPL		
+			inr		XH,offset_PrePEEPH		
 			adiw	XL,0x32
 			cpi		XL,low(600)
 			cpci	XH,high(600)
 			rbrsh	salir_int_rx1
-			outr	offset_PEEPH,XH
-			outr	offset_PEEPL,XL
+			outr	offset_PrePEEPH,XH		
+			outr	offset_PrePEEPL,XL		
 			jmp		salir_int_rx1
 decP_Nivel_PEEP:
-			inr		XL,offset_PEEPL
-			inr		XH,offset_PEEPH
+			inr		XL,offset_PrePEEPL		
+			inr		XH,offset_PrePEEPH		
 			sbiw	XL,0x32
 			cpi		XL,0x00
 			cpci	XH,0x00
 			rbrlt	salir_int_rx1
-			outr	offset_PEEPH,XH
-			outr	offset_PEEPL,XL
+			outr	offset_PrePEEPH,XH		
+			outr	offset_PrePEEPL,XL		
 			jmp		salir_int_rx1
 ;*************************************************************
 

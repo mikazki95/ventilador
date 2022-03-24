@@ -79,6 +79,8 @@ s_tmr_Ctrl_FiO2:
 			;movr	En_Ctrl_FiO2L,Set_Ctrl_FiO2L
 			outi	En_Ctrl_FiO2H,0x00;17
 			outi	En_Ctrl_FiO2L,0x32
+;************************************************************
+;********************fin timer fio2**************************
 skip_timer_ctrl_fio2:
 
 			cpri	inhibe_on_off_pwm,'1'
@@ -316,24 +318,21 @@ tiempo_fase:
 			outr		tmr_U,R25
 			rjmp		salir_contar_pulsos
 rst_tmr_U:
+/* no aplicable creo CAMBIOS_606001
+			rbreq		salir_contar_pulsos
+			decr		tmr_U
+			inr			r25,tmr_U 	////nuevo
+			cpi			r25,0x02	////nuevo
+			rbrsh		salir_contar_pulsos///rbrne
+*/
 			outi		tmr_U,150		;30 x 10ms = 300ms
 			outi		tx_U,'1'
 			rjmp		salir_contar_pulsos
 
 verifica_otras_fases:
 			
-			outi	start_exha,'0'
-			
-	/*		cpri		FASE,STANDBY		;Si la fase es STANDBY, se cancela el resto
-			rbreq		salir_contar_pulsos	;del proceso.
-
-			cpri		FASE,CALIBRA_O2_21	;En caso de que se esten ejecutando alguna
-			rbreq		salir_contar_pulsos	;de las calibraciones de O2, tambien se
-			;cpri		FASE,CALIBRA_O2_21	;cancela el resto del proceso.
-			;rbreq		salir_contar_pulsos
-			cpri		FASE,CALIBRA_O2_100	;cancela el resto del proceso.
-			rbreq		salir_contar_pulsos
-*/			cpri		ON_OFF,'0'
+			outi	start_exha,'0'		
+			cpri		ON_OFF,'0'
 			rbreq		salir_contar_pulsos
 			cpri		ON_OFF,'2'
 			rbreq		salir_contar_pulsos
@@ -375,8 +374,6 @@ temporizacion_general:
 			;sbi		led_run
 			outr		cont_10msL,r24
 			outr		cont_10msH,r25
-			
-
 			rjmp		salir_contar_pulsos
 ;TST_FASE:	
 
@@ -518,17 +515,18 @@ inicia_inspiracion:
 			outi	cont_10msH,high(20)
 			outi	cont_10msL,low (20)
 			rjmp	salir_contar_pulsos
-/*
-			cpri	stop_ventilador,0x01	;Antes de iniciar la fase de inspiración, se
-			rbrne	inicia_fase_inspiracion	;verifica si hay una solicitud para detener
-											;el respirador o bien para actualizar valores
-			FASE_ESPERA						;Esta condición la indica el registro
-			rjmp	salir_contar_pulsos		;stop_ventilador = 0x01, de ser asi, se borra
-											;el registro y se da por terminada la
-											;interrupción, lo siguiente dependera de la
-											;ejecución del comando 'M'
-*/
+
 inicia_fase_inspiracion:
+//CAMBIO_606001
+			cpri	B_PEEP_ok,0x31
+			rbrne	inicia_fase_inspiracion_2
+			;ELECTROVALVULAS		0  	//checar pendiente
+			outi	B_PEEP_out,0x31
+			outi	cont_10msH,high(25)
+			outi	cont_10msL,low (25)
+			rjmp	salir_contar_pulsos
+inicia_fase_inspiracion_2:
+//fin_CAMBIO_606001
 			outi		presion_liberada,'0'
 
 			FASE_INSPIRACION

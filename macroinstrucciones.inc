@@ -58,6 +58,12 @@
 			.endif
 			.endm
 
+.macro		rbrlt
+			brge	salto
+			jmp	@0
+salto:
+			.endm
+
 .macro		inr
 			.if		@1>0x40
 			lds		@0,@1
@@ -266,13 +272,6 @@ salto:
 			jmp	@0
 salto:
 			.endm
-
-.macro		rbrlt
-			brge	salto
-			jmp	@0
-salto:
-			.endm
-
 
 .macro		rbrts
 			brtc	salto
@@ -1002,3 +1001,4 @@ ms:			delay_us	1000
 			outiw		ubrr3h,ubrr3l,UBRR_U2X0
 		.endif
 .endm
+

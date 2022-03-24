@@ -359,6 +359,8 @@ calcula_Pmax:
 ;
 calcula_PRESION_AIRE:
 			cli
+			//outi	presion_hex_aireH,0x02
+			//outi	presion_hex_aireL,0x80
 			inr		r17,presion_hex_aireH
 			inr		r16,presion_hex_aireL
 			sei
@@ -390,6 +392,8 @@ calcula_PRESION_AIRE:
 ;************************************************************
 calcula_PRESION_O2:
 			cli
+			//outi	presion_hex_O2H,0x02
+			//outi	presion_hex_O2L,0x80
 			inr		r17,presion_hex_O2H
 			inr		r16,presion_hex_O2L
 			sei
@@ -851,6 +855,8 @@ OL_CONT:
 calcula_FiO2_HEX:
 
 			call	N_FiO2_HX
+			//outi	FiO2HEX_H,0x00
+			//outi	FiO2HEX_L,0x15
 			outr	FiO2HEX_H,XH
 			outr	FiO2HEX_L,XL
 			ret

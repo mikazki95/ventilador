@@ -17,7 +17,7 @@ rd_NPA700:	pushw
 			breq	sensor_OK
 ;Si se deja de detectar el sensor de presion, se procede a liberar la presion
 ;error_liberar_presion:
-			ASIGNA_PWM_FLUJO					0,0
+			;ASIGNA_PWM_FLUJO					0,0
 			;ASIGNA_PWM_V_ex  					0,0;ELECTROVALVULAS						0
 			outi	presion_liberada,'1'
 			jmp		fin_NPA700
@@ -378,7 +378,7 @@ control_presion:
 ;			cpri	FASE,CPAP_APNEA
 ;			rbreq	salir_control;tst_P_INSPIRACION;tst_CPAP
 			cpri	FASE,CPAP_SIN_APNEA
-			rbreq	tst_PEEP;peep_CPAP;tst_CPAP
+			rbreq	tst_PEEP2;peep_CPAP;tst_CPAP
 salir_control:
 									outi	ucsr1b,0x98
 			ret
@@ -804,8 +804,8 @@ actualizar_Pres_PIP:
 CARGA_PR_OFFSET:
 			inr		r24,Presion_cmH2OL
 			inr		r25,Presion_cmH2OH
-			inr		ZL,offset_PIPL
-			inr		ZH,offset_PIPH
+			inr		ZL,offset_PreInsL	//CAMBIOS_606001	offset_PIPL
+			inr		ZH,offset_PreInsH	//CAMBIOS_606001	offset_PIPH
 			cp		R24,ZL
 			cpc		R25,ZH
 			rbrlo	out_carga_offset
@@ -880,8 +880,15 @@ sigue_control_PEEP:
 			cpri	Modo_Op,P_CPAP
 			breq	@0
 .endm
-;************************************************************
 
+;************************************************************
+tst_PEEP2:
+			sbi		led_run
+			;tst_PEEP_0					salir_control
+			;tst_tiempo_final_fase	20,	prueba_gases;sin_flujo
+			jmp	peep_control
+;************************************************************
+;************************************************************
 prueba_gases:
 			outi		B_Ctrl_Parker,'1'
 			;tst_tiempo_final_fase	10,	sin_flujo
@@ -1220,8 +1227,8 @@ CHK_PEEP_Alta_lim:
 Carga_offset_PEEP:
 			inr		r24,Presion_cmH2OL
 			inr		r25,Presion_cmH2OH
-			inr		ZL,offset_PEEPL
-			inr		ZH,offset_PEEPH
+			inr		ZL,offset_PrePEEPL		//CAMBIOS_606001	offset_PEEPL
+			inr		ZH,offset_PrePEEPH		//CAMBIOS_606001	offset_PEEPH
 			cp		R24,ZL
 			cpc		R25,ZH
 			rbrlo	out_carga_offset
