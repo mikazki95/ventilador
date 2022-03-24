@@ -806,12 +806,6 @@ calib_mezcl:
 			movr		offset_Val_PrincH,temp_H
 			movr		offset_Val_PrincL,temp_L	
 
-
-
-//			conv_A_H	temp_H,temp_L,				rx_TMR_O2_MH,rx_TMR_O2_ML,rx_TMR_O2_L
-//			;cp_limites	temp_H,temp_L,				'n',	520,	tx_error_rango_rx
-//			movr		TMR_FiO2_O2H,temp_H
-//			movr		TMR_FiO2_O2L,temp_L	
 //fin_cambios_606001
 
 			conv_A_H	temp_H,temp_L,				rx_Cont_O2_MH,rx_Cont_O2_ML,rx_Cont_O2_L
@@ -873,9 +867,9 @@ asigna_valores:
 			movr		buffer_tx0+1	,rx_flujo_O2_MH
 			movr		buffer_tx0+2	,rx_flujo_O2_ML
 			movr		buffer_tx0+3	,rx_flujo_O2_L
-			movr		buffer_tx0+4	,rx_TMR_O2_MH
-			movr		buffer_tx0+5	,rx_TMR_O2_ML
-			movr		buffer_tx0+6	,rx_TMR_O2_L
+			movr		buffer_tx0+4	,rx_O_OFSTFJMH
+			movr		buffer_tx0+5	,rx_O_OFSTFJML
+			movr		buffer_tx0+6	,rx_O_OFSTFJL
 			movr		buffer_tx0+7	,rx_Cont_O2_MH
 			movr		buffer_tx0+8	,rx_Cont_O2_ML
 			movr		buffer_tx0+9	,rx_Cont_O2_L

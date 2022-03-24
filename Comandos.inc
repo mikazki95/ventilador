@@ -388,9 +388,9 @@ tst_ejecuta_C:
 			movr		rx_flujo_O2_MH			,buffer_rx0+0			;Rx_modo
 			movr		rx_flujo_O2_ML			,buffer_rx0+1		;Decenas
 			movr		rx_flujo_O2_L			,buffer_rx0+2		;Unidades
-			movr		rx_TMR_O2_MH			,buffer_rx0+3		;Decimas de segundo
-			movr		rx_TMR_O2_ML			,buffer_rx0+4		;Centesimas de segundo
-			movr		rx_TMR_O2_L				,buffer_rx0+5			;Espera los bytes del tiempo "pausa"
+			movr		rx_O_OFSTFJMH			,buffer_rx0+3		;Decimas de segundo
+			movr		rx_O_OFSTFJML			,buffer_rx0+4		;Centesimas de segundo
+			movr		rx_O_OFSTFJL			,buffer_rx0+5			;Espera los bytes del tiempo "pausa"
 			movr		rx_Cont_O2_MH			,buffer_rx0+6
 			movr		rx_Cont_O2_ML			,buffer_rx0+7
 			movr		rx_Cont_O2_L			,buffer_rx0+8
