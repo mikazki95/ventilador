@@ -883,9 +883,7 @@ sigue_control_PEEP:
 
 ;************************************************************
 tst_PEEP2:
-			sbi		led_run
-			;tst_PEEP_0					salir_control
-			;tst_tiempo_final_fase	20,	prueba_gases;sin_flujo
+			;sbi		led_run
 			jmp	peep_control
 ;************************************************************
 ;************************************************************
@@ -893,12 +891,17 @@ prueba_gases:
 			outi		B_Ctrl_Parker,'1'
 			;tst_tiempo_final_fase	10,	sin_flujo
 			jmp	sin_flujo;peep_CPAP
+;************************************************************
+salir_PEEP:
+			outi	B_PEEP_ok,0x30
+			rjmp	salir_control
 ;******************;PEEP_Control******************************
 tst_PEEP:
-			tst_PEEP_0					salir_control
+			tst_PEEP_0					salir_PEEP
 			tst_tiempo_final_fase	20,	prueba_gases;sin_flujo
 
 peep_CPAP:
+			//outi	B_PEEP_ok,0x30	//prueba
 			;inr		r24,Presion_cmH2OL
 			;inr		r25,Presion_cmH2OH
 			inr		Xl,reg_PEEPL_100porciento
@@ -909,6 +912,7 @@ peep_CPAP:
 ;Si es algún modo de volumen, se considera que en los primeros ciclos respiratorios
 ;se debe de alcanzar el nivel de PEEP, independientemente de si aun no se alcanza
 ;el volumen programado
+			sbi		led_run
 			cpri	primer_cruce,'1'
 			rbreq	PEEP_control
 			
@@ -921,6 +925,7 @@ peep_CPAP:
 			cpc		R25,XH
 			rbrsh	ini_PEEP;actualizar_Pres_PEEP;carga_V_Exh_AD;PEEP_Alta
 			outi	primer_cruce,'1'
+			outi	B_PEEP_ok,0x30
 			
 PEEP_control:
 			call	Carga_offset_PEEP
@@ -944,13 +949,18 @@ PEEP_control:
 			cpc		R25,XH
 			rbrlo	PEEP_Baja
 ;************************************************************
+;*******************PEEP_OK**********************************
+//cambios_606001
+PEEP_Ok:
+			outi	B_Ctrl_Parker,'0'
+			outi	B_PEEP_ok,0x30
+			//verificar si no requiere algun tipo de compenzacion 
+//fin_cambios_606001
 			call	cerrar_val_ex
 			outi	habilita_PEEP_Baja,'1'
 			call	Carga_offset_PEEP ;44
 			inr		XL,Presion_antL
 			inr		XH,Presion_antH
-			;inr		ZL,desc_max_L
-			;inr		ZH,desc_max_H
 			subi	XL,low(-4)
 			sbci	XH,high(-4)
 			cp		R24,XL
@@ -1092,6 +1102,19 @@ cerrar_val_ex_exit:
 ;************************************************************
 ;************************************************************
 PEEP_Baja:
+//cambios_606001
+			call 	Carga_offset_PEEP
+			inr		xl,reg_PEEPL_100porciento
+			inr		xh,reg_PEEPH_100porciento
+			subi	XL,low(450)
+			sbci	XH,high(450)
+			cp		R24,XL
+			cpc		R25,XH
+			rbrsh	PEEP_Baja_ok
+			outi	B_Ctrl_Parker,'1'
+PEEP_Baja_ok:
+			outi	B_PEEP_ok,0x30
+//fin_cambios_606001
 			call	cerrar_val_ex
 			call	cerrar_val_ex
 			call	cerrar_val_ex

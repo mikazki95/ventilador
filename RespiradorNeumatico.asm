@@ -12,11 +12,11 @@
 
 ;#define    simulacion
 
-#define	version_firmwareH	'5'
+#define	version_firmwareH	'4'
 #define	version_firmwareP	'.'
-#define	version_firmwareM	'0'
+#define	version_firmwareM	'2'
 ;#define	version_firmwareLP	'.'
-#define	version_firmwareL	'0'
+#define	version_firmwareL	'X'
 
 .equ	fxtal		=	11059200		;Frecuencia del cristal
 
@@ -1313,6 +1313,11 @@ tx_listo:	outi	cont_rx0,0x00	;Desecha los datos que se Rx
 control_FiO2:
 			call	calcula_FiO2_HEX
 ;************************************************************
+;****************modo manual*********************************			
+			inr		YL,Modo_TST
+			cpi		YL,0x02
+			rbreq	FiO2_manual
+;************************************************************
 ;************************************************************
 			inr		ZL,reg_O2L		;compara si es 21% de oxigeno (hex)
 			inr		ZH,reg_O2H
@@ -1334,10 +1339,7 @@ control_FiO2:
 ;************************************************************
 			cpri	habilita_control_O2,'0'
 			rbreq	retorno_control_O2
-			
-			inr		YL,Modo_TST
-			cpi		YL,0x02
-			rbreq	FiO2_manual
+
 ;************************************************************
 ;************************************************************
 			cpri	B_FIO2_ANTL,'1'
@@ -1644,7 +1646,6 @@ salir_control_O2:
 			cli
 			;sbi		led_run
 //606001 se puede eliminar una variable
-			sbi		led_run
 			outi	TMR_FiO2_O2H,0x00
 			outi	TMR_FiO2_O2L,0xF0
 			movr	timer_O2H,TMR_FiO2_O2H
@@ -1702,6 +1703,11 @@ control_Parker_in:
 ;			inr		XL,portl
 ;			sbrs	XL,6	
 ;			jmp		sin_gases
+;************************************************************
+;****************modo manual*********************************			
+			inr		YL,Modo_TST
+			cpi		YL,0x02
+			rbreq	FiO2_manual
 ;************************************************************
 ;************************************************************
 			inr		ZL,reg_O2L		;compara si es 21% de oxigeno (hex)

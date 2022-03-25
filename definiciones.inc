@@ -506,23 +506,11 @@ fin_macro_tiempo_pausa:
 ;*********************************************************************
 
 .macro		FASE_EXHALACION
-
-/*
-			;outi		B_PEEP_out,0x31
-			ELECTROVALVULAS		200
+//cambios_606001
 			outi	B_PEEP_ok,0x31
-			;outi	portg,0b00000000
-			outi	B_Ctrl_Parker,'0'
-;			cpri	presion_liberada,'1'
-;			breq	fin_macro_exhalacion
-			
-					outi	primer_cruce,'0'
 			ASIGNA_PWM_O2						  reg_PWM1_O2H,reg_PWM1_O2L
 			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
-			outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
-			outi	PWM_FLUJOL,low(PWMZERO);;
-*/
-
+//fin_cambios_606001
 			outi	primer_cruce,'0'
 			outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
 			outi	PWM_FLUJOL,low(PWMZERO)
