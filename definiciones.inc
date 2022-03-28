@@ -1561,9 +1561,9 @@ fin_macro_dec_volumen:
 ;.equ		reg_PEEPLFPx0p95		=	reg_NPA700+52
 ;.equ		reg_PEEPMLFPx0p95		=	reg_NPA700+53
 ;.equ		reg_PEEPMHFPx0p95		=	reg_NPA700+54
-;.equ		reg_PEEPHFPx0p95		=	reg_NPA700+55
+.equ		tmr_exha_Ok				=	reg_NPA700+55
 
-;.equ		PEEP_en_rango			=	reg_NPA700+56
+.equ		PEEP_en_rango			=	reg_NPA700+56
 
 .equ		tmr_inicio_exhalacion	=	reg_NPA700+57	;Temporizador desde que inicia
 											;la exhalación hasta que ya transcurrieron

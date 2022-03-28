@@ -13,12 +13,30 @@ timer_10ms:
 			pushr	sreg
 			pushx
 			pushz
-;			cpri	tmr_de_presion,0
-;			breq	skip_tmr_presion
-;			decr	tmr_de_presion
 
+;*******************timer PEEP OK ESTABLE********************
+;************************************************************
+			;sbi		led_run
+			cpri	B_PEEP_ok,0x31
+			rbrne	TMR_PEEP_ON
+			inr		XL,tmr_exha_Ok
+			dec		XL
+			cpi		XL,0x03
+			brlo	c_fase_ok
+			outr	tmr_exha_Ok,XL
+			jmp		skip_TMR_PEEP	
+c_fase_ok:
+			outi	PEEP_en_rango,0x30
+			jmp		skip_TMR_PEEP		
+			;cpri	tmr_PEEP_Ok,0
+			;breq	skip_tmr_presion
+			;decr	tmr_de_presion
 
+TMR_PEEP_ON:
+			outi	PEEP_en_rango,0x31
+			outi	tmr_exha_Ok,0x0F
 
+skip_TMR_PEEP:
 ;*******************timer control de fio2********************
 ;************************************************************
 /*			inr		XL,portl
@@ -519,13 +537,13 @@ inicia_inspiracion:
 inicia_fase_inspiracion:
 //CAMBIO_606001
 			cpri	B_PEEP_ok,0x31
-			rbrne	inicia_fase_inspiracion_2
-			;ELECTROVALVULAS		0  	//checar pendiente
-			outi	B_PEEP_out,0x31
-			outi	cont_10msH,high(25)
+			rbrne	inicia_fase_inspiracion_3		
+			//outi	B_PEEP_out,0x31
+			//outi	habilita_PEEP_Baja,'1'	//parche
+			outi	cont_10msH,high(25)	//cambiar por valor de 25 
 			outi	cont_10msL,low (25)
 			rjmp	salir_contar_pulsos
-inicia_fase_inspiracion_2:
+inicia_fase_inspiracion_3:
 //fin_CAMBIO_606001
 			outi		presion_liberada,'0'
 

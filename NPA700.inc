@@ -385,7 +385,7 @@ salir_control:
 
 libera_pres:
 			outi	reg_PWM_Val_ExH,0x00
-			outi	reg_PWM_Val_ExL,0x00
+			outi	reg_PWM_Val_ExL,0x0A
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
 			outi		PWM_FLUJOH,high(60)
 			outi		PWM_FLUJOL,low(60)
@@ -453,7 +453,7 @@ O2_100_ON:
 ;************************************************************
 control_pres_cal_gases:
 			outi	reg_PWM_Val_ExH,0x00
-			outi	reg_PWM_Val_ExL,0x00
+			outi	reg_PWM_Val_ExL,0x0A
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
 
 			call	CARGA_PR_OFFSET
@@ -888,7 +888,9 @@ tst_PEEP2:
 ;************************************************************
 ;************************************************************
 prueba_gases:
-			outi		B_Ctrl_Parker,'1'
+			cpri	B_PEEP_ok,0x30
+			rbrne	actualizar_Pres_PEEP//inicia_fase_inspiracion_3			
+			outi	B_Ctrl_Parker,'1'
 			;tst_tiempo_final_fase	10,	sin_flujo
 			jmp	sin_flujo;peep_CPAP
 ;************************************************************
@@ -897,22 +899,25 @@ salir_PEEP:
 			rjmp	salir_control
 ;******************;PEEP_Control******************************
 tst_PEEP:
+			sbi		led_run
 			tst_PEEP_0					salir_PEEP
 			tst_tiempo_final_fase	20,	prueba_gases;sin_flujo
-
+			
+			
 peep_CPAP:
 			//outi	B_PEEP_ok,0x30	//prueba
 			;inr		r24,Presion_cmH2OL
 			;inr		r25,Presion_cmH2OH
-			inr		Xl,reg_PEEPL_100porciento
+
+/*			inr		Xl,reg_PEEPL_100porciento
 			inr		Xh,reg_PEEPH_100porciento
 			cpi		XL,0x00
 			cpci	XH,0x00
-			rbreq	libera_pres
+			rbreq	libera_pres*/
 ;Si es algún modo de volumen, se considera que en los primeros ciclos respiratorios
 ;se debe de alcanzar el nivel de PEEP, independientemente de si aun no se alcanza
 ;el volumen programado
-			sbi		led_run
+			
 			cpri	primer_cruce,'1'
 			rbreq	PEEP_control
 			
@@ -928,6 +933,7 @@ peep_CPAP:
 			outi	B_PEEP_ok,0x30
 			
 PEEP_control:
+			
 			call	Carga_offset_PEEP
 			inr		xl,reg_PEEPL_100porciento
 			inr		xh,reg_PEEPH_100porciento
@@ -1025,7 +1031,8 @@ ini_PEEP:
 ;************************************************************		
 ;************************************************************
 PEEP_Alta:
-			;outi		B_TMR_PEEP_ok,'1'
+			
+			outi	B_PEEP_ok,0x31
 			;rjmp	salir_control
 			outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
 			outi	PWM_FLUJOL,low(PWMZERO)
@@ -1062,7 +1069,12 @@ abrir_val_ex_in:
 			outi	habilita_PEEP_Baja,'0'
 			inr		ZL,PWM_EXH_IN_L
 			inr		ZH,PWM_EXH_IN_H
-			;adiw	Z,5
+			inr		XL,reg_PWM_Val_ExL
+			inr		XH,reg_PWM_Val_ExH
+			cp		XL,ZL
+			cpc		XH,ZH
+			brlo	abrir_val_ex
+			sbiw	Z,1
 			outr	reg_PWM_Val_ExL,ZL;XH
 			outr	reg_PWM_Val_ExH,ZH;XH
 						
@@ -1073,9 +1085,12 @@ abrir_val_ex:
 			inr		ZL,reg_PWM_Val_ExL
 			inr		ZH,reg_PWM_Val_ExH
 			sbiw	Z,1
+			cpi		ZL,0x10
+			cpci	ZH,0x00
+			rbrlo	actualizar_Pres_PEEP
 			outr	reg_PWM_Val_ExL,ZL;XH
 			outr	reg_PWM_Val_ExH,ZH;XH
-			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL
 			jmp		actualizar_Pres_PEEP
 
 
