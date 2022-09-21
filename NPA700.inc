@@ -240,9 +240,12 @@ rd_i2c_NPA:	ldi		r25,(0x28*2)+1		;ID de la memoria
 			breq	lectura_NPA_OK
 			cpi		r25,0b10000000	;Si el bit más significativo esta activo, solo indica
 			brne	ERROR2			;que el sensor envió el dato anterior
-			inr		r25,NPA_700H
+			
+			/*inr		r25,NPA_700H
 			andi	r25,0b00111111
 			outr	NPA_700H,r25
+			*/
+			jmp		rd_i2c_NPA		;tratamos de obtener un dato nuevo todo el tiempo 
 lectura_NPA_OK:
 			outi	estado_i2cNPA,'0'
 
