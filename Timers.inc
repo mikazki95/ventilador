@@ -16,16 +16,18 @@ timer_10ms:
 
 ;*******************timer PEEP OK ESTABLE********************
 ;************************************************************
-			;sbi		led_run
 			cpri	B_PEEP_ok,0x31
 			rbrne	TMR_PEEP_ON
+			sbi		led_run
 			inr		XL,tmr_exha_Ok
 			dec		XL
 			cpi		XL,0x03
-			brlo	c_fase_ok
+			rbrlo	c_fase_ok
 			outr	tmr_exha_Ok,XL
 			jmp		skip_TMR_PEEP	
 c_fase_ok:
+			sbi		led_run
+			outi	tmr_exha_Ok,0x0F
 			outi	PEEP_en_rango,0x30
 			jmp		skip_TMR_PEEP		
 			;cpri	tmr_PEEP_Ok,0
@@ -377,7 +379,7 @@ temporizacion_ventana:
 		;	rjmp		temporizacion_general
 
 temporizacion_general:
-			;sbi		led_run
+			
 			inr			r24,cont_10msL
 			inr			r25,cont_10msH
 			ldiw		xh,xl,6001

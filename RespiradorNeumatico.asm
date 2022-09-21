@@ -12,11 +12,11 @@
 
 ;#define    simulacion
 
-#define	version_firmwareH	'4'
+#define	version_firmwareH	'5'
 #define	version_firmwareP	'.'
-#define	version_firmwareM	'2'
+#define	version_firmwareM	'0'
 ;#define	version_firmwareLP	'.'
-#define	version_firmwareL	'X'
+#define	version_firmwareL	'0'
 
 .equ	fxtal		=	11059200		;Frecuencia del cristal
 
