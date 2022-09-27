@@ -511,6 +511,8 @@ fin_macro_tiempo_pausa:
 			ASIGNA_PWM_O2						  reg_PWM1_O2H,reg_PWM1_O2L
 			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
 //fin_cambios_606001
+			movr	aux_desc_PEEPH,Presion_cmH2OH
+			movr	aux_desc_PEEPL,Presion_cmH2OL
 			outi	primer_cruce,'0'
 			outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
 			outi	PWM_FLUJOL,low(PWMZERO)
@@ -521,7 +523,7 @@ fin_macro_tiempo_pausa:
 			outi	B_cont_TMR_PEEP,'1'
 			outi	cont_Prs_Aux, 0x00
 			outi	cont_Aux0,0x00
-			outi		B_Ctrl_Parker,'0'
+			outi	B_Ctrl_Parker,'0'
 			;outi	reg_PWM_Val_ExH,0x00;10;01
 			;outi	reg_PWM_Val_ExL,0xF0;00;B0
 
@@ -530,8 +532,8 @@ fin_macro_tiempo_pausa:
 			
 			;inr		XL,PWM_min_val_exha_L
 			;inr		XH,PWM_min_val_exha_H
-			inr		ZL,PWM_EXH_IN_L
-			inr		ZH,PWM_EXH_IN_H
+			inr		ZL,G_batL//PWM_EXH_IN_L
+			inr		ZH,G_batH//PWM_EXH_IN_H
 			;add		XL,ZL
 			;adc		XH,ZH
 			;sub		XL,ZL
@@ -572,9 +574,6 @@ fin_macro_tiempo_pausa:
 					outi		B_PEEP_DC,'0'	
 					outi		B_Cont,'0'
 					outi		C_PEEP_DOWN,0
-
-					
-;;
 
 
 fin_macro_exhalacion:
@@ -1577,6 +1576,9 @@ fin_macro_dec_volumen:
 
 .equ		reg_PEEPH_100porciento	=	reg_NPA700+63
 .equ		reg_PEEPL_100porciento	=	reg_NPA700+64
+
+.equ		aux_desc_PEEPH			=	reg_NPA700+65
+.equ		aux_desc_PEEPL			=	reg_NPA700+66
 
 ;Dirección de la presion, para el control del PEEP
 ;.equ		direccion_presion		=	reg_NPA700+69

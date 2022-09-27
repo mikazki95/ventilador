@@ -702,18 +702,18 @@ carga_modo_bat:
 			rjmp			tx_modo_alimentacion
 tx_modo_alimentacion:
 
-			movr	buffer_tx0+7,modo_alimentacion
-			movr	buffer_tx0+8,nivel_bat
+		//	movr	buffer_tx0+7,modo_alimentacion
+		//	movr	buffer_tx0+8,nivel_bat
 
 ;6 BYTES DE LA LECTURA DE PRESION DE ENTRADA DE AIRE Y O2 (EN PSI)
 			call			calcula_PRESION_AIRE
 			call			calcula_PRESION_O2
-			movr	buffer_tx0+9,tx_presion_aireH
-			movr	buffer_tx0+10,tx_presion_aireM
-			movr	buffer_tx0+11,tx_presion_aireL
-			movr	buffer_tx0+12,tx_presion_O2H
-			movr	buffer_tx0+13,tx_presion_O2M
-			movr	buffer_tx0+14,tx_presion_O2L
+			movr	buffer_tx0+7,tx_presion_aireH
+			movr	buffer_tx0+8,tx_presion_aireM
+			movr	buffer_tx0+9,tx_presion_aireL
+			movr	buffer_tx0+10,tx_presion_O2H
+			movr	buffer_tx0+11,tx_presion_O2M
+			movr	buffer_tx0+12,tx_presion_O2L
 
 
 /*
@@ -733,21 +733,21 @@ tx_modo_alimentacion:
 */
 ;Lectura de la presión de aire del flujo principal
 			call	convierte_cmH2OHEX
-			movr	buffer_tx0+15,tx_PSI_4
-			movr	buffer_tx0+16,tx_PSI_3
-			movr	buffer_tx0+17,tx_PSI_2
+			movr	buffer_tx0+13,tx_PSI_4
+			movr	buffer_tx0+14,tx_PSI_3
+			movr	buffer_tx0+15,tx_PSI_2
 
 
 
 
-			movr	buffer_tx0+18,estado_i2cNPA
+			movr	buffer_tx0+16,estado_i2cNPA
 
-			movr	buffer_tx0+19,rx_Ctrl_Vol
-			movr	buffer_tx0+20,rx_Ctrl_FiO2
+			movr	buffer_tx0+17,rx_Ctrl_Vol
+			movr	buffer_tx0+18,rx_Ctrl_FiO2
 			
-			outi	buffer_tx0+21,0x0A
+			outi	buffer_tx0+19,0x0A
 					outi	bandera_tx_estado,0x00
-					outi	cont_tx0,21
+					outi	cont_tx0,19
 
 			outi	udr_debug,'P'	;Inicia la tx del primer byte de respuesta del
 									;Time out
