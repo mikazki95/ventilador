@@ -249,6 +249,18 @@ fin_macro_standby:
 .macro		FASE_INSPIRACION
 			;outi	portg,0b00000001
 //CAMBIOS_606001
+			inr		YL,flag_tmp_min
+			cpi		YL,0x02
+			breq	chk_tmr
+			inr		XL,PWM_EXH_IN_L
+			inr		XH,PWM_EXH_IN_H
+			sbiw	X,1
+			outr	PWM_EXH_IN_H,XH
+			outr	PWM_EXH_IN_L,XL
+			sbi		led_run
+chk_tmr:
+			
+
 			outi		CB_PIP_out,0x00
 			outi		B_Vol_out,0x30
 			outi		B_PEEP_out,0x30
@@ -420,20 +432,10 @@ fin_macro_presion_soporte:
 			ASIGNA_TIEMPO_10ms					;tmr_TIEMPO_INSH,tmr_TIEMPO_INSL
 			
 			
-			inr		XL,PWM_min_val_exha_L
-			inr		XH,PWM_min_val_exha_H
-			;inr		ZL,PWM_EXH_IN_L
-			;inr		ZH,PWM_EXH_IN_H
-			;add		XL,ZL
-			;adc		XH,ZH
-			subi	XL,low(-50)
-			sbci	XH,high(-50)
-			outr	reg_PWM_Val_ExH,XH
-			outr	reg_PWM_Val_ExH,XH
-						
-
-;			movr	reg_PWM_Val_ExH,PWM_EXH_IN_H
-;			movr	reg_PWM_Val_ExL,PWM_EXH_IN_L
+			inr		ZL,G_batL//PWM_EXH_IN_L
+			inr		ZH,G_batH//PWM_EXH_IN_H
+			outr	reg_PWM_Val_ExL,ZL;XH
+			outr	reg_PWM_Val_ExH,ZH;XH
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
 			
 			outi		bandera_inc_compensacion,'0'
@@ -511,6 +513,14 @@ fin_macro_tiempo_pausa:
 			ASIGNA_PWM_O2						  reg_PWM1_O2H,reg_PWM1_O2L
 			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
 //fin_cambios_606001
+			inr 	XL,tmp_tmr_TIEMPO_EXPL
+			inr 	XH,tmp_tmr_TIEMPO_EXPH
+			lsr		XH
+			ror		XL
+			outr	Aux_TIEMPO_min_EXPH,XH
+			outr	Aux_TIEMPO_min_EXPL,XL
+			outi	flag_tmp_min,0x00
+
 			movr	aux_desc_PEEPH,Presion_cmH2OH
 			movr	aux_desc_PEEPL,Presion_cmH2OL
 			outi	primer_cruce,'0'
@@ -524,28 +534,10 @@ fin_macro_tiempo_pausa:
 			outi	cont_Prs_Aux, 0x00
 			outi	cont_Aux0,0x00
 			outi	B_Ctrl_Parker,'0'
-			;outi	reg_PWM_Val_ExH,0x00;10;01
-			;outi	reg_PWM_Val_ExL,0xF0;00;B0
-
-			;movr	reg_PWM_Val_ExH,PWM_Aire_TST_H
-			;movr	reg_PWM_Val_ExL,PWM_Aire_TST_L
-			
-			;inr		XL,PWM_min_val_exha_L
-			;inr		XH,PWM_min_val_exha_H
 			inr		ZL,G_batL//PWM_EXH_IN_L
 			inr		ZH,G_batH//PWM_EXH_IN_H
-			;add		XL,ZL
-			;adc		XH,ZH
-			;sub		XL,ZL
-			;sbc		XH,ZH
-			;subi	XL,low(-50)
-			;sbci	XH,high(-50)
 			outr	reg_PWM_Val_ExL,ZL;XH
 			outr	reg_PWM_Val_ExH,ZH;XH
-						
-
-;			movr	reg_PWM_Val_ExH,PWM_EXH_IN_H
-;			movr	reg_PWM_Val_ExL,PWM_EXH_IN_L
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
 			
 			outi	tmr_inhibe_on_off_pwm,		3
@@ -1131,6 +1123,14 @@ fin_macro_dec_volumen:
 .equ		offset_Val_PrincH		=	Reg_hex+66
 .equ		offset_Val_PrincL		=	Reg_hex+67
 //FIN_cambios_606001
+.equ		Aux_TIEMPO_min_EXPL		=	Reg_hex+68
+.equ		Aux_TIEMPO_min_EXPH		=	Reg_hex+69
+.equ		TIEMPO_min_EXPL			=	Reg_hex+70
+.equ		TIEMPO_min_EXPH			=	Reg_hex+71
+
+.equ		flag_tmp_min			=	Reg_hex+72
+.equ		flag_peep_out			=	Reg_hex+73
+
 
 .equ		Reg_misc			=	0x0700
 .equ		cont_10msL			=	Reg_misc+0

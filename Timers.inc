@@ -14,6 +14,7 @@ timer_10ms:
 			pushx
 			pushz
 
+
 ;*******************timer PEEP OK ESTABLE********************
 ;************************************************************
 			cpri	B_PEEP_ok,0x31
@@ -39,55 +40,6 @@ TMR_PEEP_ON:
 skip_TMR_PEEP:
 ;*******************timer control de fio2********************
 ;************************************************************
-/*			inr		XL,portl
-			sbrs	XL,6	
-			jmp		skip_timer_ctrl_fio2
-			inr		XH,En_Ctrl_FiO2H
-			inr		XL,En_Ctrl_FiO2L
-
-			cpi		XL,0x00
-			cpci	XH,0x00
-			rbreq	s_tmr_Ctrl_FiO2
-			sbiw	X,1
-			outr	En_Ctrl_FiO2H,XH
-			outr	En_Ctrl_FiO2L,XL
-			inr		ZH,Set_Ctrl_FiO2H
-			inr		ZL,Set_Ctrl_FiO2L
-			cp		XL,ZL
-			cpc		XH,ZH
-			brlo	set_O2
-
-
-
-
-			outi	B_ctrl_FiO2,0x00
-
-			outi	reg_PWM1_O2H,high(0)
-			outi	reg_PWM1_O2L,low(0)
-			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
-			outi	reg_PWM2_AireH,high(450)
-			outi	reg_PWM2_AireL,low(450)
-			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
-
-
-			Jmp		skip_timer_ctrl_fio2
-
-set_O2:	
-
-		
-			outi	B_ctrl_FiO2,0x01
-
-
-			movr	reg_PWM1_O2H,PWM_FiO2_O2H
-			movr	reg_PWM1_O2L,PWM_FiO2_O2L
-			ASIGNA_PWM_O2						reg_PWM1_O2H,reg_PWM1_O2L
-
-			outi	reg_PWM2_AireH,high(0)
-			outi	reg_PWM2_AireL,low(0)
-			ASIGNA_PWM_AIRE						reg_PWM2_AireH,reg_PWM2_AireL
-		
-
-*/
 			;Jmp		skip_timer_ctrl_fio2
 ;************************************************************
 ;************************************************************
@@ -413,20 +365,16 @@ fin_ciclo:
 			rjmp	salir_contar_pulsos
 
 W_CALIBRA_O2_21:
-			;sbi		led_run
-			;outi	FASE,					CALIBRA_O2_21
 			FASE_O2_21
 			rjmp	salir_contar_pulsos
 
 W_CALIBRA_O2_100:
 			
-			;outi	FASE,					CALIBRA_O2_21
 			FASE_O2_100
-			;sbi		led_run
 salir_contar_pulsos:
 			;ret
 /****************timer de control de peep****************************/
-			outi	portg,0b00000000
+			//outi	portg,0b00000000
 			cpri	B_Cont_TMR_PEEP,'0'
 			rbreq	fin_tmr_PEEP
 			inr		XL,Cont_TMR_PEEP
@@ -436,7 +384,7 @@ salir_contar_pulsos:
 			rbrsh	fin_tmr_PEEP
 			adiw	X,1
 			outr	Cont_TMR_PEEP,XL
-			outi	portg,0b00000001
+			//outi	portg,0b00000001
 			
 			;outr	TMR_PEEP_ok_H,XH
 /*************************************************************/
@@ -453,6 +401,27 @@ fin_tmr_PEEP:
 			outr	TMR_PEEP_ok_L,XL
 			outr	TMR_PEEP_ok_H,XH
 /*************************************************************/
+;*********************timer PEEP minimo**********************
+;************************************************************
+			inr 	XL,Aux_TIEMPO_min_EXPL
+			inr 	XH,Aux_TIEMPO_min_EXPH
+			sbiw	X,1
+			cpi		XL,0x01
+			cpci	XH,0x00
+			brlo	tmr_Exh_min
+			outr	Aux_TIEMPO_min_EXPH,XH
+			outr	Aux_TIEMPO_min_EXPL,XL
+			jmp		timer_O2_on_of		
+tmr_Exh_min:
+			inr		YL,flag_tmp_min
+			cpi		YL,0x00
+			rbrne	tmr_Exh_max
+			outi	flag_tmp_min,0x01
+			jmp		timer_O2_on_of
+;*********************timer PEEP maximo**********************
+;************************************************************
+tmr_Exh_max:
+			
 timer_O2_on_of:
 			cpri	timer_O2H,0
 			brne	dec_timer_O2
