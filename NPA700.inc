@@ -349,10 +349,10 @@ control_presion:
 			rbreq	O2_100_ON
 
 			cpri	FASE,EXHALACION
-			rbreq	tst_PEEP
+			rbreq	PEEP_control
 
 			cpri	presion_maxima,'1'
-			rbreq	tst_PEEP;sin_flujo
+			rbreq	PEEP_SobreP;sin_flujo
 /*
 			inr		xL,reg_PmaxL
 			inr		xH,reg_PmaxH
@@ -897,25 +897,30 @@ salir_PEEP:
 			outi	B_PEEP_ok,0x30
 			rjmp	salir_control
 ;******************;PEEP_Control******************************
-tst_PEEP:
+PEEP_SobreP:
+
+			outi	reg_PWM_Val_ExH,0x00
+			outi	reg_PWM_Val_ExL,0x29
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
+		
+			inr		ZL,PWM_FLUJOL
+			inr		ZH,PWM_FLUJOH
+			sbiw	Z,20
+			cpi		ZL,low(PWMZERO)
+			cpci	ZH,high(PWMZERO)
+			rbrlo	PEEP_Alta
+			outr	PWM_FLUJOH,ZH;XH
+			outr	PWM_FLUJOL,ZL;XH
+			jmp		PEEP_Alta
+PEEP_control:
 			tst_PEEP_0					salir_PEEP
 			tst_tiempo_final_fase	20,	prueba_gases;sin_flujo
-			
-			
-peep_CPAP:
 
 ;Si es algún modo de volumen, se considera que en los primeros ciclos respiratorios
 ;se debe de alcanzar el nivel de PEEP, independientemente de si aun no se alcanza
 ;el volumen programado
-			
-			cpri	primer_cruce,'1'
-			rbreq	PEEP_control
-			//tal vez se puede resolver bugg en esta rutina 
-			jmp		PEEP_control
 
 			
-			
-PEEP_control:
 ;************************************************************
 ;************************************************************
 			call	Carga_offset_PEEP
@@ -1189,10 +1194,9 @@ Carga_offset_PEEP:
 
 
 sobre_presion:
-						outi		b_sp,'1'
-						outi		tx_b_sp,'1'
-						outi		presion_maxima,'1'
-						
+			outi	b_sp,'1'
+			outi	tx_b_sp,'1'
+			outi	presion_maxima,'1'
 		
 sin_flujo:
 											
