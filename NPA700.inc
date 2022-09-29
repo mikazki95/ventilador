@@ -953,6 +953,16 @@ PEEP_Ok:
 			;outi	flag_tmp_min,0x01
 			outi	B_Ctrl_Parker,'0'
 			outi	B_PEEP_ok,0x30
+
+			inr		ZL,PWM_FLUJOL
+			inr		ZH,PWM_FLUJOH
+			sbiw	Z,2
+			cpi		ZL,low(PWMZERO)
+			cpci	ZH,high(PWMZERO)
+			rbrlo	actualizar_Pres_PEEP
+			outr	PWM_FLUJOH,ZH;XH
+			outr	PWM_FLUJOL,ZL;XH
+
 			//verificar si no requiere algun tipo de compenzacion 
 //fin_cambios_606001
 
@@ -972,8 +982,8 @@ PEEP_Alta:
 			cpi		ZL,low(PWMZERO)
 			cpci	ZH,high(PWMZERO)
 			rbrlo	PEEP_sn_flujo
-			outr	PWM_FLUJOL,ZL;XH
 			outr	PWM_FLUJOH,ZH;XH
+			outr	PWM_FLUJOL,ZL;XH
 
 PEEP_sn_flujo:
 			call	Carga_offset_PEEP ;44
@@ -1055,6 +1065,27 @@ PEEP_Baja_Tmr:
 			cpc		R25,XH
 			rbrsh	PEEP_Baja_ok
 			outi	B_Ctrl_Parker,'1'
+//***********//meter aumento de flujo ////
+			sbi		led_run
+			call	CARGA_PR_OFFSET
+			inr		XL,Presion_antL
+			inr		XH,Presion_antH
+			subi	XL,low(-1)
+			sbci	XH,high(-1)
+			cp		R24,XL
+			cpc		R25,XH
+			rbrsh	PEEP_Baja_ok
+			inr		XL,PWM_FLUJOL
+			inr		XH,PWM_FLUJOH
+			cpi		XL,low(450)
+			cpci	XH,high(450)
+			rbrsh	PEEP_Baja_ok
+			adiw	XL,1
+			outr	PWM_FLUJOH,XH
+			outr	PWM_FLUJOL,XL
+			;ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	
+///**************/fin de  aumento de flujo ////
+
 PEEP_Baja_ok:
 			outi	B_PEEP_ok,0x30
 //fin_cambios_606001

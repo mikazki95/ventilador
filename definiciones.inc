@@ -249,7 +249,6 @@ fin_macro_standby:
 .macro		FASE_INSPIRACION
 			;outi	portg,0b00000001
 //CAMBIOS_606001			
-			sbi		led_run
 			inr		YL,flag_tmp_min
 			cpi		YL,0x02
 			breq	chk_tmr
@@ -287,7 +286,6 @@ chk_tmr2:
 			outr	PWM_EXH_IN_L,ZL
 			;outi	portg,0b00000000
 			jmp		f_exh_OK	
-			;sbi		led_run
 
 exh_ol_2:
 			inr		YL,Cont_TMR_PEEP
@@ -1687,8 +1685,8 @@ fin_macro_dec_volumen:
 init_io:	outi	ddra, 0b11111111
 			outi	porta,0b00000000
 
-			outi	ddrb, 0b11000000	;PB7 = OC1C = PWM0, control de la electrovalvula
-			outi	portb,0b00111111	;para el control del flujo.
+			outi	ddrb, 0b11100000	;PB7 = OC1C = PWM0, control de la electrovalvula
+			outi	portb,0b00011111	;para el control del flujo.
 										;PB5 = Entrada de interrupción
 										;PB6 = Entrada de interrupción
 
@@ -2076,7 +2074,13 @@ init_io:	outi	ddra, 0b11111111
 			outi		habilita_PEEP_Baja,'0'
 			outi 		timer_PEEP_H,0x00
 			outi 		timer_PEEP_L,0x05
-
+			outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
+			outi	PWM_FLUJOL,low(PWMZERO)
+			outi	reg_PWM_Val_ExL,0x20
+			outi	reg_PWM_Val_ExH,0x00
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
+			
+			
             sei                                 ;Habilita de manera global las interrupciones
             ret
 
