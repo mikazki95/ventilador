@@ -248,7 +248,8 @@ fin_macro_standby:
 
 .macro		FASE_INSPIRACION
 			;outi	portg,0b00000001
-//CAMBIOS_606001
+//CAMBIOS_606001			
+			sbi		led_run
 			inr		YL,flag_tmp_min
 			cpi		YL,0x02
 			breq	chk_tmr
@@ -257,10 +258,18 @@ fin_macro_standby:
 			sbiw	X,1
 			outr	PWM_EXH_IN_H,XH
 			outr	PWM_EXH_IN_L,XL
-			sbi		led_run
-chk_tmr:
-			
+			jmp		chk_tmr2
 
+chk_tmr:	inr		YL,flag_peep_out
+			cpi		YL,0x03
+			brlo	chk_tmr2
+			inr		XL,PWM_EXH_IN_L
+			inr		XH,PWM_EXH_IN_H
+			adiw	X,1
+			outr	PWM_EXH_IN_H,XH
+			outr	PWM_EXH_IN_L,XL
+			
+chk_tmr2:
 			outi		CB_PIP_out,0x00
 			outi		B_Vol_out,0x30
 			outi		B_PEEP_out,0x30
@@ -316,7 +325,7 @@ f_exh_OK:
 			outi		b_sp,'0'
 			outi		ventana,'1'
 			outi		B_PIP_OK,'0'
-			outi		B_PEEP_DOWN,'1'
+			outi		B_PEEP_DOWN,'0'
 			outi		B_PEEP_UP,'0'
 			outi		tmr_inhibe_on_off_pwm,		3			; -> 3 int de 10ms
 			outi		inhibe_on_off_pwm,			'1'
@@ -375,7 +384,7 @@ fin_macro_inspiracion:
 			outi		b_sp,'0'
 			outi		ventana,'1'
 			outi		B_PIP_OK,'0'
-			outi		B_PEEP_DOWN,'1'
+			outi		B_PEEP_DOWN,'0'
 			outi		B_PEEP_UP,'0'
 			outi		tmr_inhibe_on_off_pwm,		3			; -> 3 int de 10ms
 			outi		inhibe_on_off_pwm,			'1'
@@ -520,6 +529,7 @@ fin_macro_tiempo_pausa:
 			outr	Aux_TIEMPO_min_EXPH,XH
 			outr	Aux_TIEMPO_min_EXPL,XL
 			outi	flag_tmp_min,0x00
+			outi	flag_peep_out,0x00
 
 			movr	aux_desc_PEEPH,Presion_cmH2OH
 			movr	aux_desc_PEEPL,Presion_cmH2OL

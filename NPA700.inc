@@ -911,28 +911,13 @@ peep_CPAP:
 			cpri	primer_cruce,'1'
 			rbreq	PEEP_control
 			//tal vez se puede resolver bugg en esta rutina 
-			jmp		PEEP_control			
-			//sbi		led_run
-			call	Carga_offset_PEEP
-			inr		xl,reg_PEEPL_100porciento
-			inr		xh,reg_PEEPH_100porciento
-			inr		ZL,desc_max_L//G_batL//
-			inr		ZH,desc_max_H//G_batH//
-			sub		XL,ZL
-			sbc		XH,ZH
-			//subi	XL,low(-350)
-			//sbci	XH,high(-350)
-			cp		R24,XL
-			cpc		R25,XH
-			rbrsh	abrir_val_ex;ini_PEEP;actualizar_Pres_PEEP;carga_V_Exh_AD;PEEP_Alta
+			jmp		PEEP_control
+
 			
-			outi	primer_cruce,'1'
-			outi	B_PEEP_ok,0x30
-			jmp		abrir_val_ex;ini_PEEP //nuevo 28/03/22
 			
 PEEP_control:
-			
-/*			outi	primer_cruce,'1'
+;************************************************************
+;************************************************************
 			call	Carga_offset_PEEP
 			inr		xl,reg_PEEPL_100porciento
 			inr		xh,reg_PEEPH_100porciento
@@ -940,7 +925,7 @@ PEEP_control:
 			sbci	XH,high(-175)
 			cp		R24,XL
 			cpc		R25,XH
-			rbrsh	PEEP_Alta_lim;carga_V_Exh_BD;*/
+			rbrsh	PEEP_Alta_lim;
 ;************************************************************
 ;************************************************************
 			call	Carga_offset_PEEP
@@ -970,84 +955,17 @@ PEEP_Ok:
 			outi	B_PEEP_ok,0x30
 			//verificar si no requiere algun tipo de compenzacion 
 //fin_cambios_606001
-/*			inr		YL,flag_tmp_min
-			cpi		YL,0x01
-			brne	PEEP_Ok_Tmr
-			outi	flag_tmp_min,0x02
-			sbi		led_run
 
-PEEP_Ok_Tmr:	*/
 			jmp		actualizar_Pres_PEEP//Pr
 
-			call	cerrar_val_ex
-			outi	habilita_PEEP_Baja,'1'
-			call	Carga_offset_PEEP ;44
-			inr		XL,Presion_antL
-			inr		XH,Presion_antH
-			subi	XL,low(-4)
-			sbci	XH,high(-4)
-			cp		R24,XL
-			cpc		R25,XH
-			rbrlo	cerrar_val_ex_in;actualizar_Pres_PEEP;cerrar_val_ex_in
-			jmp		actualizar_Pres_PEEP
-;**********************************************************
-			inr		ZL,reg_PWM_Val_ExL
-			inr		ZH,reg_PWM_Val_ExH
-			adiw	Z,4
-			outr	reg_PWM_Val_ExL,ZL;XH
-			outr	reg_PWM_Val_ExH,ZH;XH
-			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
-			jmp		actualizar_Pres_PEEP
-;************************************************************		
-;************************************************************
-/*PEEP_Alta_lim:
-			;outi	flag_tmp_min,0x00
-			inr		YL,flag_tmp_min
-			cpi		YL,0x02
-			rbrne	PEEP_Alta_Tmr
-			sbi		led_run
-			inr		XL,PWM_EXH_IN_L
-			inr		XH,PWM_EXH_IN_H
-			sbiw	X,1
-			outr	PWM_EXH_IN_H,XH
-			outr	PWM_EXH_IN_L,XL
-			outi	flag_tmp_min,0x02
-PEEP_Alta_Tmr:
-			jmp		PEEP_Alta*/
-;************************************************************		
-;************************************************************
-ini_PEEP:
-			outi	PWM_FLUJOH,high(PWMZERO);;*************modificacion
-			outi	PWM_FLUJOL,low(PWMZERO)
-			cpri	habilita_PEEP_Baja,'1'
-			rbreq	abrir_val_ex_in
-;************************************************************
-			call	Carga_offset_PEEP ;44
-			inr		XL,Presion_antL
-			inr		XH,Presion_antH
-			subi	XL,low(1)//ZL
-			sbci	XH,high(1)//ZH
-			cp		R24,XL
-			cpc		R25,XH
-			rbrsh	abrir_val_ex
 
-			call	Carga_offset_PEEP ;44
-			inr		XL,Presion_antL
-			inr		XH,Presion_antH
-			inr		ZL,desc_max_L//offset_batL//
-			inr		ZH,desc_max_H//offset_batH//
-			sub		XL,ZL
-			sbc		XH,ZH
-			cp		R24,XL
-			cpc		R25,XH
-			rbrsh	actualizar_Pres_PEEP;cerrar_val_ex_in
-			call	cerrar_val_ex
-			jmp		actualizar_Pres_PEEP
 ;************************************************************		
+;************************************************************
+PEEP_Alta_lim:
+			outi	B_PEEP_UP,0x01
+;************************************************************
 ;************************************************************
 PEEP_Alta:
-
-
 			inr		ZL,PWM_FLUJOL
 			inr		ZH,PWM_FLUJOH
 			sbiw	Z,2
@@ -1095,7 +1013,6 @@ abrir_val_ex:
 			cpc		ZH,XH
 			rbrlo	actualizar_Pres_PEEP
 			
-//			sbi		led_run
 			outr	reg_PWM_Val_ExL,ZL;XH
 			outr	reg_PWM_Val_ExH,ZH;XH
 			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL
@@ -1128,8 +1045,7 @@ PEEP_Baja:
 			cpi		YL,0x01
 			brne	PEEP_Baja_Tmr
 			outi	flag_tmp_min,0x02
-			;sbi		led_run
-PEEP_Baja_Tmr:						
+PEEP_Baja_Tmr:							
 			call 	Carga_offset_PEEP
 			inr		xl,reg_PEEPL_100porciento
 			inr		xh,reg_PEEPH_100porciento
@@ -1142,6 +1058,17 @@ PEEP_Baja_Tmr:
 PEEP_Baja_ok:
 			outi	B_PEEP_ok,0x30
 //fin_cambios_606001
+/////////////chequeo de veces que cambia de mas a menos///////////////
+			inr		YL,B_PEEP_UP
+			cpi		YL,0x01
+			brne	PEEP_Baja_cnt	
+			inr		YL,flag_peep_out
+			inc		YL
+			outr	flag_peep_out,YL
+			
+//////////fin de chequeo de veces que cambia de mas a menos///////////
+PEEP_Baja_cnt:
+			outi	B_PEEP_UP,'0'
 			call	cerrar_val_ex
 			;call	cerrar_val_ex
 
