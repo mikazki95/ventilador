@@ -352,7 +352,7 @@ control_presion:
 			rbreq	PEEP_control
 
 			cpri	presion_maxima,'1'
-			rbreq	PEEP_SobreP;sin_flujo
+			rbreq	libera_SP;PEEP_SobreP;sin_flujo
 /*
 			inr		xL,reg_PmaxL
 			inr		xH,reg_PmaxH
@@ -920,7 +920,7 @@ PEEP_control:
 ;se debe de alcanzar el nivel de PEEP, independientemente de si aun no se alcanza
 ;el volumen programado
 
-			
+PEEP_Control_Skip:			
 ;************************************************************
 ;************************************************************
 			call	Carga_offset_PEEP
@@ -1211,18 +1211,26 @@ sin_flujo:
 ;********************sobre presion***************************
 ;************************************************************
 ;************************************************************
-libera_PS:			
+libera_SP:			
 			;outi		B_PR_SP,'1'
 			;ASIGNA_PWM_V_ex  				0,0;ELECTROVALVULAS				0
 			;delay_ms	100
-			outi		PWM_FLUJOH,high(60)
-			outi		PWM_FLUJOL,low(60)
-			PIN_PS0
+			outi	reg_PWM_Val_ExH,0x00
+			outi	reg_PWM_Val_ExL,0x29
+			ASIGNA_PWM_V_ex  				reg_PWM_Val_ExH,reg_PWM_Val_ExL	;electrovalvulas		200
+
+			outi		PWM_FLUJOH,high(PWMZERO)
+			outi		PWM_FLUJOL,low(PWMZERO)
+			//PIN_PS0
 			
-			cli
-			outi		cont_10msL,0x0C
-			outi		cont_10msH,0x00
-			sei
+			call	Carga_offset_PEEP
+			inr		xl,reg_PEEPL_100porciento
+			inr		xh,reg_PEEPH_100porciento
+			subi	XL,low(-875)
+			sbci	XH,high(-875)
+			cp		R24,XL
+			cpc		R25,XH
+			rbrlo	PEEP_Control_skip
 
 			rjmp		salir_control
 ;************************************************************

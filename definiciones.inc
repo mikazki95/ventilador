@@ -1685,10 +1685,10 @@ fin_macro_dec_volumen:
 init_io:	outi	ddra, 0b11111111
 			outi	porta,0b00000000
 
-			outi	ddrb, 0b11100000	;PB7 = OC1C = PWM0, control de la electrovalvula
-			outi	portb,0b00011111	;para el control del flujo.
+			outi	ddrb, 0b11000000	;PB7 = OC1C = PWM0, control de la electrovalvula
+			outi	portb,0b00111111	;para el control del flujo.
 										;PB5 = Entrada de interrupción
-										;PB6 = Entrada de interrupción
+										;PB4 = Entrada de interrupción
 
 			outi	ddrc, 0b00000000	;PC0 Entrada de estado de la alimentacion AC o Bat
 			outi	portc,0b11111111
