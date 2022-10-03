@@ -1,0 +1,1 @@
+Este es un proyecto que desarrolla un ventilador mecanico, con la finalidad de resolver el problema derivado de la pandemia 
